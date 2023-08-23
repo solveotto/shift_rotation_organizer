@@ -36,9 +36,7 @@ text_objects = page.extract_words(x_tolerance = 1, y_tolerance = 1)
 turnus_1_navn = text_objects[21]["text"] + " " + text_objects[23]["text"]
 turnus_2_navn = text_objects[164]["text"] + " " + text_objects[166]["text"]
 
-side = {turnus_1_navn: {'Uke1':{'Mandag':[],
-                                
-                                }}}
+side = [{turnus_1_navn: [{'Uke1':[]}]}]
 
 for word in text_objects:
     # Filtrerer ut hva som skal med videre fra pdf-en
@@ -46,7 +44,7 @@ for word in text_objects:
         
         # Siler ut hvilken turnus (1 eller 2)
         if word['top'] >= turnus_1_pos[0]["Uke1"][0] and word['bottom'] <= turnus_1_pos[5]['Uke6'][1]:
-
+            
             for uke in turnus_1_pos:  
                 for key, value in uke.items():
                     if word['top'] >= value[0] and word['bottom'] <= value[1]:
@@ -56,7 +54,8 @@ for word in text_objects:
                             for dag, verdi in dager.items():
                                 if word['x0'] >= verdi[0] and word['x1'] <= verdi[1]:
                                     print(word['text'], '-', dag, verdi)
-                        
+                                    print(key)
+                                    side[0][turnus_1_navn][key].append[word['text']]
                         
 
 
@@ -82,7 +81,7 @@ for word in text_objects:
         #     new_table_dict["uke1"]["Onsdag"].append(word["text"])
 
 
-print(turnus_1_navn, turnus_2_navn)
+print(side)
 
 # for dag_x in dag_pos:
 #     print(dag_x)
