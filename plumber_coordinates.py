@@ -6,13 +6,14 @@ turnus_teller = 1
 
 linje_teller = 0
 
-word_filter = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:', 'Turnus:', 'Stasjoneringssted:']
+word_remove_filter = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:', 'Turnus:', 'Stasjoneringssted:']
+word_allow_filter = [':', 'XX', 'OO', 'TT']
 
 # Dimensjoner
 
 # Y-pos: top, bottom
-uke_1_pos = [{'Uke1':(88, 114)}, {'Uke2':(115, 141)}, {'Uke3':(142, 167)}, {'Uke4':(168, 194)}, {'Uke5':(195, 221)}, {'Uke6':(222, 247)}]
-uke_2_pos = [{'Uke1':(374, 401)}, {'Uke2':(402, 427)}, {'Uke3':(428, 454)}, {'Uke4':(455, 480)}, {'Uke5':(481, 506)}, {'Uke6':(507, 533)}]
+turnus_1_pos = [{'Uke1':(88, 115)}, {'Uke2':(115, 142)}, {'Uke3':(142, 168)}, {'Uke4':(168, 195)}, {'Uke5':(195, 222)}, {'Uke6':(222, 248)}]
+turnus_2_pos = [{'Uke1':(374, 401)}, {'Uke2':(402, 427)}, {'Uke3':(428, 454)}, {'Uke4':(455, 480)}, {'Uke5':(481, 506)}, {'Uke6':(507, 533)}]
 # X-pos:
 dag_pos = [{'Mandag':(51, 109)}, {'Tirsdag':(110, 167)}, {'Onsdag':(167, 224)}, {'Torsdag':(225, 283)}, 
            {'Fredag':(284, 340)}, {'Lørdag':(341, 399)}, {'Søndag':(400, 456)}, {'Mandag-2':(458, 514)}]
@@ -40,14 +41,23 @@ side = {turnus_1_navn: {'Uke1':{'Mandag':[],
                                 }}}
 
 for word in text_objects:
-    if ":" in word["text"] and word["text"] not in word_filter:
+    # Filtrerer ut hva som skal med videre fra pdf-en
+    if (":" in word["text"] or any(sub in word["text"] for sub in word_allow_filter)) and word["text"] not in word_remove_filter:
         
-        
-        for uke in uke_1_pos:
-            for key, value in uke.items():
-                if word['top'] >= value[0] and word['bottom'] <= value[1]:
-                    print(word['text'], key)
-    
+        # Siler ut hvilken turnus (1 eller 2)
+        if word['top'] >= turnus_1_pos[0]["Uke1"][0] and word['bottom'] <= turnus_1_pos[5]['Uke6'][1]:
+
+            for uke in turnus_1_pos:  
+                for key, value in uke.items():
+                    if word['top'] >= value[0] and word['bottom'] <= value[1]:
+                        #print(word['text'], ' - ', key)
+                        
+                        for dager in dag_pos:
+                            for dag, verdi in dager.items():
+                                if word['x0'] >= verdi[0] and word['x1'] <= verdi[1]:
+                                    print(word['text'], '-', dag, verdi)
+                        
+                        
 
 
 
