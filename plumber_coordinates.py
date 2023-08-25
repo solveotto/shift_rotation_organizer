@@ -1,4 +1,7 @@
 import pdfplumber
+import pandas as pd
+
+
 
 # Intitial Constants
 word_crossover_tolerance = 20
@@ -13,10 +16,10 @@ word_allow_filter = [':', 'XX', 'OO', 'TT']
 
 # Y-pos: top, bottom
 turnus_1_pos = [{1:(88, 115)}, {2:(115, 142)}, {3:(142, 168)}, {4:(168, 195)}, {5:(195, 222)}, {6:(222, 248)}]
-turnus_2_pos = [{7:(374, 401)}, {8:(402, 427)}, {9:(428, 454)}, {10:(455, 480)}, {11:(481, 506)}, {12:(507, 533)}]
+turnus_2_pos = [{1:(374, 401)}, {2:(402, 427)}, {3:(428, 454)}, {4:(455, 480)}, {5:(481, 506)}, {6:(507, 533)}]
 # X-pos:
 dag_pos = [{1:(51, 109)}, {2:(110, 167)}, {3:(167, 224)}, {4:(225, 283)}, 
-           {5:(284, 340)}, {6:(341, 399)}, {7:(400, 456)}, {8:(458, 514)}]
+           {5:(284, 340)}, {6:(341, 399)}, {7:(400, 456)}]
 
 new_table_dict = {"turnus1":
                   {"Mandag":[], "Tirsdag":[], "Onsdag":[], 
@@ -26,7 +29,8 @@ new_table_dict = {"turnus1":
                    "Torsdag":[], "Fredag":[], "Lørdag":[], "Søndag":[], "Mandag_2":[]}
                    }
 
-
+###
+### Fjernet dag åtte: , {8:(458, 514)}
 
 pdf = pdfplumber.open('turnus.pdf')
 page = pdf.pages[0]
@@ -115,15 +119,85 @@ def sorter_turnus_side(page):
                                     if word['x0'] >= verdi[0] and word['x1'] <= verdi[1]+word_crossover_tolerance:
                 
                                         if dag == 8:
-                                            dag = 7
-
+                                            pass
+                                        
+                                        
+                                        
                                         sidens_turnuser[0][turnus_1_navn][uke][dag]['tid'].append(word['text'])
+
+            if word['top'] > turnus_2_pos[0][1][0]:
+                
+                for uker in turnus_2_pos:  
+                    for uke, uke_verdi in uker.items():
+                        if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
+                            
+                            for dager in dag_pos:
+                                for dag, verdi in dager.items():
+                                    if word['x0'] >= verdi[0] and word['x1'] <= verdi[1]+word_crossover_tolerance:
+                
+                                        if dag == 8:
+                                            pass
+                                        
+                                        
+                                        sidens_turnuser[1][turnus_2_navn][uke][dag]['tid'].append(word['text'])
+
+
     turnuser.append(sidens_turnuser)                      
 
-                                    
+
+def create_excel():
+    
+    data = {
+        'Name': ['Alice', 'Bob', 'Charlie', 'David'],
+        'Age': [25, 30, 35, 40],
+        'Department': ['HR', 'Finance', 'IT', 'Operations']
+    }
+
+
+    df = pd.DataFrame(data)
+
+    #df.set_index('Uke', inplace=True)
+    
+    with pd.ExcelWriter("output.xlsx", engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Sheet1', index=False)
+        workbook  = writer.book
+        worksheet = writer.sheets['Sheet1']
+
+        # Define a format for the cell background color.
+        red_format = workbook.add_format({'bg_color': '#FFC7CE',
+                                        'font_color': '#9C0006'})
+        green_format = workbook.add_format({'bg_color': '#C6EFCE',
+                                            'font_color': '#006100'})
+
+        # Get the default column width for the Age column.
+        col_width = max(df['Age'].astype(str).apply(len))
+
+        # Set column width and conditional format for the Age column.
+        worksheet.set_column('B:B', col_width + 12)  # Add 2 for aesthetics.
+        worksheet.set_column('C:C', col_width + 12)  # Add 2 for aesthetics.
+
+        # Apply the conditional format to the Age column based on the value.
+        worksheet.conditional_format('B2:B5', {'type': 'cell',
+                                            'criteria': '>=',
+                                            'value': 35,
+                                            'format': red_format})
+        worksheet.conditional_format('B2:B5', {'type': 'cell',
+                                            'criteria': '<',
+                                            'value': 35,
+                                            'format': green_format})
+
+
+
+
+
+                             
 
 sorter_turnus_side(page)      
-                        
+
+create_excel()                   
+
+
+
 
 for turnus in turnuser[0]:
     for turnus, turnus_value in turnus.items():
@@ -131,6 +205,16 @@ for turnus in turnuser[0]:
             for g, h in uke_value.items():
                 print(turnus, uke_nr, h['tid'])
                 print(" ")
+
+
+
+
+
+
+
+
+
+
 
     
     # for linje in uke_pos:
