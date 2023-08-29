@@ -99,14 +99,11 @@ turnus_mal = {1:{
 def sorter_turnus_side(page):
     text_objects = page.extract_words(x_tolerance = 1, y_tolerance = 1)
 
-    turnus_1_navn = text_objects[21]["text"] + " " + text_objects[23]["text"]
-    turnus_2_navn = text_objects[164]["text"] + " " + text_objects[166]["text"]
-
+    turnus_1_navn = text_objects[21]["text"][:-1] + " " + text_objects[23]["text"]
+    turnus_2_navn = text_objects[164]["text"][:-1] + " " + text_objects[166]["text"]
     turnus1 = copy.deepcopy(turnus_mal)
     turnus2 = copy.deepcopy(turnus_mal)
 
-    
-    
 
     for word in text_objects:
         
@@ -227,7 +224,14 @@ def sorter_turnus_side(page):
 
 def create_excel(turnus):
     
-    data = {
+    df_dict = {}
+    
+    
+
+
+
+    for turnus_navn, turnus_verdi in turnus.items():
+        data = {
         'Uke': [1, 2, 3, 4, 5, 6],
         'Mandag': [],
         'Tirsdag': [],
@@ -235,12 +239,7 @@ def create_excel(turnus):
         'Torsdag': [],
         'Fredag': [],
         'Lørdag': [],
-        'Søndag': []
-    }
-
-
-
-    for turnus_navn, turnus_verdi in turnus.items():
+        'Søndag': []}
         
         for uke_nr, uke in turnus_verdi.items():
             for dag_nr, dag in uke.items():
@@ -252,75 +251,83 @@ def create_excel(turnus):
    
                     data[dag['navn']].append(" - ".join(dag['tid']))
 
-    print(data)
-
-    df = pd.DataFrame(data)
+        df_dict[turnus_navn] = pd.DataFrame(data)
 
 
 
-    #df.set_index('Department', inplace=True)
     
     with pd.ExcelWriter("output.xlsx", engine='xlsxwriter') as writer:
-        df.to_excel(writer, sheet_name='Turnus 13', index=False)
-        workbook  = writer.book
-        worksheet = writer.sheets['Turnus 13']
+        for sheet_name, df in df_dict.items():
+            print(df)
+
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+            workbook  = writer.book
+            worksheet = writer.sheets[sheet_name]
+            
         
-     
 
 
-        # Define a format for the cell background color.
-        tidlig_format = workbook.add_format({'bg_color': '#7abfff',
-                                        'font_color': '#000000'})
-        kveld_format = workbook.add_format({'bg_color': '#ed7777',
-                                            'font_color': '#000000'})
-        natt_format = workbook.add_format({'bg_color': '#4a4a4a',
-                                            'font_color': '#ffffff'})
-        fridag_format = workbook.add_format({'bg_color': '#13bd57',
-                                            'font_color': '#ffffff'})
-        centered_format = workbook.add_format({
-                                            'align': 'center',
-                                            'valign': 'vcenter',
-                                            'border':1})
+            # Define a format for the cell background color.
+            tidlig_format = workbook.add_format({'bg_color': '#7abfff',
+                                                'font_color': '#000000'})
+            tidlig_kveld_format = workbook.add_format({'bg_color': '#e6bc4c',
+                                                'font_color': '#000000'})
+            kveld_format = workbook.add_format({'bg_color': '#ed7777',
+                                                'font_color': '#000000'})
+            natt_format = workbook.add_format({'bg_color': '#4a4a4a',
+                                                'font_color': '#ffffff'})
+            fridag_format = workbook.add_format({'bg_color': '#13bd57',
+                                                'font_color': '#ffffff'})
+            centered_format = workbook.add_format({
+                                                'align': 'center',
+                                                'valign': 'vcenter',
+                                                'border':1})
 
-        # Get the default column width for the Age column.
-        col_width = max(df['Tirsdag'].astype(str).apply(len))
+            # Get the default column width for the Age column.
+            col_width = max(df['Tirsdag'].astype(str).apply(len))
 
 
 
-        # Set column width and conditional format for the Age column.
-        worksheet.set_column('B:H', col_width + 2)  # Add 2 for aesthetics.
-        
-        
-        # Apply centered text and borders for the range 'A1:H6'.
-        for row in range(6):
-            for col, column_label in enumerate(df.columns):
-                cell_value = df.at[row, column_label]
-                worksheet.write(row + 1, col, cell_value, centered_format) # +1 to account for header row
+            # Set column width and conditional format for the Age column.
+            worksheet.set_column('B:H', col_width + 2)  # Add 2 for aesthetics.
+            
+            
+            # Apply centered text and borders for the range 'A1:H6'.
+            for row in range(6):
+                for col, column_label in enumerate(df.columns):
+                    cell_value = df.at[row, column_label]
+                    worksheet.write(row + 1, col, cell_value, centered_format) # +1 to account for header row
 
-        for col in range(1, 8):  # Columns B(1) through H(7)
-            for row in range(1, 7):  # Rows 2 through 7
-                cell = xlsxwriter.utility.xl_rowcol_to_cell(row, col)
-                worksheet.conditional_format(cell, {'type': 'formula',
-                                                    'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=4)' 
-                                                    'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=9)'
-                                                    'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) < 16)',
-                                                    'format': tidlig_format})
-                
-                worksheet.conditional_format(cell, {'type': 'formula',
-                                                    'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=6)'
-                                                    'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=17)',
-                                                    'format': kveld_format})
-
-                worksheet.conditional_format(cell, {'type': 'formula',
-                                                    'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=18)'
-                                                    'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=23)',
-                                                    'format': natt_format})
-                worksheet.conditional_format(cell, {'type': 'formula',
-                                                    'criteria': '=(' + cell + '="")',
-                                                    'format': natt_format})
-                worksheet.conditional_format(cell, {'type': 'formula',
-                                                    'criteria': '=(' + cell + '="XX")' 'OR (' + cell + '="OO")' 'OR (' + cell + '="TT")',
-                                                    'format': fridag_format})
+            
+            # Logikken for hvilke celler som blir farget.
+            for col in range(1, 8):  # Columns B(1) through H(7)
+                for row in range(1, 7):  # Rows 2 through 7
+                    cell = xlsxwriter.utility.xl_rowcol_to_cell(row, col)
+                    worksheet.conditional_format(cell, {'type': 'formula',
+                                                        'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)' 
+                                                        'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1)) < 16)'
+                                                        'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) < 16)',
+                                                        'format': tidlig_format})
+                    worksheet.conditional_format(cell, {'type': 'formula',
+                                                        'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)'
+                                                        'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1)) <= 8)'
+                                                        'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) >= 16)',
+                                                        'format': tidlig_kveld_format})                
+                    worksheet.conditional_format(cell, {'type': 'formula',
+                                                        'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=9)'
+                                                        'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=17)'
+                                                        'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) >= 16)',
+                                                        'format': kveld_format})
+                    worksheet.conditional_format(cell, {'type': 'formula',
+                                                        'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=18)'
+                                                        'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=23)',
+                                                        'format': natt_format})
+                    worksheet.conditional_format(cell, {'type': 'formula',
+                                                        'criteria': '=(' + cell + '="")',
+                                                        'format': natt_format})
+                    worksheet.conditional_format(cell, {'type': 'formula',
+                                                        'criteria': '=(' + cell + '="XX")' 'OR (' + cell + '="OO")' 'OR (' + cell + '="TT")',
+                                                        'format': fridag_format})
 
                              
 
