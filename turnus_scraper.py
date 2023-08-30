@@ -6,19 +6,10 @@ import xlsxwriter
 
 
 
-# Intitial Constants
-word_crossover_tolerance = 13
-turnus_teller = 1
+### Intitial Constants ###
 
-linje_teller = 0
-
-word_remove_filter = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:', 'Turnus:', 'Stasjoneringssted:']
-word_allow_filter = [':', 'XX', 'OO', 'TT']
-
-
-# Get today's date
+# Dagens dato
 turnus_start_dato = datetime(2022, 12, 11)
-
 
 # Dimensjoner
 # Y-pos: top, bottom
@@ -28,18 +19,13 @@ turnus_2_pos = [{1:(374, 401)}, {2:(402, 427)}, {3:(428, 454)}, {4:(455, 480)}, 
 dag_pos = [{1:(51, 109)}, {2:(110, 167)}, {3:(167, 224)}, {4:(225, 283)}, 
            {5:(284, 340)}, {6:(341, 399)}, {7:(400, 456)}]
 
-
-
-###
-### Fjernet dag åtte: , {8:(458, 514)}
-
+word_remove_filter = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:', 'Turnus:', 'Stasjoneringssted:']
+word_allow_filter = [':', 'XX', 'OO', 'TT']
 pdf = pdfplumber.open('turnus.pdf')
 pages_in_pdf = pdf.pages
 
-#text_objects = page.extract_words(x_tolerance = 1, y_tolerance = 1)
 
 turnuser = []
-
 turnus_mal = {1:{
                 1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
                 2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
@@ -133,16 +119,24 @@ def sorter_turnus_side(page):
 
 
     def plasserings_logikk(turnus_pos, turnus):
+
         for uker in turnus_pos:  
             for uke, uke_verdi in uker.items():
-                if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
-                    
-                    for dager in dag_pos:
-                        for dag, verdi in dager.items():
+                for dager in dag_pos:
+                    for dag, verdi in dager.items():
+                        
+                        
+                        if dag == 7:
+                            word_crossover_tolerance = 13
+                        else:
+                            word_crossover_tolerance = 13
+                        
+                        # Sjekker om objektet er innenfor nåværende uke
+                        if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
+                            # Sjekker om objektet er innenfor nåværende dags parametere
                             if word['x0'] >= verdi[0] and word['x1'] <= verdi[1]+word_crossover_tolerance:
-                                
-                                if dag == 8:
-                                    pass
+                            
+
 
                                 if (uke == 1 and dag == 1) or word['text'] in word_allow_filter:
                                     turnus[uke][dag]['tid'].append(word['text'])
