@@ -17,7 +17,7 @@ turnus_1_pos = [{1:(88, 115)}, {2:(115, 142)}, {3:(142, 168)}, {4:(168, 195)}, {
 turnus_2_pos = [{1:(374, 401)}, {2:(402, 427)}, {3:(428, 454)}, {4:(455, 480)}, {5:(481, 507)}, {6:(508, 533)}]
 # X-pos:
 dag_pos = [{1:(51, 109)}, {2:(110, 167)}, {3:(167, 224)}, {4:(225, 283)}, 
-           {5:(284, 340)}, {6:(341, 399)}, {7:(400, 456)}]
+           {5:(284, 340)}, {6:(341, 399)}, {7:(400, 514)}]
 
 word_remove_filter = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:', 'Turnus:', 'Stasjoneringssted:']
 word_allow_filter = [':', 'XX', 'OO', 'TT']
@@ -123,56 +123,69 @@ def sorter_turnus_side(page):
         for uker in turnus_pos:  
             for uke, uke_verdi in uker.items():
                 for dager in dag_pos:
-                    for dag, verdi in dager.items():
+                    for dag, dag_verdi in dager.items():
                         
-                        
+
+
                         if dag == 7:
                             word_crossover_tolerance = 13
                         else:
                             word_crossover_tolerance = 13
                         
-                        # Sjekker om objektet er innenfor nåværende uke
+                        # Er objektet er innenfor nåværende uke
                         if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
-                            # Sjekker om objektet er innenfor nåværende dags parametere
-                            if word['x0'] >= verdi[0] and word['x1'] <= verdi[1]+word_crossover_tolerance:
+                            # Er objektet er innenfor nåværende dags parametere
+                            if word['x0'] >= dag_verdi[0] and word['x0'] <= dag_verdi[1]:
                             
+                                
 
-
+                                # Hvis det er uke1 og dag 1 så skal det ikke sjekkes om objektet finnes i uken og dagen før,
+                                # men lagres i nåværende dag og uke.
                                 if (uke == 1 and dag == 1) or word['text'] in word_allow_filter:
                                     turnus[uke][dag]['tid'].append(word['text'])
                                     turnus[uke][dag]['x0'].append(word['x0'])
                                 
-                                elif uke > 1 and dag == 1:
+                                # Hopp over itterering hvis det er mandag og søndag over uke1 har to verdier, 
+                                # og verdien på mandag er samme verdi som andre verdi på søndag.
+                                elif uke != 1 and dag == 1:
+                                    if uke == 2 and dag == 1 and word['text'] == '22:26':
+                                        print(uke, dag, word['text'], '-', word['x0'])
 
-                                    if word['x0'] in turnus[uke-1][7]['x0']:
+                                    if (len(turnus[uke-1][7]['tid']) == 2) and (word['text'] == turnus[uke-1][7]['tid'][1]):
                                         continue
-                                    if any(val in turnus[uke-1][7]['tid'] for val in word_allow_filter):
+                                        
+                                    # hvis objektet er :, XX, OO eller TT: lagre i nåværede dag og uke
+                                    elif any(val in turnus[uke-1][7]['tid'] for val in word_allow_filter):
                                         turnus[uke][dag]['tid'].append(word['text'])
                                         turnus[uke][dag]['x0'].append(word['x0'])
+                                    # Hvis det bare er et objekt på søndag uke over: legg objekt til søndag
                                     elif len(turnus[uke-1][7]['tid']) == 1:
                                         turnus[uke-1][7]['tid'].append(word['text'])
                                         turnus[uke-1][7]['x0'].append(word['x0'])
+                                    
                                     else:
                                         turnus[uke][dag]['tid'].append(word['text'])
                                         turnus[uke][dag]['x0'].append(word['x0'])
 
-                                
+                                # Hvis det ikke er dag1
                                 elif uke >= 1 and dag > 1:
                                     if word['x0'] in turnus[uke][dag-1]['x0']:
-                                        continue
+                                        pass
                                     elif any(val in turnus[uke][dag-1]['tid'] for val in word_allow_filter):
                                         turnus[uke][dag]['tid'].append(word['text'])
                                         turnus[uke][dag]['x0'].append(word['x0'])
                                     elif len(turnus[uke][dag-1]['tid']) == 1:
+
                                         turnus[uke][dag-1]['tid'].append(word['text'])
                                         turnus[uke][dag-1]['x0'].append(word['x0'])
                                     else:
                                         turnus[uke][dag]['tid'].append(word['text'])
                                         turnus[uke][dag]['x0'].append(word['x0'])
 
-                                else:
-                                    turnus[uke][dag]['tid'].append(word['text'])
-                                    turnus[uke][dag]['x0'].append(word['x0'])   
+                                # else:
+                                #     turnus[uke][dag]['tid'].append(word['text'])
+                                #     turnus[uke][dag]['x0'].append(word['x0'])   
+                        
 
 
     for word in text_objects:
@@ -237,8 +250,6 @@ def create_excel(data):
             worksheet = writer.sheets[sheet_name]
             
         
-
-
             # Define a format for the cell background color.
             tidlig_format = workbook.add_format({'bg_color': '#7abfff',
                                                 'font_color': '#000000'})
@@ -274,28 +285,35 @@ def create_excel(data):
             for col in range(1, 8):  # Columns B(1) through H(7)
                 for row in range(1, 7):  # Rows 2 through 7
                     cell = xlsxwriter.utility.xl_rowcol_to_cell(row, col)
+                    ## Formater ##
+                    # Tidligvakt
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)' 
                                                         'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1)) < 16)'
                                                         'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) < 16)',
                                                         'format': tidlig_format})
+                    # Tidlig og kveld
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)'
                                                         'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1)) <= 8)'
                                                         'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) >= 16)',
-                                                        'format': tidlig_kveld_format})                
+                                                        'format': tidlig_kveld_format})
+                    # Kveld                
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=9)'
-                                                        'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=17)'
-                                                        'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) >= 16)',
+                                                        'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=18)',
+                                                        #'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) >= 16)',
                                                         'format': kveld_format})
+                    # Natt
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=18)'
                                                         'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=23)',
                                                         'format': natt_format})
+                    # Tomme celler
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(' + cell + '="")',
                                                         'format': natt_format})
+                    # XX, OO og TT celler
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(' + cell + '="XX")' 'OR (' + cell + '="OO")' 'OR (' + cell + '="TT")',
                                                         'format': fridag_format})
@@ -303,7 +321,7 @@ def create_excel(data):
 
 
                              
-for page in pages_in_pdf[7:10]:
+for page in pages_in_pdf:
     sorter_turnus_side(page)      
 
 create_excel(turnuser)
