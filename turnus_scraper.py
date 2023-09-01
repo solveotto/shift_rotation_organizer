@@ -83,6 +83,7 @@ turnus_mal = {1:{
 
 
 def sorter_turnus_side(page):
+    
     text_objects = page.extract_words(x_tolerance = 1, y_tolerance = 1)
 
     turnus_1_navn = 'Turnus1'
@@ -111,11 +112,12 @@ def sorter_turnus_side(page):
             pass
 
     
-    print(turnus_1_navn, turnus_2_navn)
+    #print(turnus_1_navn, turnus_2_navn)
 
 
     turnus1 = copy.deepcopy(turnus_mal)
     turnus2 = copy.deepcopy(turnus_mal)
+
 
 
     def plasserings_logikk(turnus_pos, turnus):
@@ -124,83 +126,90 @@ def sorter_turnus_side(page):
             for uke, uke_verdi in uker.items():
                 for dager in dag_pos:
                     for dag, dag_verdi in dager.items():
-                        
 
-                        # crossover tolerance
-                        ct = 5
-                        
                         # Er objektet er innenfor nåværende uke
                         if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
                             # Er objektet er innenfor nåværende dags parametere
                             if word['x0'] >= dag_verdi[0]and word['x0'] <= dag_verdi[1]:
-                            
                                 
+                                # Siler ut objekter som er tid. Kan trolig fjerne filtere
+                                if (":" in word["text"] or any(sub in word["text"] for sub in word_allow_filter)) and word["text"] not in word_remove_filter:
 
-                                # Hvis det er uke1 og dag 1 så skal det ikke sjekkes om objektet finnes i uken og dagen før,
-                                # men lagres i nåværende dag og uke.
-                                if (uke == 1 and dag == 1) or word['text'] in word_allow_filter:
-                                    turnus[uke][dag]['tid'].append(word['text'])
-                                    turnus[uke][dag]['x0'].append(word['x0'])
-                                
-                                # Hopp over itterering hvis det er mandag og søndag over uke1 har to verdier, 
-                                # og verdien på mandag er samme verdi som andre verdi på søndag.
-                                elif uke != 1 and dag == 1:
-                                    if uke == 2 and dag == 1 and word['text'] == '22:26':
-                                        print(uke, dag, word['text'], '-', word['x0'])
+                                    # Hvis det er uke1 og dag 1 så skal det ikke sjekkes om objektet finnes i uken og dagen før,
+                                    # men lagres i nåværende dag og uke.
+                                    if (uke == 1 and dag == 1) or word['text'] in word_allow_filter:
+                                        turnus[uke][dag]['tid'].append(word['text'])
+                                        turnus[uke][dag]['x0'].append(word['x0'])
                                     
-                                    # Hopper over objekter på mandag hvis søndagen før har to objekter og det er likt det som skal plasseres
-                                    if (len(turnus[uke-1][7]['tid']) == 2) and (word['text'] == turnus[uke-1][7]['tid'][1]) and len(turnus[uke][dag]['tid']) == 0:
-                                        print(uke, dag, word['text'], '-', word['x0'])
-                                        continue
-                                    
-                                    
+                                    # Hopp over itterering hvis det er mandag og søndag over uke1 har to verdier, 
+                                    # og verdien på mandag er samme verdi som andre verdi på søndag.
+                                    elif uke != 1 and dag == 1:
                                         
-                                    # hvis objektet er :, XX, OO eller TT: lagre i nåværede dag og uke
-                                    elif any(val in turnus[uke-1][7]['tid'] for val in word_allow_filter):
-                                        turnus[uke][dag]['tid'].append(word['text'])
-                                        turnus[uke][dag]['x0'].append(word['x0'])
-                                    # Hvis det bare er et objekt på søndag uke over: legg objekt til søndag
-                                    elif len(turnus[uke-1][7]['tid']) == 1:
-                                        turnus[uke-1][7]['tid'].append(word['text'])
-                                        turnus[uke-1][7]['x0'].append(word['x0'])
-                                    
-                                    else:
-                                        turnus[uke][dag]['tid'].append(word['text'])
-                                        turnus[uke][dag]['x0'].append(word['x0'])
+                                        # Hopper over objekter på mandag hvis søndagen før har to objekter,
+                                        # mandagen har null objekter og objektet på søndag er likt det som skal plasseres.
+                                        if (len(turnus[uke-1][7]['tid']) == 2 and
+                                            len(turnus[uke][dag]['tid']) == 0 and
+                                            word['text'] == turnus[uke-1][7]['tid'][1]):
+                                            continue
 
-                                # Hvis det ikke er dag1
-                                elif uke >= 1 and dag > 1:
-                                    if word['x0'] in turnus[uke][dag-1]['x0']:
-                                        pass
-                                    elif any(val in turnus[uke][dag-1]['tid'] for val in word_allow_filter):
-                                        turnus[uke][dag]['tid'].append(word['text'])
-                                        turnus[uke][dag]['x0'].append(word['x0'])
-                                    elif len(turnus[uke][dag-1]['tid']) == 1:
+                                            
+                                        # hvis objektet er :, XX, OO eller TT: lagre i nåværede dag og uke
+                                        elif any(val in turnus[uke-1][7]['tid'] for val in word_allow_filter):
+                                            turnus[uke][dag]['tid'].append(word['text'])
+                                            turnus[uke][dag]['x0'].append(word['x0'])
+                                        # Hvis det bare er et objekt på søndag uke over: legg objekt til søndag
+                                        elif len(turnus[uke-1][7]['tid']) == 1:
+                                            turnus[uke-1][7]['tid'].append(word['text'])
+                                            turnus[uke-1][7]['x0'].append(word['x0'])
+                                        
+                                        else:
+                                            turnus[uke][dag]['tid'].append(word['text'])
+                                            turnus[uke][dag]['x0'].append(word['x0'])
 
-                                        turnus[uke][dag-1]['tid'].append(word['text'])
-                                        turnus[uke][dag-1]['x0'].append(word['x0'])
-                                    else:
-                                        turnus[uke][dag]['tid'].append(word['text'])
-                                        turnus[uke][dag]['x0'].append(word['x0'])
+                                    # Hvis det ikke er dag1
+                                    elif uke >= 1 and dag > 1:
+                                        if word['x0'] in turnus[uke][dag-1]['x0']:
+                                            pass
+                                        elif any(val in turnus[uke][dag-1]['tid'] for val in word_allow_filter):
+                                            turnus[uke][dag]['tid'].append(word['text'])
+                                            turnus[uke][dag]['x0'].append(word['x0'])
+                                        elif len(turnus[uke][dag-1]['tid']) == 1:
 
-                                # else:
-                                #     turnus[uke][dag]['tid'].append(word['text'])
-                                #     turnus[uke][dag]['x0'].append(word['x0'])   
+                                            turnus[uke][dag-1]['tid'].append(word['text'])
+                                            turnus[uke][dag-1]['x0'].append(word['x0'])
+                                        else:
+                                            turnus[uke][dag]['tid'].append(word['text'])
+                                            turnus[uke][dag]['x0'].append(word['x0'])
+
+                                    # else:
+                                    #     turnus[uke][dag]['tid'].append(word['text'])
+                                    #     turnus[uke][dag]['x0'].append(word['x0'])
+                                
+
+
+                                #############
+                                # PLasseres i eget feilt med litt flere filtere
+                                else:
+                                    print(word['text'])
                         
-
+    
 
     for word in text_objects:
 
-        # Filtrerer ut hva som skal med videre fra pdf-en
-        if (":" in word["text"] or any(sub in word["text"] for sub in word_allow_filter)) and word["text"] not in word_remove_filter:
+        # if 'H' in word['text'] and '-' in word['text']:
+        #     print(word['text'])
 
-            
-            # Siler ut hvilken turnus (1 eller 2)
+        # Filtrerer ut hva som skal med videre fra pdf-en
+        #if (":" in word["text"] or any(sub in word["text"] for sub in word_allow_filter)) and word["text"] not in word_remove_filter:
+        
+        
+        if int(word['x0']) >= dag_pos[0][1][0] and int(word['x1']) <= dag_pos[6][7][1]:
+        # Siler ut hvilken turnus (1 eller 2)
             if int(word['top']) >= turnus_1_pos[0][1][0] and int(word['bottom']) <= turnus_1_pos[5][6][1]:
                 plasserings_logikk(turnus_1_pos, turnus1)
 
 
-            elif int(word['top']) >= turnus_2_pos[0][1][0]:    
+            elif int(word['top']) >= turnus_2_pos[0][1][0] and int(word['bottom']) <= turnus_2_pos[5][6][1]:    
                 plasserings_logikk(turnus_2_pos, turnus2)
 
                 
@@ -323,8 +332,9 @@ def create_excel(data):
 
 
                              
-for page in pages_in_pdf:
+for page in pages_in_pdf[0:1]:
     sorter_turnus_side(page)      
+
 
 create_excel(turnuser)
 
