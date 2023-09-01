@@ -16,8 +16,8 @@ turnus_start_dato = datetime(2022, 12, 11)
 turnus_1_pos = [{1:(88, 115)}, {2:(115, 142)}, {3:(142, 168)}, {4:(168, 195)}, {5:(195, 222)}, {6:(222, 248)}]
 turnus_2_pos = [{1:(374, 401)}, {2:(402, 427)}, {3:(428, 454)}, {4:(455, 480)}, {5:(481, 507)}, {6:(508, 533)}]
 # X-pos:
-dag_pos = [{1:(51, 109)}, {2:(110, 167)}, {3:(167, 224)}, {4:(225, 283)}, 
-           {5:(284, 340)}, {6:(341, 399)}, {7:(400, 514)}]
+dag_pos = [{1:(51, 109)}, {2:(109, 167)}, {3:(167, 224)}, {4:(224, 283)}, 
+           {5:(283, 340)}, {6:(340, 399)}, {7:(399, 514)}]
 
 word_remove_filter = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:', 'Turnus:', 'Stasjoneringssted:']
 word_allow_filter = [':', 'XX', 'OO', 'TT']
@@ -126,16 +126,13 @@ def sorter_turnus_side(page):
                     for dag, dag_verdi in dager.items():
                         
 
-
-                        if dag == 7:
-                            word_crossover_tolerance = 13
-                        else:
-                            word_crossover_tolerance = 13
+                        # crossover tolerance
+                        ct = 5
                         
                         # Er objektet er innenfor nåværende uke
                         if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
                             # Er objektet er innenfor nåværende dags parametere
-                            if word['x0'] >= dag_verdi[0] and word['x0'] <= dag_verdi[1]:
+                            if word['x0'] >= dag_verdi[0]and word['x0'] <= dag_verdi[1]:
                             
                                 
 
@@ -150,9 +147,13 @@ def sorter_turnus_side(page):
                                 elif uke != 1 and dag == 1:
                                     if uke == 2 and dag == 1 and word['text'] == '22:26':
                                         print(uke, dag, word['text'], '-', word['x0'])
-
-                                    if (len(turnus[uke-1][7]['tid']) == 2) and (word['text'] == turnus[uke-1][7]['tid'][1]):
+                                    
+                                    # Hopper over objekter på mandag hvis søndagen før har to objekter og det er likt det som skal plasseres
+                                    if (len(turnus[uke-1][7]['tid']) == 2) and (word['text'] == turnus[uke-1][7]['tid'][1]) and len(turnus[uke][dag]['tid']) == 0:
+                                        print(uke, dag, word['text'], '-', word['x0'])
                                         continue
+                                    
+                                    
                                         
                                     # hvis objektet er :, XX, OO eller TT: lagre i nåværede dag og uke
                                     elif any(val in turnus[uke-1][7]['tid'] for val in word_allow_filter):
@@ -290,7 +291,8 @@ def create_excel(data):
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)' 
                                                         'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1)) < 16)'
-                                                        'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) < 16)',
+                                                        'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) < 16)'
+                                                        'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) > 3)',
                                                         'format': tidlig_format})
                     # Tidlig og kveld
                     worksheet.conditional_format(cell, {'type': 'formula',
