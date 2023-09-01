@@ -19,7 +19,8 @@ turnus_2_pos = [{1:(374, 401)}, {2:(402, 427)}, {3:(428, 454)}, {4:(455, 480)}, 
 dag_pos = [{1:(51, 109)}, {2:(109, 167)}, {3:(167, 224)}, {4:(224, 283)}, 
            {5:(283, 340)}, {6:(340, 399)}, {7:(399, 514)}]
 
-word_remove_filter = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:', 'Turnus:', 'Stasjoneringssted:']
+word_remove_filter = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:', 'Turnus:', 'Stasjoneringssted:', 
+                      'OSL', 'HLD']
 word_allow_filter = [':', 'XX', 'OO', 'TT']
 pdf = pdfplumber.open('turnus.pdf')
 pages_in_pdf = pdf.pages
@@ -185,12 +186,28 @@ def sorter_turnus_side(page):
                                     #     turnus[uke][dag]['tid'].append(word['text'])
                                     #     turnus[uke][dag]['x0'].append(word['x0'])
                                 
-
-
-                                #############
-                                # PLasseres i eget feilt med litt flere filtere
+                                
+                                # Filtrerer dagsverk
                                 else:
-                                    print(word['text'])
+                                    # Hvis det er uke1 og dag 1 så skal det ikke sjekkes om objektet finnes i uken og dagen før,
+                                    # men lagres i nåværende dag og uke.
+                                    if (uke == 1 and dag == 1) and word['text'] not in word_remove_filter:
+                                        turnus[uke][dag]['dagsverk'].append(word['text'])
+                                        print(word['text'])
+                                    
+                                    elif uke != 1 and dag == 1:
+                                        
+                                        # Hopper over objekter på mandag hvis søndagen før har to objekter,
+                                        # mandagen har null objekter og objektet på søndag er likt det som skal plasseres.
+                                        if (len(turnus[uke-1][7]['tid']) == 2 and
+                                            len(turnus[uke][dag]['tid']) == 0 and
+                                            word['text'] == turnus[uke-1][7]['tid'][1]):
+                                            continue
+
+###### FUNGERER IKKE HELT ENDA
+                                    # else:
+                                    #     turnus[uke][dag]['dagsverk'].append(word['text'])
+
                         
     
 
@@ -223,9 +240,6 @@ def create_excel(data):
     
     df_dict = {}
     
-    
-
-
     for turnus in data:
         for turnus_navn, turnus_verdi in turnus.items():
             df_data = {
@@ -245,8 +259,8 @@ def create_excel(data):
                         df_data[dag['navn']].append('')
                     else:
                         
-    
-                        df_data[dag['navn']].append(" - ".join(dag['tid']))
+                        df_data[dag['navn']].append(" - ".join(dag['tid']+dag['dagsverk']))
+                        
             
             df_dict.update({turnus_navn : pd.DataFrame(df_data)})
 
@@ -274,7 +288,8 @@ def create_excel(data):
             centered_format = workbook.add_format({
                                                 'align': 'center',
                                                 'valign': 'vcenter',
-                                                'border':1})
+                                                'border':1,
+                                                'text_wrap': True})
 
             
         
@@ -282,7 +297,10 @@ def create_excel(data):
             # Set column width and conditional format for the Age column.
             worksheet.set_column('B:H', 12) 
             worksheet.set_column('A:A', 4)
-            
+
+            # Setter høyden på columns
+            for row in range(1,7):
+                worksheet.set_row(row, 32)
             
             # Apply centered text and borders for the range 'A1:H6'.
             for row in range(6):
