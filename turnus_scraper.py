@@ -28,58 +28,58 @@ pages_in_pdf = pdf.pages
 
 turnuser = []
 turnus_mal = {1:{
-                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}},
+                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}},
 
             2:{
-                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}},
+                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}},
             
             3:{
-                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}},
+                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}},
             
             4:{
-                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}},
+                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}},
             
             5:{
-                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}},
+                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}},
             
             6:{
-                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}, 
-                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]},
-                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':[]}},
+                1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
+                6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
+                7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}},
             }
 
 
@@ -127,15 +127,15 @@ def sorter_turnus_side(page):
             for uke, uke_verdi in uker.items():
                 for dager in dag_pos:
                     for dag, dag_verdi in dager.items():
-
+                        
                         # Er objektet er innenfor nåværende uke
                         if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
                             # Er objektet er innenfor nåværende dags parametere
-                            if word['x0'] >= dag_verdi[0]and word['x0'] <= dag_verdi[1]:
-                                
-                                # Siler ut objekter som er tid. Kan trolig fjerne filtere
-                                if (":" in word["text"] or any(sub in word["text"] for sub in word_allow_filter)) and word["text"] not in word_remove_filter:
+                            if word['x0'] >= dag_verdi[0]and word['x0'] <= dag_verdi[1] and word['text'] not in word_remove_filter:
 
+                                # Siler ut objekter som er tid. Kan trolig fjerne filtere
+                                if (":" in word["text"] or any(sub in word["text"] for sub in word_allow_filter)):
+                                    
                                     # Hvis det er uke1 og dag 1 så skal det ikke sjekkes om objektet finnes i uken og dagen før,
                                     # men lagres i nåværende dag og uke.
                                     if (uke == 1 and dag == 1) or word['text'] in word_allow_filter:
@@ -144,6 +144,9 @@ def sorter_turnus_side(page):
                                     
                                     # Hopp over itterering hvis det er mandag og søndag over uke1 har to verdier, 
                                     # og verdien på mandag er samme verdi som andre verdi på søndag.
+
+
+                                    # Hvis det mandag men ikke uke1
                                     elif uke != 1 and dag == 1:
                                         
                                         # Hopper over objekter på mandag hvis søndagen før har to objekter,
@@ -169,6 +172,7 @@ def sorter_turnus_side(page):
 
                                     # Hvis det ikke er dag1
                                     elif uke >= 1 and dag > 1:
+                                        
                                         if word['x0'] in turnus[uke][dag-1]['x0']:
                                             pass
                                         elif any(val in turnus[uke][dag-1]['tid'] for val in word_allow_filter):
@@ -186,29 +190,47 @@ def sorter_turnus_side(page):
                                     #     turnus[uke][dag]['tid'].append(word['text'])
                                     #     turnus[uke][dag]['x0'].append(word['x0'])
                                 
-                                
+
                                 # Filtrerer dagsverk
                                 else:
+                                    
                                     # Hvis det er uke1 og dag 1 så skal det ikke sjekkes om objektet finnes i uken og dagen før,
                                     # men lagres i nåværende dag og uke.
                                     if (uke == 1 and dag == 1) and word['text'] not in word_remove_filter:
-                                        turnus[uke][dag]['dagsverk'].append(word['text'])
-                                        print(word['text'])
-                                    
-                                    elif uke != 1 and dag == 1:
-                                        
+                                        turnus[uke][dag]['dagsverk'] = word['text']
+
+                                    elif uke != 1 and dag == 1:    
                                         # Hopper over objekter på mandag hvis søndagen før har to objekter,
                                         # mandagen har null objekter og objektet på søndag er likt det som skal plasseres.
-                                        if (len(turnus[uke-1][7]['tid']) == 2 and
-                                            len(turnus[uke][dag]['tid']) == 0 and
-                                            word['text'] == turnus[uke-1][7]['tid'][1]):
+                                        if (len(turnus[uke-1][7]['dagsverk']) > 1 and
+                                            len(turnus[uke][dag]['dagsverk']) == 0 and
+                                            word['text'] == turnus[uke-1][7]['dagsverk'][1]):
                                             continue
+                                        # hvis objektet er :, XX, OO eller TT: lagre i nåværede dag og uke
+                                        elif any(val in turnus[uke-1][7]['tid'] for val in word_allow_filter):
+                                            turnus[uke][dag]['dagverk'] = word['text']
+                                        # Hvis det bare er et objekt på søndag uke over: legg objekt til søndag
+                                        elif len(turnus[uke-1][7]['dagsverk']) == 0:
+                                            turnus[uke-1][7]['dagsverk'] = word['text']
 
-###### FUNGERER IKKE HELT ENDA
-                                    # else:
-                                    #     turnus[uke][dag]['dagsverk'].append(word['text'])
+                                        
+                                        else:
+                                            turnus[uke][dag]['dagsverk'] = word['text']
 
-                        
+                                        
+                                                                      
+                                    # Hvis det ikke er dag1
+                                    elif uke >= 1 and dag > 1:
+
+                                            
+                                        if turnus[uke][dag-1]['dagsverk'] == "":
+                                            
+                                            turnus[uke][dag-1]['dagsverk'] = word['text']
+                                        else:
+                                            turnus[uke][dag]['dagsverk'] =  word['text']
+
+                                            
+
     
 
     for word in text_objects:
@@ -254,12 +276,12 @@ def create_excel(data):
             
             for uke_nr, uke in turnus_verdi.items():
                 for dag_nr, dag in uke.items():
+
                     
                     if len(dag['tid']) == 0:
                         df_data[dag['navn']].append('')
                     else:
-                        
-                        df_data[dag['navn']].append(" - ".join(dag['tid']+dag['dagsverk']))
+                        df_data[dag['navn']].append(" - ".join(dag['tid'])+ " " + dag['dagsverk'])
                         
             
             df_dict.update({turnus_navn : pd.DataFrame(df_data)})
@@ -344,7 +366,7 @@ def create_excel(data):
                                                         'format': natt_format})
                     # XX, OO og TT celler
                     worksheet.conditional_format(cell, {'type': 'formula',
-                                                        'criteria': '=(' + cell + '="XX")' 'OR (' + cell + '="OO")' 'OR (' + cell + '="TT")',
+                                                        'criteria': '=(' + cell + '="XX ")' 'OR (' + cell + '="OO ")' 'OR (' + cell + '="TT ")',
                                                         'format': fridag_format})
 
 
