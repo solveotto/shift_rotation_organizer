@@ -191,9 +191,27 @@ def sorter_turnus_side(page):
                                     #     turnus[uke][dag]['x0'].append(word['x0'])
                                 
 
-                                # Filtrerer dagsverk
+
+
+    def plasseringslogikk_dagsverk(turnus_pos, turnus):
+        
+                # Filtrerer dagsverk
+        for uker in turnus_pos:  
+            for uke, uke_verdi in uker.items():
+                for dager in dag_pos:
+                    for dag, dag_verdi in dager.items():
+                        
+                        # Er objektet er innenfor nåværende uke
+                        if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
+                            # Er objektet er innenfor nåværende dags parametere
+                            if word['x0'] >= dag_verdi[0]and word['x0'] <= dag_verdi[1] and word['text'] not in word_remove_filter:
+                                                                # Siler ut objekter som er tid. Kan trolig fjerne filtere
+                                
+                                if (":" in word["text"] or any(sub in word["text"] for sub in word_allow_filter)):
+                                    continue
                                 else:
-                                    
+
+                                        
                                     # Hvis det er uke1 og dag 1 så skal det ikke sjekkes om objektet finnes i uken og dagen før,
                                     # men lagres i nåværende dag og uke.
                                     if (uke == 1 and dag == 1) and word['text'] not in word_remove_filter:
@@ -218,29 +236,22 @@ def sorter_turnus_side(page):
                                             turnus[uke][dag]['dagsverk'] = word['text']
 
                                         
-                                                                      
+                                                                        
                                     # Hvis det ikke er dag1
                                     elif uke >= 1 and dag > 1:
 
-                                            
-                                        if turnus[uke][dag-1]['dagsverk'] == "":
-                                            
-                                            turnus[uke][dag-1]['dagsverk'] = word['text']
+                                        
+
+                                        if len(turnus[uke][dag-1]['tid']) == 2 and turnus[uke][dag-1]['dagsverk'] == "":
+                                            turnus[uke][dag-1]['dagsverk'] =  word['text']
+
+
                                         else:
                                             turnus[uke][dag]['dagsverk'] =  word['text']
 
-                                            
 
-    
 
     for word in text_objects:
-
-        # if 'H' in word['text'] and '-' in word['text']:
-        #     print(word['text'])
-
-        # Filtrerer ut hva som skal med videre fra pdf-en
-        #if (":" in word["text"] or any(sub in word["text"] for sub in word_allow_filter)) and word["text"] not in word_remove_filter:
-        
         
         if int(word['x0']) >= dag_pos[0][1][0] and int(word['x1']) <= dag_pos[6][7][1]:
         # Siler ut hvilken turnus (1 eller 2)
@@ -248,10 +259,21 @@ def sorter_turnus_side(page):
                 plasserings_logikk(turnus_1_pos, turnus1)
 
 
+
             elif int(word['top']) >= turnus_2_pos[0][1][0] and int(word['bottom']) <= turnus_2_pos[5][6][1]:    
                 plasserings_logikk(turnus_2_pos, turnus2)
 
-                
+    for word in text_objects:
+        
+        if int(word['x0']) >= dag_pos[0][1][0] and int(word['x1']) <= dag_pos[6][7][1]:
+        # Siler ut hvilken turnus (1 eller 2)
+            if int(word['top']) >= turnus_1_pos[0][1][0] and int(word['bottom']) <= turnus_1_pos[5][6][1]:
+                plasseringslogikk_dagsverk(turnus_1_pos, turnus1)
+
+
+            elif int(word['top']) >= turnus_2_pos[0][1][0] and int(word['bottom']) <= turnus_2_pos[5][6][1]:    
+                plasseringslogikk_dagsverk(turnus_2_pos, turnus2)
+            
 
 
     turnuser.append({turnus_1_navn:turnus1})
@@ -372,7 +394,7 @@ def create_excel(data):
 
 
                              
-for page in pages_in_pdf[0:1]:
+for page in pages_in_pdf[0:20]:
     sorter_turnus_side(page)      
 
 
