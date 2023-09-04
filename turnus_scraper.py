@@ -22,6 +22,7 @@ dag_pos = [{1:(51, 109)}, {2:(109, 167)}, {3:(167, 224)}, {4:(224, 283)},
 word_remove_filter = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:', 'Turnus:', 'Stasjoneringssted:', 
                       'OSL', 'HLD']
 word_allow_filter = [':', 'XX', 'OO', 'TT']
+fridag_filter = ['XX', 'OO', 'TT']
 pdf = pdfplumber.open('turnus.pdf')
 pages_in_pdf = pdf.pages
 
@@ -218,18 +219,8 @@ def sorter_turnus_side(page):
                                         turnus[uke][dag]['dagsverk'] = word['text']
 
                                     elif uke != 1 and dag == 1:    
-                                        # Hopper over objekter på mandag hvis søndagen før har to objekter,
-                                        # mandagen har null objekter og objektet på søndag er likt det som skal plasseres.
-                                        if (len(turnus[uke-1][7]['dagsverk']) > 1 and
-                                            len(turnus[uke][dag]['dagsverk']) == 0 and
-                                            word['text'] == turnus[uke-1][7]['dagsverk'][1]):
-                                            continue
-                                        # hvis objektet er :, XX, OO eller TT: lagre i nåværede dag og uke
-                                        elif any(val in turnus[uke-1][7]['tid'] for val in word_allow_filter):
-                                            turnus[uke][dag]['dagverk'] = word['text']
-                                        # Hvis det bare er et objekt på søndag uke over: legg objekt til søndag
-                                        elif len(turnus[uke-1][7]['dagsverk']) == 0:
-                                            turnus[uke-1][7]['dagsverk'] = word['text']
+                                        if len(turnus[uke-1][7]['tid']) == 2 and turnus[uke-1][7]['dagsverk'] == "":
+                                            turnus[uke][dag-1]['dagsverk'] =  word['text']
 
                                         
                                         else:
@@ -394,7 +385,7 @@ def create_excel(data):
 
 
                              
-for page in pages_in_pdf[0:20]:
+for page in pages_in_pdf[0:5]:
     sorter_turnus_side(page)      
 
 
