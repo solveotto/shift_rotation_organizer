@@ -5,6 +5,13 @@ from datetime import datetime, time
 import xlsxwriter
 
 
+# BUGS/FORBEDRINGER
+# - Når det er en dag uten jobb blir denne også farget samme farge som etter en nattevakt
+#
+#
+
+
+
 
 ### Intitial Constants ###
 
@@ -206,8 +213,8 @@ def sorter_turnus_side(page):
                         if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
                             # Er objektet er innenfor nåværende dags parametere
                             if word['x0'] >= dag_verdi[0]and word['x0'] <= dag_verdi[1] and word['text'] not in word_remove_filter:
-                                                                # Siler ut objekter som er tid. Kan trolig fjerne filtere
-                                
+                                                               # Siler ut objekter som er tid. Kan trolig fjerne filtere
+
                                 if (":" in word["text"] or any(sub in word["text"] for sub in word_allow_filter)):
                                     continue
                                 else:
@@ -217,15 +224,22 @@ def sorter_turnus_side(page):
                                     # men lagres i nåværende dag og uke.
                                     if (uke == 1 and dag == 1) and word['text'] not in word_remove_filter:
                                         turnus[uke][dag]['dagsverk'] = word['text']
-
-                                    elif uke != 1 and dag == 1:    
-                                        if len(turnus[uke-1][7]['tid']) == 2 and turnus[uke-1][7]['dagsverk'] == "":
+                                    
+                                    # Mandager som ikke er uke1
+                                    elif uke != 1 and dag == 1:
+                                        # Hopper over iterering hvis dagsverket er likt dagsverket i søndagen uka før
+                                        # og tidene i de to dagene ikke er like.
+                                        if (word['text'] == turnus[uke-1][7]['dagsverk'] and 
+                                            turnus[uke][dag]['tid'] != turnus[uke-1][7]['tid']):
+                                            continue   
+                                        elif len(turnus[uke-1][7]['tid']) == 2 and turnus[uke-1][7]['dagsverk'] == "":
                                             turnus[uke][dag-1]['dagsverk'] =  word['text']
 
-                                        
+
                                         else:
                                             turnus[uke][dag]['dagsverk'] = word['text']
-
+                                            if word['text'] == '9312':
+                                                print(turnus[uke-1][7]['dagsverk'], word['text'])
                                         
                                                                         
                                     # Hvis det ikke er dag1
@@ -310,13 +324,15 @@ def create_excel(data):
             
         
             # Define a format for the cell background color.
+            hdag_format = workbook.add_format({'bg_color': '#dbcc27',
+                                               'font_color': '#000000'})
             tidlig_format = workbook.add_format({'bg_color': '#7abfff',
                                                 'font_color': '#000000'})
-            tidlig_kveld_format = workbook.add_format({'bg_color': '#e6bc4c',
+            tidlig_kveld_format = workbook.add_format({'bg_color': '#c46d45',
                                                 'font_color': '#000000'})
             kveld_format = workbook.add_format({'bg_color': '#ed7777',
                                                 'font_color': '#000000'})
-            natt_format = workbook.add_format({'bg_color': '#4a4a4a',
+            natt_format = workbook.add_format({'bg_color': '#730856',
                                                 'font_color': '#ffffff'})
             fridag_format = workbook.add_format({'bg_color': '#13bd57',
                                                 'font_color': '#ffffff'})
@@ -335,7 +351,7 @@ def create_excel(data):
 
             # Setter høyden på columns
             for row in range(1,7):
-                worksheet.set_row(row, 32)
+                worksheet.set_row(row, 40)
             
             # Apply centered text and borders for the range 'A1:H6'.
             for row in range(6):
@@ -349,6 +365,12 @@ def create_excel(data):
                 for row in range(1, 7):  # Rows 2 through 7
                     cell = xlsxwriter.utility.xl_rowcol_to_cell(row, col)
                     ## Formater ##
+                    # H-Dager
+                    worksheet.conditional_format(cell, {'type': 'formula',
+                                                        'criteria': '=RIGHT(' + cell +', 1)="H"',
+                                                        'format': hdag_format
+
+                    })
                     # Tidligvakt
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)' 
@@ -385,7 +407,7 @@ def create_excel(data):
 
 
                              
-for page in pages_in_pdf[0:5]:
+for page in pages_in_pdf[0:3]:
     sorter_turnus_side(page)      
 
 
