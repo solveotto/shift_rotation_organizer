@@ -99,7 +99,7 @@ def sorter_turnus_side(page):
     turnus_2_navn = 'Turnus2'
 
 
-                    # Finne og navgi turns.
+    # Finne og navgi turns.
     for turnus_name in text_objects:
 
         if turnus_name["text"] == 'RAMME' or turnus_name["text"] == 'UTLAND':
@@ -328,14 +328,19 @@ def create_excel(data):
                                                'font_color': '#000000'})
             tidlig_format = workbook.add_format({'bg_color': '#7abfff',
                                                 'font_color': '#000000'})
-            tidlig_kveld_format = workbook.add_format({'bg_color': '#c46d45',
+            tidlig_kveld_format = workbook.add_format({'bg_color': '#d68f6d',
                                                 'font_color': '#000000'})
-            kveld_format = workbook.add_format({'bg_color': '#ed7777',
+            kveld_format = workbook.add_format({'bg_color': '#fa7f7f',
                                                 'font_color': '#000000'})
-            natt_format = workbook.add_format({'bg_color': '#730856',
-                                                'font_color': '#ffffff'})
-            fridag_format = workbook.add_format({'bg_color': '#13bd57',
-                                                'font_color': '#ffffff'})
+            natt_format = workbook.add_format({'bg_color': '#c34fe3',
+                                                'font_color': '#000000'})
+            turnusfri_format = workbook.add_format({'bg_color': '#13bd57',
+                                                'font_color': '#000000'})
+            skjult_fridag_format = workbook.add_format({'bg_color': '#cc9fe3',
+                                                'font_color': '#000000',
+                                                'border':2,
+                                                'border_color': '#c34fe3'})
+            
             centered_format = workbook.add_format({
                                                 'align': 'center',
                                                 'valign': 'vcenter',
@@ -398,83 +403,16 @@ def create_excel(data):
                     # Tomme celler
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(' + cell + '="")',
-                                                        'format': natt_format})
+                                                        'format': skjult_fridag_format})
                     # XX, OO og TT celler
                     worksheet.conditional_format(cell, {'type': 'formula',
                                                         'criteria': '=(' + cell + '="XX ")' 'OR (' + cell + '="OO ")' 'OR (' + cell + '="TT ")',
-                                                        'format': fridag_format})
-
+                                                        'format': turnusfri_format})
 
 
                              
-for page in pages_in_pdf[0:3]:
+for page in pages_in_pdf:
     sorter_turnus_side(page)      
 
 
 create_excel(turnuser)
-
-
-
-
-
-
-# for turnus in turnuser[0]:
-    
-#     for turnus, turnus_value in turnus.items():
-
-#             for uke_nr, uke_value in turnus_value.items():
-#                 for g, h in uke_value.items():
-#                     print(turnus, uke_nr, g, h['tid'], "-", h['x0'])
-#                     print(" ")
-
-
-
-
-
-#### BACKUP AV TURNUS2 SORTERING:
-# for uker in turnus_2_pos:  
-                #     for uke, uke_verdi in uker.items():
-                #         if word['top'] >= uke_verdi[0] and word['bottom'] <= uke_verdi[1]:
-                            
-                #             for dager in dag_pos:
-                #                 for dag, verdi in dager.items():
-                #                     if word['x0'] >= verdi[0] and word['x1'] <= verdi[1]+word_crossover_tolerance:
-                
-                #                         if dag == 8:
-                #                             pass
-                                        
-                #                         if (uke == 1 and dag == 1) or word['text'] in word_allow_filter:
-                #                             turnus2[uke][dag]['tid'].append(word['text'])
-                #                             turnus2[uke][dag]['x0'].append(word['x0'])
-                                            
-                                        
-                #                         elif uke > 1 and dag == 1:
-                #                             if word['x0'] in turnus2[uke-1][7]['x0']:
-                #                                 pass
-                #                             if any(val in turnus2[uke-1][7]['tid'] for val in word_allow_filter):
-                #                                 turnus2[uke][dag]['tid'].append(word['text'])
-                #                                 turnus2[uke][dag]['x0'].append(word['x0'])
-                #                             elif len(turnus2[uke-1][7]['tid']) == 1:
-                #                                 turnus2[uke-1][7]['tid'].append(word['text'])
-                #                                 turnus2[uke-1][7]['x0'].append(word['x0'])
-                #                             else:
-                #                                 turnus2[uke][dag]['tid'].append(word['text'])
-                #                                 turnus2[uke][dag]['x0'].append(word['x0'])
-
-                                        
-                #                         elif uke >= 1 and dag > 1:
-                #                             if word['x0'] in turnus2[uke][dag-1]['x0']:
-                #                                 pass
-                #                             elif any(val in turnus2[uke][dag-1]['tid'] for val in word_allow_filter):
-                #                                 turnus2[uke][dag]['tid'].append(word['text'])
-                #                                 turnus2[uke][dag]['x0'].append(word['x0'])
-                #                             elif len(turnus2[uke][dag-1]['tid']) == 1:
-                #                                 turnus2[uke][dag-1]['tid'].append(word['text'])
-                #                                 turnus2[uke][dag-1]['x0'].append(word['x0'])
-                #                             else:
-                #                                 turnus2[uke][dag]['tid'].append(word['text'])
-                #                                 turnus2[uke][dag]['x0'].append(word['x0'])
-
-                #                         else:
-                #                             turnus2[uke][dag]['tid'].append(word['text'])
-                #                             turnus2[uke][dag]['x0'].append(word['x0'])  
