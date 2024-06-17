@@ -3,6 +3,7 @@ import pandas as pd
 import copy
 from datetime import datetime
 import xlsxwriter
+import json
 
 
 ### Intitial Constants ###
@@ -307,6 +308,10 @@ if __name__ == '__main__':
         sorterte_turnuser = sorter_side(page)
         for sortert_turnus in sorterte_turnuser:
             turnuser.append(sortert_turnus)
+    print(turnuser)
+
+    with open('turnuser.json', 'w') as f:
+        json.dump(turnuser, f, indent=4)
 
     # Lager excel av de sorterte turnusene
-    create_excel(turnuser)
+    #create_excel(turnuser)
