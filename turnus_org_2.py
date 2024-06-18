@@ -1,4 +1,5 @@
 from datetime import datetime
+import pandas as pd
 
 turnuser = [{
         "OSL_01": {
@@ -529,16 +530,29 @@ turnuser = [{
 # Iterate over the data and convert the times
 
 filter = [['XX'], ['TT'], ['OO'], []]
+data = {
+    'Turnus' : ['Osl1'],
+    'Uke'   : [1],
+    'Start' : [1],
+    'Slutt' : [1],
+    'Ukedag': ['mandag']
+}
+df = pd.DataFrame(data)
 
-for user in turnuser:
-    for key, value in user.items():
-        for uke, value2 in value.items():
-           for k, v in value2.items():
-               if v['tid'] not in filter:
+for turnus in turnuser:
+    for turnus_navn, turnus_data in turnus.items():
+        for uke, uke_data in turnus_data.items():
+           for dag, dag_data in uke_data.items():
+               if dag_data['tid'] not in filter:
                     #print(v['tid'])
-                    v['tid'] = [datetime.strptime(time, '%H:%M') for time in v['tid']]
-                    # print(v["tid"][0].hour, v["tid"][0].minute)
+                    new_time = [datetime.strptime(time, '%H:%M') for time in dag_data['tid']]
+                    start_tid = new_time[0].strftime("%H:%M")
+                    slutt_tid = new_time[1].strftime("%H:%M")
+                    #print(start_tid, '-', slutt_tid)
+
+                    new_row = {'Turnus': turnus_navn,  }
 
 
-print(turnuser)
+
+print(df)
 # Now you can search or compare the times
