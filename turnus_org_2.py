@@ -529,13 +529,13 @@ turnuser = [{
 
 # Iterate over the data and convert the times
 
-filter = [['XX'], ['TT'], ['OO'], []]
+fridager = [['XX'], ['TT'], ['OO'], []]
 data = {
-    'Turnus' : ['Osl1'],
-    'Uke'   : [1],
-    'Start' : [1],
-    'Slutt' : [1],
-    'Ukedag': ['mandag']
+    'Turnus' : [], 
+    'Start' : [],
+    'Slutt' : [],
+    'Uke'   : [],
+    'Ukedag': []
 }
 df = pd.DataFrame(data)
 
@@ -543,16 +543,29 @@ for turnus in turnuser:
     for turnus_navn, turnus_data in turnus.items():
         for uke, uke_data in turnus_data.items():
            for dag, dag_data in uke_data.items():
-               if dag_data['tid'] not in filter:
-                    #print(v['tid'])
+               if dag_data['tid'] not in fridager:
                     new_time = [datetime.strptime(time, '%H:%M') for time in dag_data['tid']]
                     start_tid = new_time[0].strftime("%H:%M")
                     slutt_tid = new_time[1].strftime("%H:%M")
-                    #print(start_tid, '-', slutt_tid)
 
-                    new_row = {'Turnus': turnus_navn,  }
+                    new_row = {
+                        'Turnus' : turnus_navn,
+                        'Uke'   : uke,
+                        'Start' : start_tid,
+                        'Slutt' : slutt_tid,
+                        'Ukedag': dag
+                    }
+                    df = df._append(new_row, ignore_index = True)
 
 
 
-print(df)
-# Now you can search or compare the times
+df_search = df.copy()
+df_search['Start'] = pd.to_datetime(df['Start'])
+df_search['Slutt'] = pd.to_datetime(df['Slutt'])
+
+df_search = df_search.set_index('Start')
+
+filtered_df = df_search.between_time('09:00', '14:00')
+
+print(filtered_df)
+
