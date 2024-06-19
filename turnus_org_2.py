@@ -533,9 +533,7 @@ fridager = [['XX'], ['TT'], ['OO'], []]
 data = {
     'Turnus' : [], 
     'Start' : [],
-    'Slutt' : [],
-    'Uke'   : [],
-    'Ukedag': []
+    'Slutt' : []
 }
 df = pd.DataFrame(data)
 
@@ -543,29 +541,59 @@ for turnus in turnuser:
     for turnus_navn, turnus_data in turnus.items():
         for uke, uke_data in turnus_data.items():
            for dag, dag_data in uke_data.items():
-               if dag_data['tid'] not in fridager:
+                if dag_data['tid'] not in fridager:
                     new_time = [datetime.strptime(time, '%H:%M') for time in dag_data['tid']]
                     start_tid = new_time[0].strftime("%H:%M")
                     slutt_tid = new_time[1].strftime("%H:%M")
+                    dagsverk_type = 'ARB'
+                else:
+                    start_tid = ''
+                    slutt_tid = ''
+                    if dag_data['tid'] == []:
+                        dagsverk_type = 'SJ'
+                    else:
+                        dagsverk_type = 'FRI'
+                    
 
-                    new_row = {
-                        'Turnus' : turnus_navn,
-                        'Uke'   : uke,
-                        'Start' : start_tid,
-                        'Slutt' : slutt_tid,
-                        'Ukedag': dag
-                    }
-                    df = df._append(new_row, ignore_index = True)
+
+
+                new_row = {
+                    'Turnus' : turnus_navn,
+                    'ukedag' : dag_data['navn'],
+                    'ukedag_nr': dag,
+                    'uke_nr'   : uke,
+                    'dagsverk_type'   : dagsverk_type,
+                    'Start' : start_tid,
+                    'Slutt' : slutt_tid,
+                    'dagsverk' : dag_data['dagsverk']
+                }
+                df = df._append(new_row, ignore_index = True)
 
 
 
 df_search = df.copy()
-df_search['Start'] = pd.to_datetime(df['Start'])
-df_search['Slutt'] = pd.to_datetime(df['Slutt'])
 
-df_search = df_search.set_index('Start')
+df_search['Start'] = pd.to_datetime(df['Start'], format="%H:%M")
+df_search['Slutt'] = pd.to_datetime(df['Slutt'], format="%H:%M")
 
-filtered_df = df_search.between_time('09:00', '14:00')
+df_start = df_search.set_index('Start')
+df_start = df_start.between_time('09:00', '18:00')
 
-print(filtered_df)
+df_slutt = df_search.set_index('Slutt')
+df_slutt = df_slutt.between_time('21:00', '22:00')
+
+
+# Find entries that are in both DataFrames
+df_filtered = pd.merge(df_start, df_slutt, how='inner')
+
+
+
+
+mask_lordag = df.isin(['Lørdag']).any(axis=1)
+mask_sondag = df.isin(['Søndag']).any(axis=1)
+mask_fri = df.isin(['FRI']).any(axis=1)
+
+
+df_lordag_and_fri = df[mask_lordag & mask_fri]
+df_sondag_and_fri = df[mask_sondag & mask_fri]
 
