@@ -1,7 +1,7 @@
 from datetime import datetime
 import pandas as pd
 
-turnuser = [{
+turnuser = [{ 
         "OSL_01": {
             "1": {
                 "1": {
@@ -524,52 +524,49 @@ turnuser = [{
 
 
 
+FIRDAGER = [['XX'], ['TT'], ['OO'], []]
 
 
+def create_dataframe(dict):
 
-# Iterate over the data and convert the times
+    df = pd.DataFrame()
 
-fridager = [['XX'], ['TT'], ['OO'], []]
-data = {
-    'Turnus' : [], 
-    'Start' : [],
-    'Slutt' : []
-}
-df = pd.DataFrame(data)
 
-for turnus in turnuser:
-    for turnus_navn, turnus_data in turnus.items():
-        for uke, uke_data in turnus_data.items():
-           for dag, dag_data in uke_data.items():
-                if dag_data['tid'] not in fridager:
-                    new_time = [datetime.strptime(time, '%H:%M') for time in dag_data['tid']]
-                    start_tid = new_time[0].strftime("%H:%M")
-                    slutt_tid = new_time[1].strftime("%H:%M")
-                    dagsverk_type = 'ARB'
-                else:
-                    start_tid = ''
-                    slutt_tid = ''
-                    if dag_data['tid'] == []:
-                        dagsverk_type = 'SJ'
+    for turnus in dict:
+        for turnus_navn, turnus_data in turnus.items():
+            for uke, uke_data in turnus_data.items():
+                for dag, dag_data in uke_data.items():
+                    if dag_data['tid'] not in FIRDAGER:
+                        new_time = [datetime.strptime(time, '%H:%M') for time in dag_data['tid']]
+                        start_tid = new_time[0].strftime("%H:%M")
+                        slutt_tid = new_time[1].strftime("%H:%M")
+                        dagsverk_type = 'ARB'
                     else:
-                        dagsverk_type = 'FRI'
-                    
+                        start_tid = ''
+                        slutt_tid = ''
+                        if dag_data['tid'] == []:
+                            dagsverk_type = 'SKJ'
+                        else:
+                            dagsverk_type = 'FRI'
+                        
 
 
 
-                new_row = {
-                    'Turnus' : turnus_navn,
-                    'ukedag' : dag_data['navn'],
-                    'ukedag_nr': dag,
-                    'uke_nr'   : uke,
-                    'dagsverk_type'   : dagsverk_type,
-                    'Start' : start_tid,
-                    'Slutt' : slutt_tid,
-                    'dagsverk' : dag_data['dagsverk']
-                }
-                df = df._append(new_row, ignore_index = True)
+                    new_row = {
+                        'Turnus' : turnus_navn,
+                        'ukedag' : dag_data['navn'],
+                        'ukedag_nr': dag,
+                        'uke_nr'   : uke,
+                        'dagsverk_type'   : dagsverk_type,
+                        'Start' : start_tid,
+                        'Slutt' : slutt_tid,
+                        'dagsverk' : dag_data['dagsverk']
+                    }
+                    df = df._append(new_row, ignore_index = True)
 
+    return df
 
+df = create_dataframe(turnuser)
 
 df_search = df.copy()
 
@@ -597,3 +594,5 @@ mask_fri = df.isin(['FRI']).any(axis=1)
 df_lordag_and_fri = df[mask_lordag & mask_fri]
 df_sondag_and_fri = df[mask_sondag & mask_fri]
 
+print(len(df_lordag_and_fri))
+print(df)
