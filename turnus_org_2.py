@@ -597,3 +597,5 @@ mask_fri = df.isin(['FRI']).any(axis=1)
 df_lordag_and_fri = df[mask_lordag & mask_fri]
 df_sondag_and_fri = df[mask_sondag & mask_fri]
 
+
+print(df)
