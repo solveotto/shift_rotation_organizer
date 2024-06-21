@@ -11,6 +11,7 @@ FIRDAGER = [['XX'], ['TT'], ['OO'], []]
 
 
 df = pd.DataFrame()
+df_result = pd.DataFrame(columns=['Turnus', 'Poeng'])
 
 
 for turnus in turnuser_dict:
@@ -97,8 +98,8 @@ for turnus_navn, turnus_df in df_grpby_turnus:
     if frihelg_count > 3:
         poeng += 10
 
+    
+    #turnus_lst.append({turnus_navn: poeng})
 
-    turnus_lst.append({turnus_navn: poeng})
 
-
-print(turnuser_dict)
+#print(turnus_lst)
