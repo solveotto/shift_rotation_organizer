@@ -93,7 +93,6 @@ for turnus_navn, turnus_df in df_grpby_turnus:
             if _dagsverk['dagsverk_type'] == 'FRI' and _dagsverk['ukedag'] == 'Lørdag':
                 new_row = df_helgefri.iloc[_index + 1]
                 if new_row['dagsverk_type'] == 'FRI' and new_row['ukedag'] == 'Søndag':
-                    print(new_row['dagsverk_type'])
                     frihelg_count += 1
     if frihelg_count > 3:
         poeng += 10
@@ -102,4 +101,4 @@ for turnus_navn, turnus_df in df_grpby_turnus:
     turnus_lst.append({turnus_navn: poeng})
 
 
-print(turnus_lst)
+print(turnuser_dict)
