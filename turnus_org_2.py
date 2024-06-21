@@ -3,7 +3,7 @@ import pandas as pd
 import json
 
 
-with open('turnuser.json', 'r') as f:
+with open('turnuser_R24.json', 'r') as f:
     turnuser_dict = json.load(f)
 
 FIRDAGER = [['XX'], ['TT'], ['OO'], []]
@@ -14,8 +14,8 @@ df = pd.DataFrame()
 
 
 for turnus in turnuser_dict:
-    for turnus_navn, turnus_data in turnus.items():
-        for uke, uke_data in turnus_data.items():
+    for turnus_navn, turnus_df in turnus.items():
+        for uke, uke_data in turnus_df.items():
             for dag, dag_data in uke_data.items():
 
                 # Konverterer tiden til datetime
@@ -80,19 +80,26 @@ for turnus in turnuser_dict:
 
 turnus_lst = []
 
-grouped = df.groupby('Turnus')
-for group_value, group_df in grouped:
-    # print(f"Group value: {group_value}")
-    # print(group_df)
-    # print()  # For better readability
-
-    # 3. helg
-    lordag = group_df[(group_df['ukedag'] == 'Lørdag') & (group_df['dagsverk_type'] == 'FRI')]
+df_grpby_turnus = df.groupby('Turnus')
+for turnus_navn, turnus_df in df_grpby_turnus:
     poeng = 0
-    if len(lordag) >= 4:
-        poeng += 1
 
-    turnus_lst.append({group_value: poeng})
+    # 3. helgfri (10p)
+    df_helgefri = turnus_df.reset_index()
+    frihelg_count = 0
+
+    for _index, _dagsverk in df_helgefri.iterrows():
+        if _index + 1 < len(df_helgefri):
+            if _dagsverk['dagsverk_type'] == 'FRI' and _dagsverk['ukedag'] == 'Lørdag':
+                new_row = df_helgefri.iloc[_index + 1]
+                if new_row['dagsverk_type'] == 'FRI' and new_row['ukedag'] == 'Søndag':
+                    print(new_row['dagsverk_type'])
+                    frihelg_count += 1
+    if frihelg_count > 3:
+        poeng += 10
+
+
+    turnus_lst.append({turnus_navn: poeng})
 
 
 print(turnus_lst)

@@ -23,8 +23,8 @@ REMOVE_FILTER = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:',
                       'Turnus:', 'Stasjoneringssted:', 'OSL', 'HLD']
 ALLOW_FILTER = [':', 'XX', 'OO', 'TT']
 FRIDAG_FILTER = ['XX', 'OO', 'TT']
-INPUT_PATH = 'input.pdf'
-OUTPUT_PATH = 'output.xlsx'
+INPUT_PATH = 'turnuser_R24.pdf'
+OUTPUT_PATH = 'turnuser_R24.xlsx'
 PDF = pdfplumber.open(INPUT_PATH)
 PAGES_IN_PDF = PDF.pages
 
@@ -161,15 +161,23 @@ def sorter_side(page):
 
     # Finne og navgi turns.
     for turnus_name in text_objects:
-        if turnus_name["text"] in ['RAMME', 'UTLAND', 'OSL']:
-            word_pos = text_objects.index(turnus_name)
+        word_pos = text_objects.index(turnus_name)
+        
+        if turnus_name["text"] == 'OSL':
             if turnus_name['top'] > 0 and turnus_name['top'] < 70:
-                turnus_1_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']
+                if text_objects[word_pos+1]['text'] in ['Ramme', 'RAMME', 'Utland', 'UTLAND']:
+                    turnus_1_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+text_objects[word_pos+2]['text']
+                else:
+                    turnus_1_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']
+                
             elif turnus_name['top'] > 340 and turnus_name['top'] < 360:
-                turnus_2_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']
+                if text_objects[word_pos+1]['text'] in ['Ramme', 'RAMME', 'Utland', 'UTLAND']:
+                    turnus_2_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+text_objects[word_pos+2]['text']
+                    print(turnus_1_navn, turnus_2_navn)
+                else:
+                    turnus_2_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']
         else:
             pass
-    
     turnus1 = generer_turnus_mal()
     turnus2 = generer_turnus_mal()
 
@@ -308,10 +316,10 @@ if __name__ == '__main__':
         sorterte_turnuser = sorter_side(page)
         for sortert_turnus in sorterte_turnuser:
             turnuser.append(sortert_turnus)
-    print(turnuser)
 
-    with open('turnuser.json', 'w') as f:
+
+    with open('turnuser_R24.json', 'w') as f:
         json.dump(turnuser, f, indent=4)
 
     # Lager excel av de sorterte turnusene
-    #create_excel(turnuser)
+    create_excel(turnuser)
