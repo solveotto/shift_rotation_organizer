@@ -10,8 +10,8 @@ FIRDAGER = [['XX'], ['TT'], ['OO'], []]
 
 
 
-df = pd.DataFrame()
-df_result = pd.DataFrame(columns=['Turnus', 'Poeng'])
+turnuser_df = pd.DataFrame()
+poeng_df = pd.Series()
 
 
 for turnus in turnuser_dict:
@@ -46,7 +46,7 @@ for turnus in turnuser_dict:
                     'Slutt' : slutt_tid,
                     'dagsverk' : dag_data['dagsverk']
                 }
-                df = df._append(new_row, ignore_index = True)
+                turnuser_df = turnuser_df._append(new_row, ignore_index = True)
 
 
 # df_search = df.copy()
@@ -79,27 +79,95 @@ for turnus in turnuser_dict:
 # df_test = df[(df['ukedag'] == 'Lørdag') & (df['dagsverk_type'] == 'ARB') & (df['Start'] < '10:00')]
 # print(df_test)
 
-turnus_lst = []
 
-df_grpby_turnus = df.groupby('Turnus')
+df_grpby_turnus = turnuser_df.groupby('Turnus')
 for turnus_navn, turnus_df in df_grpby_turnus:
-    poeng = 0
+    poeng_df.loc[turnus_navn] = 0.0 
 
-    # 3. helgfri (10p)
-    df_helgefri = turnus_df.reset_index()
-    frihelg_count = 0
+    turns_df_reset = turnus_df.reset_index()
 
-    for _index, _dagsverk in df_helgefri.iterrows():
-        if _index + 1 < len(df_helgefri):
-            if _dagsverk['dagsverk_type'] == 'FRI' and _dagsverk['ukedag'] == 'Lørdag':
-                new_row = df_helgefri.iloc[_index + 1]
-                if new_row['dagsverk_type'] == 'FRI' and new_row['ukedag'] == 'Søndag':
-                    frihelg_count += 1
-    if frihelg_count > 3:
-        poeng += 10
-
+    # Initialize total weekend hours
+    total_weekend_hours = 0
     
-    #turnus_lst.append({turnus_navn: poeng})
+
+    #### TEST ####
+    test_turnus = "OSL_Ramme_03"
+
+    # Helgefri. 5p for lørdag og søndag
+    for _index, _dagsverk in turns_df_reset.iterrows():
+        
+        
+        if _index + 1 < len(turns_df_reset):
+           if len(_dagsverk['Start']) > 0:
+            start = pd.to_datetime(_dagsverk['Start'], format='%H:%M')
+            end = pd.to_datetime(_dagsverk['Slutt'], format='%H:%M')
+            ukedag = _dagsverk['ukedag']
+
+            # Adjust end time if it's on the next day
+            if end < start:
+                end += pd.Timedelta(days=1)
 
 
-#print(turnus_lst)
+            # Check if the shift starts on Friday and ends on Saturday
+            if ukedag == 'Fredag' and end.day > start.day:
+                midnight = start.replace(hour=23, minute=59, second=59)
+                friday_hours = (midnight - start).total_seconds() / 3600
+                saturday_hours = (end - (midnight + pd.Timedelta(seconds=1))).total_seconds() / 3600
+                total_weekend_hours += saturday_hours
+
+                if turnus_navn == test_turnus:
+                    print(_dagsverk['ukedag'], _dagsverk['uke_nr'], saturday_hours)
+
+            elif ukedag == 'Søndag':
+                if end.day > start.day:
+                    midnight = start.replace(hour=23, minute=59, second=59)
+                    sunday_hours = ((midnight + pd.Timedelta(seconds=1)) - start).total_seconds() / 3600
+                    total_weekend_hours += sunday_hours
+
+                    if turnus_navn == test_turnus:
+                        print(_dagsverk['ukedag'], _dagsverk['uke_nr'], sunday_hours)
+
+
+                else:
+                    hours = (end - start).total_seconds() / 3600
+                    total_weekend_hours += hours
+
+
+                    if turnus_navn == test_turnus:
+                        print(_dagsverk['ukedag'], _dagsverk['uke_nr'], hours)
+
+
+     
+            elif ukedag == 'Lørdag':
+                # Calculate total hours for shifts fully within the weekend
+                hours = (end - start).total_seconds() / 3600
+                total_weekend_hours += hours
+
+                if turnus_navn == test_turnus:
+                    print(_dagsverk['ukedag'], _dagsverk['uke_nr'], hours)
+
+                
+    total_hours = int(total_weekend_hours)  # Get the whole hours
+    total_minutes = int((total_weekend_hours - total_hours) * 60)  # Convert the fractional hours to minutes
+
+
+    # Add it to poeng_df as a new column
+    poeng_df[turnus_navn] += total_weekend_hours
+    #print(f"{turnus_navn}: Total weekend hours: {type(total_weekend_hours)}")
+    # print(f"{turnus_navn}: Hours: {total_hours}, Minutes: {total_minutes}")
+
+
+for i, x in poeng_df.items():
+    # Given number
+    total_time = x
+
+    # Extract whole hours
+    hours = int(total_time)
+
+    # Calculate minutes from the fractional part
+    minutes = int((total_time - hours) * 60)
+
+    #print(f"Tunrus: {i}, Hours: {hours}, Minutes: {minutes}, {x}")
+
+
+print(poeng_df.sort_values())
