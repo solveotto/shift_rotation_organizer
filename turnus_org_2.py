@@ -133,8 +133,9 @@ class Turnus():
 
 
 turnus = Turnus()
-turnus.get_afternoons(start_time= pd.to_datetime("12:00", format="%H:%M"))
-# print(turnus.turnuser_df)
+turnus.get_weekend_hours()
+#turnus.get_afternoons(start_time= pd.to_datetime("12:00", format="%H:%M"))
+print(turnus.turnuser_poeng)
 
 
 
