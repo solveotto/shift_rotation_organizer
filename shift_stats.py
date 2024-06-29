@@ -8,7 +8,7 @@ import json
 class Turnus():
     def __init__(self, json_path) -> None:
         self.turnuser_df = self.JsonToDataframe(json_path)
-        self.points_df = pd.Series()
+        self.stats_df = pd.DataFrame(columns=['turnus', 'poeng', 'weekends'])
         
 
 
@@ -52,11 +52,26 @@ class Turnus():
         return pd.DataFrame(df)
     
 
+    def add_or_update_points(self, df, turnus, *args):
+        if len(args) < 2:
+            raise ValueError("At least two arguments are required: one for the name and at least one for the value")
+        
+        poeng = args[0]
+        weekends = args[1]
+
+        if turnus in df['turnus'].values:
+            df.loc[df['turnus'] == turnus, 'poeng'] += value
+        else:
+            new_row = pd.DataFrame({'turnus': [turnus], 'poeng': [value]})
+            df = pd.concat([df, new_row], ignore_index=True)
+        return df    
+    
+
+
     def get_weekend_hours(self):
         df_grpby_turnus = self.turnuser_df.groupby('turnus')
         for turnus_navn, turnus_df in df_grpby_turnus:
             # Sets initial value
-            self.points_df.loc[turnus_navn] = 0.0 
             
             turns_df_reset = turnus_df.reset_index()
 
@@ -85,9 +100,6 @@ class Turnus():
                             #### TEST ####
                             #print(f"{_dagsverk['turnus']}, {_dagsverk['uke_nr']}, {_dagsverk['ukedag']}, {saturday_hours}")
 
-
-
-
                         elif ukedag == 'Søndag':
                             if end.day > start.day:
                                 midnight = start.replace(hour=23, minute=59, second=59)
@@ -108,11 +120,11 @@ class Turnus():
                             #### TEST ####
                             #print(f"{_dagsverk['turnus']}, {_dagsverk['uke_nr']}, {_dagsverk['ukedag']}, {saturday_hours}")
 
-            # Add total hours to turnus_poeng
-            self.points_df[turnus_navn] += total_weekend_hours
-            
-            # # Add to weekend points
-            # self.weekend_hours[turnus_navn] = total_weekend_hours
+            # Add values to stats_df
+            if self.stats_df.empty:
+                self.stats_df = pd.DataFrame({'turnus': [turnus_navn], 'poeng': [total_weekend_hours]})
+            else:
+                self.stats_df = self.add_or_update_points(self.stats_df, turnus_navn, total_weekend_hours)
 
 
 
@@ -131,4 +143,4 @@ turnus = Turnus('turnuser_R24.json')
 #turnus.get_afternoons()
 turnus.get_weekend_hours()
 
-print(turnus.points_df.sort_values())
+print(turnus.stats_df.sort_values(by='poeng'))
