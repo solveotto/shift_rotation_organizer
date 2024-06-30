@@ -3,14 +3,18 @@ import pandas as pd
 import numpy as np
 import json
 
+'''
+- Fridays that goes over 2 hours into saturay counts as weekend days.
+'''
+
+
 
 
 class Turnus():
     def __init__(self, json_path) -> None:
         self.turnuser_df = self.JsonToDataframe(json_path)
-        self.stats_df = pd.DataFrame(columns=['turnus', 'poeng', 'weekends'])
+        self.stats_df = pd.DataFrame(columns=['turnus', 'poeng', 'weekend_days', 'afternoons'])
         
-
 
 
 
@@ -52,17 +56,17 @@ class Turnus():
         return pd.DataFrame(df)
     
 
-    def add_or_update_points(self, df, turnus, *args):
-        if len(args) < 2:
-            raise ValueError("At least two arguments are required: one for the name and at least one for the value")
+    def add_or_update_points(self, df, **kwargs):
+        if 'turnus' not in kwargs:
+            raise ValueError("The primary key 'turnus' must be provided as a keyword argument.")
         
-        poeng = args[0]
-        weekends = args[1]
+        turnus = kwargs['turnus']
 
         if turnus in df['turnus'].values:
-            df.loc[df['turnus'] == turnus, 'poeng'] += value
+            for key, value in kwargs.items():
+                df.loc[df['turnus'] == turnus, key] += value
         else:
-            new_row = pd.DataFrame({'turnus': [turnus], 'poeng': [value]})
+            new_row = pd.DataFrame([kwargs])
             df = pd.concat([df, new_row], ignore_index=True)
         return df    
     
@@ -77,6 +81,7 @@ class Turnus():
 
             # Initialize total weekend hours
             total_weekend_hours = 0
+            total_weekends_days = 0
             
 
             for _index, _dagsverk in turns_df_reset.iterrows():
@@ -96,6 +101,9 @@ class Turnus():
                             midnight = start.replace(hour=23, minute=59, second=59)
                             saturday_hours = (end - (midnight + pd.Timedelta(seconds=1))).total_seconds() / 3600
                             total_weekend_hours += saturday_hours
+                            # fridays over 2 hours into saturday
+                            if saturday_hours > 2:
+                                total_weekends_days += 1
 
                             #### TEST ####
                             #print(f"{_dagsverk['turnus']}, {_dagsverk['uke_nr']}, {_dagsverk['ukedag']}, {saturday_hours}")
@@ -108,6 +116,7 @@ class Turnus():
                             else:
                                 sunday_hours = (end - start).total_seconds() / 3600
                                 total_weekend_hours += sunday_hours
+                            total_weekends_days += 1
 
                             #### TEST ####
                             #print(f"{_dagsverk['turnus']}, {_dagsverk['uke_nr']}, {_dagsverk['ukedag']}, {sunday_hours}")
@@ -116,31 +125,39 @@ class Turnus():
                         elif ukedag == 'Lørdag':
                             saturday_hours = (end - start).total_seconds() / 3600
                             total_weekend_hours += saturday_hours
+                            total_weekends_days += 1
 
                             #### TEST ####
                             #print(f"{_dagsverk['turnus']}, {_dagsverk['uke_nr']}, {_dagsverk['ukedag']}, {saturday_hours}")
 
             # Add values to stats_df
-            if self.stats_df.empty:
-                self.stats_df = pd.DataFrame({'turnus': [turnus_navn], 'poeng': [total_weekend_hours]})
-            else:
-                self.stats_df = self.add_or_update_points(self.stats_df, turnus_navn, total_weekend_hours)
-
+            # if self.stats_df.empty:
+            #     self.stats_df = pd.DataFrame({'turnus': [turnus_navn], 'poeng': [total_weekend_hours], 'weekend_days': [total_weekends_days]})
+            # else:
+            self.stats_df = self.add_or_update_points(self.stats_df, turnus=turnus_navn, poeng=total_weekend_hours, weekend_days=total_weekends_days)
+    
+    def get_nights():
+        pass
 
 
     def get_afternoons(self):
+        afternoon_count = 0
+
         afternons_df = self.turnuser_df.groupby('turnus')
-        for turns_name, turnuser_df in afternons_df:
+        for turnus_name, turnuser_df in afternons_df:
             afternons_df = turnuser_df.reset_index()
 
             for _index, turnus in afternons_df.iterrows():
                 if turnus['start'] > pd.to_datetime('13:00', format='%H:%M'):
-                    print(turns_name, turnus['ukedag'], turnus['uke_nr'], turnus['dag_nr'], turnus['start'])
+                    #print(turnus_name, turnus['ukedag'], turnus['uke_nr'], turnus['dag_nr'], turnus['start'])
+                    afternoon_count += 1
+                    self.add_or_update_points(self.stats_df, turnus=turnus_name, afternoons=afternoon_count)
                     
 
 turnus = Turnus('turnuser_R24.json')
 
 #turnus.get_afternoons()
 turnus.get_weekend_hours()
+turnus.get_afternoons()
 
 print(turnus.stats_df.sort_values(by='poeng'))
