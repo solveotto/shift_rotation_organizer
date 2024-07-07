@@ -13,7 +13,10 @@ import json
 class Turnus():
     def __init__(self, json_path) -> None:
         self.turnuser_df = self.JsonToDataframe(json_path)
-        self.stats_df = pd.DataFrame(columns=['turnus', 'poeng', 'weekend_days', 'afternoons'])
+        self.stats_df = pd.DataFrame()
+
+
+        
         
 
 
@@ -67,35 +70,45 @@ class Turnus():
                 df.loc[df['turnus'] == turnus, key] += value
         else:
             new_row = pd.DataFrame([kwargs])
+            df = df.dropna(axis=1, how='all')
             df = pd.concat([df, new_row], ignore_index=True)
-        return df    
+        
+        return df
     
 
 
-    def get_weekend_hours(self):
+    def get_shift_stats(self):
         df_grpby_turnus = self.turnuser_df.groupby('turnus')
         for turnus_navn, turnus_df in df_grpby_turnus:
-            # Sets initial value
-            
-            turns_df_reset = turnus_df.reset_index()
 
-            # Initialize total weekend hours
+            turuns_df_reset = turnus_df.reset_index()
+
+
             total_weekend_hours = 0
             total_weekends_days = 0
+            afternoon_count = 0
+            afternons_in_row = 0
+            night_count = 0
             
 
-            for _index, _dagsverk in turns_df_reset.iterrows():
+            for _index, _dagsverk in turuns_df_reset.iterrows():
                 if _dagsverk['start'] != _dagsverk['slutt']:     
                     # Checks for bottom of the list
-                    if _index + 1 < len(turns_df_reset):
+                    if _index + 1 < len(turuns_df_reset):
                         start = pd.to_datetime(_dagsverk['start'], format='%H:%M')
                         end = pd.to_datetime(_dagsverk['slutt'], format='%H:%M')
+                        
                         ukedag = _dagsverk['ukedag']
 
                         # Adjust end time if it's on the next day
                         if end < start:
                             end += pd.Timedelta(days=1)
+                            # Counts night shifts
+                            if _dagsverk['slutt'] > pd.to_datetime('03:00', format='%H:%M'):
+                                night_count += 1
 
+
+                        ### Weekends ###
                         # Check if the shift starts on Friday and ends on Saturday
                         if ukedag == 'Fredag' and end.day > start.day:
                             midnight = start.replace(hour=23, minute=59, second=59)
@@ -130,34 +143,49 @@ class Turnus():
                             #### TEST ####
                             #print(f"{_dagsverk['turnus']}, {_dagsverk['uke_nr']}, {_dagsverk['ukedag']}, {saturday_hours}")
 
-            # Add values to stats_df
-            # if self.stats_df.empty:
-            #     self.stats_df = pd.DataFrame({'turnus': [turnus_navn], 'poeng': [total_weekend_hours], 'weekend_days': [total_weekends_days]})
-            # else:
-            self.stats_df = self.add_or_update_points(self.stats_df, turnus=turnus_navn, poeng=total_weekend_hours, weekend_days=total_weekends_days)
-    
-    def get_nights():
-        pass
 
+                        ### AFTERNOONS ###
+                        # creates a string version of the end date to check if i
+                        end_str = f'{end.year}-{end.month}-{end.day}'
+                        start_time = start.time()
+                        end_time = end.time()
+                        if start > pd.to_datetime('12:00', format='%H:%M'):
+                            if end == '1900-1-2':
+                                if end < pd.to_datetime('03:00', format='%H:%M'):
+                                    afternoon_count += 1
+                            elif end < pd.to_datetime('23:59', format='%H:%M'):
+                                    afternoon_count += 1
 
-    def get_afternoons(self):
-        afternoon_count = 0
+                                    print(start_time)
+                                    print(f"{_dagsverk['turnus']}, {_dagsverk['uke_nr']}, {_dagsverk['ukedag']}")
+                                      
+                            
 
-        afternons_df = self.turnuser_df.groupby('turnus')
-        for turnus_name, turnuser_df in afternons_df:
-            afternons_df = turnuser_df.reset_index()
+                            # ### Afternoons in row ###
+                            # next_row_value = turuns_df_reset.iloc[_index + 1]['start']
+                            # # Check if the next row's 'column_name' contains a specific value
+                            # if next_row_value > pd.to_datetime('13:00', format='%H:%M'):
+                            #     afternons_in_row += 1
+                                
 
-            for _index, turnus in afternons_df.iterrows():
-                if turnus['start'] > pd.to_datetime('13:00', format='%H:%M'):
-                    #print(turnus_name, turnus['ukedag'], turnus['uke_nr'], turnus['dag_nr'], turnus['start'])
-                    afternoon_count += 1
-                    self.add_or_update_points(self.stats_df, turnus=turnus_name, afternoons=afternoon_count)
+            # Adds shift as new row to dataframe
+            new_row = pd.DataFrame({
+                'turnus': [turnus_navn], 
+                'weekend_hours': [round(total_weekend_hours,1)], 
+                'weekend_days': [total_weekends_days],
+                'nights': [night_count],
+                'afternoons' : [afternoon_count],
+                'afternoons_in_row' : [afternons_in_row]
+                })
+            
+            self.stats_df = pd.concat([self.stats_df, new_row], ignore_index=True)
+
                     
 
 turnus = Turnus('turnuser_R24.json')
 
 #turnus.get_afternoons()
-turnus.get_weekend_hours()
-turnus.get_afternoons()
+turnus.get_shift_stats()
+#turnus.get_afternoons()
 
-print(turnus.stats_df.sort_values(by='poeng'))
+print(turnus.stats_df.sort_values(by='weekend_hours'))
