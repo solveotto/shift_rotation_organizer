@@ -17,6 +17,7 @@ class DataframeManager():
     def update_df(self):
         self.calc_helgetimer()
         self.calc_netter()
+        self.df = self.df.sort_values(by='poeng')
 
 
     def calc_helgetimer(self):
@@ -52,7 +53,7 @@ def calulate():
     helgetimer = request.form.get('helgetimer', '0')
     df_manager.helgetimer_mulip = int(helgetimer)
 
-    
+
     
     
     df_manager.update_df()
