@@ -7,51 +7,63 @@ app = Flask(__name__)
 app.secret_key = "secret"
 
 
+class DataframeManager():
+    def __init__(self) -> None:
+        self.df = pd.read_json('turnus_df_R24.json')
+        self.helgetimer_mulip = 1
 
-org_df = pd.read_json('turnus_df_R24.json')
+        self.update_df()
+
+    def update_df(self):
+        self.calc_helgetimer()
+        self.calc_netter()
 
 
-    
+    def calc_helgetimer(self):
+        self.df['poeng'] = self.df['poeng'] + self.df['helgetimer'] * self.helgetimer_mulip
 
+    def calc_netter(self):
+        self.df.loc[self.df['natt'] > 6, 'poeng'] += 1
+
+
+        
+
+df_manager = DataframeManager()
 
 
 @app.route('/')
 def home():
-    session['dataframe'] = org_df.to_json(orient='split')
-    df_json = session.get('dataframe')
-    df = pd.read_json(df_json, orient='split')
-    
-    #data = df.to_html()
-
     # Convert DataFrame to a list of dictionaries
-    table_data = df.to_dict(orient='records')
+    table_data = df_manager.df.to_dict(orient='records')
+
+    helgetimer = session.get('helgetimer', '0')
+
+    session.clear()
 
     # Pass the table data to the template
-    return render_template('index.html', table_data=table_data)
+    return render_template('index.html', table_data=table_data, helgetimer=helgetimer)
 
 
 @app.route('/submit', methods=['POST'])
 def calulate():
-    df_json = session.get('dataframe')
-    df_calc = pd.read_json(df_json, orient='split')
-    print(type(df_calc))
-
-
-
-    helgetimer_input = int(request.form['helgetimer'])
-
-    df_calc['poeng'] = df_calc['poeng'] + df_calc['helgetimer']
+    # Resets points value
+    df_manager.df['poeng'] = 0
+   
+    helgetimer = request.form.get('helgetimer', '0')
+    df_manager.helgetimer_mulip = int(helgetimer)
 
     
     
-    #df_calc = session.get('dataframe')
-
     
-    #df_calc.loc[df_calc['natt'] > 6, 'poeng'] += 1
+    df_manager.update_df()
+    
+    session['helgetimer'] = helgetimer
+    
+    
+    
 
-    session['dataframe'] = df_calc.to_json(orient='split')
 
-
+    #return render_template('index.html', helgetimer=helgetimer)
     return redirect(url_for('home'))
 
 
