@@ -317,7 +317,7 @@ if __name__ == '__main__':
         for sortert_turnus in sorterte_turnuser:
             turnuser.append(sortert_turnus)
 
-
+    # Lager JSON-fil
     with open('turnuser_R24.json', 'w') as f:
         json.dump(turnuser, f, indent=4)
 
