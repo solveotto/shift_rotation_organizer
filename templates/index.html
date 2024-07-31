@@ -43,28 +43,26 @@
 
         <div class="row py-3">
           <h4>Ettermiddag</h4>
-          <div class="col-md-4">
-            <h6>Vakter med flere ettermiddager enn dette:</h6>
+          <div class="col-md-3">
+            <h6>Vakter med flere ettermiddager enn:</h6>
             <div class="form">
-                <select class="form-select" aria-label="Default select example" id="helgetimer" name="helgetimer">
-                  <option value="0" {% if helgetimer == '0' %}selected{% endif %}>Velg antall vakter</option>
-                  <option value="1" {% if helgetimer == '1' %}selected{% endif %}>1</option>
-                  <option value="2" {% if helgetimer == '2' %}selected{% endif %}>2</option>
-                  <option value="3" {% if helgetimer == '3' %}selected{% endif %}>3</option>
-                </select>
-              </div>
+              <select class="form-select" aria-label="Default select example" id="ettermiddager" name="ettermiddager">
+                <option value="0" {% if ettermiddager == '0' %}selected{% endif %}>Velg antall vakter</option>
+                <option value="5" {% if ettermiddager == '5' %}selected{% endif %}>5</option>
+                <option value="10" {% if ettermiddager == '10' %}selected{% endif %}>10</option>
+              </select>
             </div>
+          </div>
           
+   
             <div class="col-md-3">
-              <div class="form-floating">
-                <select class="form-select" id="dagihelg" name="dagihelg">
-                  <option value="0" {% if dagihelg == '0' %}selected{% endif %}>Velg antall poeng</option>
-                  <option value="1" {% if dagihelg == '1' %}selected{% endif %}>1</option>
-                  <option value="2" {% if dagihelg == '2' %}selected{% endif %}>2</option>
-                  <option value="3" {% if dagihelg == '3' %}selected{% endif %}>3</option>
+                <h6>Får så mange poeng per vakt:</h6>
+                <select class="form-select" id="ettermiddager_poeng" name="ettermiddager_poeng">
+                  <option value="0" {% if ettermiddager_poeng == '0' %}selected{% endif %}>Velg antall poeng</option>
+                  <option value="1" {% if ettermiddager_poeng == '1' %}selected{% endif %}>1</option>
+                  <option value="5" {% if ettermiddager_poeng == '5' %}selected{% endif %}>5</option>
+                  <option value="10" {% if ettermiddager_poeng == '10' %}selected{% endif %}>10</option>
                 </select>
-                <label class="custom-label" for="dagihelg">Får dette antall poeng per vakt:</label>
-              </div>
             </div>
         </div>
 
