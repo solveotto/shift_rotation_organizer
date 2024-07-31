@@ -10,7 +10,7 @@ app.secret_key = "secret"
 class DataframeManager():
     def __init__(self) -> None:
         self.df = pd.read_json('turnus_df_R24.json')
-        self.helgetimer_mulip = 1
+        self.helgetimer_mulip = 0
         self.ettermiddager = 0
         self.ettermiddag_poeng = 0
 
