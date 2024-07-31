@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-  
+
   
 {% block title %}DataFrame Manipulation{% endblock %}
   
@@ -7,53 +7,135 @@
   <body>
     <div class="container">
       <h1 class="mt-5">Sorter Turnuser</h1>
-
       <hr>
-
-
-      <form action="{{ url_for('calulate') }}" method="post">
-        <div class="container text-center">
-          <div class="row">
-            <div class="col">
-              <h6>Helgetimer</h6>
-              <div class="row">
-
-
-
+      
+      <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('calulate') }}" method="post">
+        
+        <div class="row py-3">
+          <h4>Helg</h4>
+          <h6>Sett variabler for helgetimer</h6>
+            <div class="col-auto">
+              <div class="form-floating">
                 <select class="form-select" aria-label="Default select example" id="helgetimer" name="helgetimer">
-                  <option value="0" {% if helgetimer == '0' %}selected{% endif %}>Velg vektleggingsverid</option>
+                  <option value="0" {% if helgetimer == '0' %}selected{% endif %}>Alle helgetimer multipleseres med: </option>
                   <option value="1" {% if helgetimer == '1' %}selected{% endif %}>1</option>
                   <option value="2" {% if helgetimer == '2' %}selected{% endif %}>2</option>
                   <option value="3" {% if helgetimer == '3' %}selected{% endif %}>3</option>
                 </select>
-
-                test
+                <label for="helgetimer">Helgetime faktor</label>
               </div>
             </div>
+          
+            <div class="col-auto">
+              <div class="form-floating">
+                <select class="form-select" id="dagihelg" name="dagihelg">
+                  <option value="0" {% if dagihelg == '0' %}selected{% endif %}>Dagtimer i helg multipleseres med: </option>
+                  <option value="1" {% if dagihelg == '1' %}selected{% endif %}>1</option>
+                  <option value="2" {% if dagihelg == '2' %}selected{% endif %}>2</option>
+                  <option value="3" {% if dagihelg == '3' %}selected{% endif %}>3</option>
+                </select>
+                <label for="dagihelg">Dagtid i helg faktor</label>
+              </div>
+            </div>
+        </div>
+      
+        <hr>
 
-            <div class="col">
-              <h6>Nattevakt</h6>
-              <select class="form-select" aria-label="Default select example" id="natt" name="natt">
-                <option value="0" {% if natt_select == '0' %}selected{% endif %}>Velg vektleggingsverid</option>
-                <option value="1" {% if natt_select == '1' %}selected{% endif %}>1</option>
-                <option value="2" {% if natt_select == '2' %}selected{% endif %}>2</option>
-                <option value="3" {% if natt_select == '3' %}selected{% endif %}>3</option>
-              </select>
+        <div class="row py-3">
+          <h4>Ettermiddag</h4>
+          <div class="col-md-4">
+            <h6>Vakter med flere ettermiddager enn dette:</h6>
+            <div class="form">
+                <select class="form-select" aria-label="Default select example" id="helgetimer" name="helgetimer">
+                  <option value="0" {% if helgetimer == '0' %}selected{% endif %}>Velg antall vakter</option>
+                  <option value="1" {% if helgetimer == '1' %}selected{% endif %}>1</option>
+                  <option value="2" {% if helgetimer == '2' %}selected{% endif %}>2</option>
+                  <option value="3" {% if helgetimer == '3' %}selected{% endif %}>3</option>
+                </select>
+              </div>
             </div>
-            <div class="col">
-              Column
+          
+            <div class="col-md-3">
+              <div class="form-floating">
+                <select class="form-select" id="dagihelg" name="dagihelg">
+                  <option value="0" {% if dagihelg == '0' %}selected{% endif %}>Velg antall poeng</option>
+                  <option value="1" {% if dagihelg == '1' %}selected{% endif %}>1</option>
+                  <option value="2" {% if dagihelg == '2' %}selected{% endif %}>2</option>
+                  <option value="3" {% if dagihelg == '3' %}selected{% endif %}>3</option>
+                </select>
+                <label class="custom-label" for="dagihelg">Får dette antall poeng per vakt:</label>
+              </div>
             </div>
-            <div class="col">
-              Column
-            </div>
-          </div>
         </div>
 
-        <br>
+        <hr><br>
+         
 
-        <br>
-        <button type="submit" class="btn btn-primary">Submit</button>
+
+
+        <div class="row align-items-center">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
       </form>
+
+
+
+
+
+
+
+        <!-- <div class="container text-center">
+          <div class="row">
+            <div class="col">
+              
+              <div class="col-md-3">
+                
+                  <select class="form-select custom-width" aria-label="Default select example" id="helgetimer" name="helgetimer">
+                    <option value="0" {% if helgetimer == '0' %}selected{% endif %}>Velg vektleggingsverid</option>
+                    <option value="1" {% if helgetimer == '1' %}selected{% endif %}>1</option>
+                    <option value="2" {% if helgetimer == '2' %}selected{% endif %}>2</option>
+                    <option value="3" {% if helgetimer == '3' %}selected{% endif %}>3</option>
+                  </select>
+
+
+                </div>
+
+                <div class="col-md-3">
+                  test
+                </div>
+            </div>
+
+
+            <div class="col-md">
+              <div class="col-md">
+                <div class="form-floating">
+                  <select class="form-select custom-width" aria-label="Default select example" id="natt" name="natt">
+                    <option value="0" {% if natt_select == '0' %}selected{% endif %}>0</option>
+                    <option value="1" {% if natt_select == '1' %}selected{% endif %}>1</option>
+                    <option value="2" {% if natt_select == '2' %}selected{% endif %}>2</option>
+                    <option value="3" {% if natt_select == '3' %}selected{% endif %}>3</option>
+                  </select>
+                  <label for="natt">Velg vakter med < netter</label>
+                </div>
+              <div class="form-floating">
+                <select class="form-select custom-width" aria-label="Default select example" id="natt2" name="natt">
+                  <option value="0" {% if natt_select == '0' %}selected{% endif %}>0</option>
+                  <option value="1" {% if natt_select == '1' %}selected{% endif %}>1</option>
+                  <option value="2" {% if natt_select == '2' %}selected{% endif %}>2</option>
+                  <option value="3" {% if natt_select == '3' %}selected{% endif %}>3</option>
+                </select>
+                <label for="natt2">Velg vektlegging</label>
+              </div>
+            </div>  
+              
+
+            </div>
+           
+          </div>
+        </div> -->
+
+
+        <!-- Andre rad -->
       
     
       
