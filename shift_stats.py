@@ -66,13 +66,13 @@ class Turnus():
             EVENING = time(16,0)
 
             # Adds new stats to dataframe
-            total_weekend_hours = 0
-            weekend_daytime_hours = 0
-            total_weekends_days = 0
-            nights_in_weekend = 0
-            evening_in_weekend = 0
-            early = 0
-            starts_before_6 = 0
+            helgetimer = 0
+            helgetimer_datid = 0
+            helgedager = 0
+            helgetimer_natt = 0
+            helgetimer_ettermiddag = 0
+            tidlig = 0
+            before_6 = 0
             afternoon_count = 0
             afternons_in_row = 0
             night_count = 0
@@ -86,6 +86,7 @@ class Turnus():
                         start = pd.to_datetime(_dagsverk['start'], format='%H:%M')
                         end = pd.to_datetime(_dagsverk['slutt'], format='%H:%M')
                         ukedag = _dagsverk['ukedag']
+                        midnight = start.replace(hour=23, minute=59, second=59)
 
                         # Adjust end time if it's on the next day
                         if end < start:
@@ -96,52 +97,62 @@ class Turnus():
 
 
                         ### WEEKENDS ###
-
-
                         if ukedag == 'Fredag' and end.day > start.day:
-                            midnight = start.replace(hour=23, minute=59, second=59)
                             saturday_hours = (end - (midnight + pd.Timedelta(seconds=1))).total_seconds() / 3600
-                            total_weekend_hours += saturday_hours
+                            helgetimer += saturday_hours
                             # fridays over 2 hours into saturday
-                            if saturday_hours > 2:
-                                total_weekends_days += 1
-
-                        elif ukedag == 'Søndag':
-                            if end.day > start.day:
-                                midnight = start.replace(hour=23, minute=59, second=59)
-                                sunday_hours = ((midnight + pd.Timedelta(seconds=1)) - start).total_seconds() / 3600
-                                total_weekend_hours += sunday_hours
-                                
-                            else:
-                                sunday_hours = (end - start).total_seconds() / 3600
-                                total_weekend_hours += sunday_hours
-
-
-                            if start.time() > EVENING:
-                                evening_in_weekend += sunday_hours
-
-                            
-                            
-                            total_weekends_days += 1
+                            if saturday_hours > 0:
+                                helgedager += 1
 
                         elif ukedag == 'Lørdag':
                             saturday_hours = (end - start).total_seconds() / 3600
-                            total_weekend_hours += saturday_hours
-                            total_weekends_days += 1
+                            helgetimer += saturday_hours
+                            helgedager += 1
 
                             if start.time() > EVENING:
-                                evening_in_weekend += saturday_hours
+                                helgetimer_ettermiddag += saturday_hours
 
-                        
+                            # Counts daytime hours in weekend
+                            if start.time() < time(12,0):
+                                helgetimer_datid += 1
+
+                        elif ukedag == 'Søndag':
+                            # counts hours before midnight and excludes hours after midnight in night shifts
+                            if end.day > start.day:
+                                sunday_hours = ((midnight + pd.Timedelta(seconds=1)) - start).total_seconds() / 3600
+                                helgetimer += sunday_hours
+                                    
+                                # Counts evning hours
+                                if start.time() > EVENING:
+                                    helgetimer_ettermiddag += sunday_hours
+
+                            # Counts sunday weekend hours    
+                            else:
+                                sunday_hours = (end - start).total_seconds() / 3600
+                                helgetimer += sunday_hours
+                                
+                                # Counts evning hours
+                                if start.time() > EVENING:
+                                    helgetimer_ettermiddag += sunday_hours
+
+                            # Counts daytime hours in weekend
+                            if start.time() < time(12,0):
+                                helgetimer_datid += 1
+
+                            helgedager += 1
+
+
+
+
                         ### ENDS BERFORE 1630 ###
                         if end.time() < time(16,20):
-                            early += 1
+                            tidlig += 1
                             ### STARTS BEFORE 6 ####
                             if start.time() < time(6,0):
-                                starts_before_6 += 1
+                                before_6 += 1
                             
                             if _dagsverk['ukedag'] == 'Lørdag':
-                                nights_in_weekend += (end - start).total_seconds() / 3600
+                                helgetimer_natt += (end - start).total_seconds() / 3600
 
 
 
@@ -166,12 +177,13 @@ class Turnus():
             # Adds shift as new row to dataframe
             new_row = pd.DataFrame({
                 'turnus': [turnus_navn], 
-                'helgetimer': [round(total_weekend_hours,1)], 
-                'helgedager': [total_weekends_days],
-                'night_wknd_hours': [round(nights_in_weekend,1)],
-                'evening_wknd_hours': [round(evening_in_weekend)],
-                'tidlig': [early],
-                'før_6': [starts_before_6],
+                'helgetimer': [round(helgetimer,1)], 
+                'helgedager': [helgedager],
+                'helgetimer_dagtid': [helgetimer_datid],
+                'helegtimer_natt': [round(helgetimer_natt,1)],
+                'helgetimer_ettermiddag': [round(helgetimer_ettermiddag)],
+                'tidlig': [tidlig],
+                'before_6      ': [before_6],
                 'ettermiddag' : [afternoon_count],
                 'natt': [night_count],
                 'poeng': 0

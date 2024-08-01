@@ -16,6 +16,8 @@ class DataframeManager():
 
         self.update_df()
 
+        print(self.df.columns)
+
     def update_df(self):
         self.calc_helgetimer()
         self.calc_ettermiddag_vakter()
@@ -50,6 +52,7 @@ def home():
     # Convert DataFrame to a list of dictionaries
     table_data = df_manager.df.to_dict(orient='records')
 
+    # Gets the values set by the user 
     helgetimer = session.get('helgetimer', '0')
     ettermiddager = session.get('ettermiddager', '0')
     ettermiddager_poeng = session.get('ettermiddager_poeng', '0')
