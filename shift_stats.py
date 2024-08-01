@@ -67,6 +67,7 @@ class Turnus():
 
             # Adds new stats to dataframe
             total_weekend_hours = 0
+            weekend_daytime_hours = 0
             total_weekends_days = 0
             nights_in_weekend = 0
             evening_in_weekend = 0
@@ -81,9 +82,9 @@ class Turnus():
                 if _dagsverk['start'] != _dagsverk['slutt']:     
                     # Checks for bottom of the list
                     if _index + 1 < len(turuns_df_reset):
+                        
                         start = pd.to_datetime(_dagsverk['start'], format='%H:%M')
                         end = pd.to_datetime(_dagsverk['slutt'], format='%H:%M')
-                        
                         ukedag = _dagsverk['ukedag']
 
                         # Adjust end time if it's on the next day
@@ -95,6 +96,8 @@ class Turnus():
 
 
                         ### WEEKENDS ###
+
+
                         if ukedag == 'Fredag' and end.day > start.day:
                             midnight = start.replace(hour=23, minute=59, second=59)
                             saturday_hours = (end - (midnight + pd.Timedelta(seconds=1))).total_seconds() / 3600
@@ -108,15 +111,17 @@ class Turnus():
                                 midnight = start.replace(hour=23, minute=59, second=59)
                                 sunday_hours = ((midnight + pd.Timedelta(seconds=1)) - start).total_seconds() / 3600
                                 total_weekend_hours += sunday_hours
-
-                                if start.time() > EVENING:
-                                    evening_in_weekend += sunday_hours
+                                
                             else:
                                 sunday_hours = (end - start).total_seconds() / 3600
                                 total_weekend_hours += sunday_hours
 
-                                if start.time() > EVENING:
-                                    evening_in_weekend += sunday_hours
+
+                            if start.time() > EVENING:
+                                evening_in_weekend += sunday_hours
+
+                            
+                            
                             total_weekends_days += 1
 
                         elif ukedag == 'Lørdag':
@@ -202,3 +207,5 @@ if __name__ == '__main__':
     turnus = Turnus('turnuser_R24.json')
 
     turnus.stats_df.to_json('turnus_df_R24.json')
+
+    print(turnus.stats_df)
