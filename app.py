@@ -10,40 +10,22 @@ app.secret_key = "secret"
 class DataframeManager():
     def __init__(self) -> None:
         self.df = pd.read_json('turnus_df_R24.json')
-        self.helgetimer_mulip = 0
-        self.ettermiddager = 0
-        self.ettermiddag_poeng = 0
-
-        self.sort_by = 'poeng'
-        self.ascending = True
-
-        self.update_df()
+        self.helgetimer_dagtid_multip = 0
 
 
-    def update_df(self):
-        self.calc_helgetimer()
-        self.calc_ettermiddag_vakter()
-        #self.calc_netter()
-        self.df = self.df.sort_values(by=self.sort_by, ascending=self.ascending)
+
+    def sort_by(self, _type, ascending=True):
+        self.df = self.df.sort_values(by=_type, ascending=ascending)
 
 
-    def calc_helgetimer(self):
-        self.df['poeng'] = self.df['poeng'] + self.df['helgetimer'] * self.helgetimer_mulip
+    def calc_multipliers(self, _type, multip):
+        self.df['poeng'] = round(self.df['poeng'] + self.df[_type] * multip, 1)
+        #self.df['poeng'] = round(self.df['poeng'] + self.df['helgetimer_dagtid'] * multip, 1)
 
-    def calc_netter(self):
-        self.df.loc[self.df['natt'] > 6, 'poeng'] += 1
-
-    def calc_ettermiddag_vakter(self):
-        threshold = self.ettermiddager  # Specific threshold
-        multiplier = self.ettermiddag_poeng  # Amount to multiply
-
-        # Iterate through each row in the DataFrame
+    def calc_thresholds(self, _type, _th, multip):
         for index, row in self.df.iterrows():
-            if row['ettermiddag'] > threshold:
-                # Multiply the 'ettermiddag' value by the specified amount
-                self.df.at[index, 'poeng'] += (row['ettermiddag'] - threshold) * multiplier
-
-    
+            if row[_type] > _th:
+                self.df.at[index, 'poeng'] += (row[_type] - _th) * multip
 
 
         
@@ -58,8 +40,11 @@ def home():
 
     # Gets the values set by the user 
     helgetimer = session.get('helgetimer', '0')
+    helgetimer_dagtid = session.get('helgetimer_dagtid', '0')
     ettermiddager = session.get('ettermiddager', '0')
     ettermiddager_poeng = session.get('ettermiddager_poeng', '0')
+    nights = session.get('nights', '0')
+    nights_pts = session.get('nights_pts', '0')
 
    
     session.clear()
@@ -68,8 +53,11 @@ def home():
     return render_template('index.html', 
                            table_data = table_data, 
                            helgetimer = helgetimer,
+                           helgetimer_dagtid = helgetimer_dagtid,
                            ettermiddager = ettermiddager,
-                           ettermiddager_poeng = ettermiddager_poeng
+                           ettermiddager_poeng = ettermiddager_poeng,
+                           nights = nights,
+                           nights_pts = nights_pts
                            )
 
 
@@ -77,22 +65,34 @@ def home():
 def calulate():
     # Resets points value
     df_manager.df['poeng'] = 0
+    df_manager.sort_by('turnus')
    
     helgetimer = request.form.get('helgetimer', '0')
-    df_manager.helgetimer_mulip = int(helgetimer)
+    df_manager.calc_multipliers('helgetimer', float(helgetimer))
     session['helgetimer'] = helgetimer
+    
+    helgetimer_dagtid = request.form.get('helgetimer_dagtid', '0')
+    df_manager.calc_multipliers('helgetimer_dagtid', float(helgetimer_dagtid))
+    session['helgetimer_dagtid'] = helgetimer_dagtid
 
+    # calculate points for ettermiddager
     ettermiddager = request.form.get('ettermiddager', '0')
-    df_manager.ettermiddager = int(ettermiddager)
+    ettermiddager_pts = request.form.get('ettermiddager_poeng', '0')
     session['ettermiddager'] = ettermiddager
+    session['ettermiddager_poeng'] = ettermiddager_pts
+    df_manager.calc_thresholds('ettermiddag', int(ettermiddager), int(ettermiddager_pts))
     
-    ettermiddager_poeng = request.form.get('ettermiddager_poeng', '0')
-    df_manager.ettermiddag_poeng = int(ettermiddager_poeng)
-    session['ettermiddager_poeng'] = ettermiddager_poeng
+
+    # caluclate points for nights
+    nights = request.form.get('nights', '0')
+    nights_pts = request.form.get('nights_pts')
+    session['nights'] = nights
+    session['nights_pts'] = nights_pts
+    df_manager.calc_thresholds('natt', int(nights), int(nights_pts))
     
     
     
-    df_manager.update_df()
+    df_manager.sort_by('poeng', True)
     
     
     

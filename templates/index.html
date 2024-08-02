@@ -10,74 +10,82 @@
       <hr>
       
       <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('calulate') }}" method="post">
-        <div class="shadow-sm p-3 mb-2 bg-body-tertiary rounded">
-          <div class="row py-3">
-            <h4>Helg</h4>
-            <h6>Sett variabler for helgetimer</h6>
-              <div class="col-auto">
-                <div class="form-floating">
-                  <select class="form-select" aria-label="Default select example" id="helgetimer" name="helgetimer">
-                    <option value="0" {% if helgetimer == '0' %}selected{% endif %}>Alle helgetimer multipleseres med: </option>
-                    <option value="1" {% if helgetimer == '1' %}selected{% endif %}>1</option>
-                    <option value="2" {% if helgetimer == '2' %}selected{% endif %}>2</option>
-                    <option value="3" {% if helgetimer == '3' %}selected{% endif %}>3</option>
-                  </select>
-                  <label for="helgetimer">Helgetime faktor</label>
-                </div>
-              </div>
-            
-              <div class="col-auto">
-                <div class="form-floating">
-                  <select class="form-select" id="dagihelg" name="dagihelg">
-                    <option value="0" {% if dagihelg == '0' %}selected{% endif %}>Dagtimer i helg multipleseres med: </option>
-                    <option value="1" {% if dagihelg == '1' %}selected{% endif %}>1</option>
-                    <option value="2" {% if dagihelg == '2' %}selected{% endif %}>2</option>
-                    <option value="3" {% if dagihelg == '3' %}selected{% endif %}>3</option>
-                  </select>
-                  <label for="dagihelg">Dagtid i helg faktor</label>
-                </div>
-              </div>
-          </div>
-        </div>
+          
 
       
 
         <div class="shadow-sm p-3 mb-5 bg-body-tertiary rounded">
           <div class="row py-3">
-            <h5>Ettermiddag</h6>
-            <div class="col-md-3">
-              <h6 class="fw-lighter fst-italic">Vakter med flere ettermiddager enn:</h6>
-                <select class="form-select-sm" aria-label="Default select example" id="ettermiddager" name="ettermiddager">
-                  <option value="0" {% if ettermiddager == '0' %}selected{% endif %}>Velg antall vakter</option>
-                  <option value="5" {% if ettermiddager == '5' %}selected{% endif %}>5</option>
-                  <option value="10" {% if ettermiddager == '10' %}selected{% endif %}>10</option>
-                </select>
+            <h5 style="text-decoration: underline;">Tildel poeng (mindre poeng er bedre):</h6>
+            
+              <div class="col-md-2">
+                <h6 class="fw-lighter fst-italic">Multipliser helgetimer med:</h6>
+                  <select class="form-select-sm" aria-label="Default select example" id="helgetimer" name="helgetimer">
+                    <option value="0" {% if helgetimer == '0' %}selected{% endif %}>0</option>
+                    <option value="0.5" {% if helgetimer == '0.5' %}selected{% endif %}>0.5</option>
+                    <option value="1" {% if helgetimer == '1' %}selected{% endif %}>1</option>
+                    <option value="1.5" {% if helgetimer == '1.5' %}selected{% endif %}>1.5</option>
+                  </select>
+              </div>
+
+
+              <div class="col-md-2">
+                <h6 class="fw-lighter fst-italic">Multipliser helgetimer på dagtid med:</h6>
+                  <select class="form-select-sm" aria-label="Default select example" id="helgetimer_dagtid" name="helgetimer_dagtid">
+                    <option value="0" {% if helgetimer_dagtid == '0' %}selected{% endif %}>0</option>
+                    <option value="0.5" {% if helgetimer_dagtid == '0.5' %}selected{% endif %}>0.5</option>
+                    <option value="1" {% if helgetimer_dagtid == '1' %}selected{% endif %}>1</option>
+                    <option value="1.5" {% if helgetimer_dagtid == '1.5' %}selected{% endif %}>1.5</option>
+                  </select>
+              </div>
+            
+            <div class="col-md-2">
+              <h6 class="fw-lighter fst-italic">Gi poeng kveldsvakter</h6>
+              <select class="form-select-sm" aria-label="Default select example" id="ettermiddager" name="ettermiddager">
+                <option value="0" {% if ettermiddager == '0' %}selected{% endif %}>> 0 vakter</option>
+                <option value="5" {% if ettermiddager == '5' %}selected{% endif %}>> 5 vakter </option>
+                <option value="10" {% if ettermiddager == '10' %}selected{% endif %}>> 10 vakter</option>
+              </select>
+
+              <select class="form-select-sm" id="ettermiddager_poeng" name="ettermiddager_poeng">
+                <option value="0" {% if ettermiddager_poeng == '0' %}selected{% endif %}>0p</option>
+                <option value="1" {% if ettermiddager_poeng == '1' %}selected{% endif %}>1p</option>
+                <option value="5" {% if ettermiddager_poeng == '5' %}selected{% endif %}>5p</option>
+                <option value="10" {% if ettermiddager_poeng == '10' %}selected{% endif %}>10p</option>
+              </select>
             </div>
-          
+
+
 
             <div class="col-md-3">
-                <h6>Får så mange poeng per vakt:</h6>
-                <select class="form-select-sm" id="ettermiddager_poeng" name="ettermiddager_poeng">
-                  <option value="0" {% if ettermiddager_poeng == '0' %}selected{% endif %}>Velg antall poeng</option>
-                  <option value="1" {% if ettermiddager_poeng == '1' %}selected{% endif %}>1</option>
-                  <option value="5" {% if ettermiddager_poeng == '5' %}selected{% endif %}>5</option>
-                  <option value="10" {% if ettermiddager_poeng == '10' %}selected{% endif %}>10</option>
-                </select>
+              <h6 class="fw-lighter fst-italic">Gi poeng nattevakter</h6>
+              <select class="form-select-sm" aria-label="Default select example" id="nights" name="nights">
+                <option value="0" {% if nights == '0' %}selected{% endif %}>> 0 vakter</option>
+                <option value="5" {% if nights == '5' %}selected{% endif %}>> 5 vakter </option>
+                <option value="10" {% if nights == '10' %}selected{% endif %}>> 10 vakter</option>
+              </select>
+
+              <select class="form-select-sm" id="nights_pts" name="nights_pts">
+                <option value="0" {% if nights_pts == '0' %}selected{% endif %}>0p</option>
+                <option value="1" {% if nights_pts == '1' %}selected{% endif %}>1p</option>
+                <option value="5" {% if nights_pts == '5' %}selected{% endif %}>5p</option>
+                <option value="10" {% if nights_pts == '10' %}selected{% endif %}>10p</option>
+              </select>
             </div>
-          </div>                              
+            
+
+
         </div>
 
-        <hr><br>
-         
+          <div class="row py-4">
+            <div class="col-md-3">
 
-
-
-        <div class="row align-items-center">
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+            </div>
+          </div>
       </form>
 
-      <div class="shadow-sm p-3 mb-5 bg-body-tertiary rounded">Small shadow</div>
 
 
 
