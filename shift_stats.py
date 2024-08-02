@@ -67,7 +67,7 @@ class Turnus():
 
             # Adds new stats to dataframe
             helgetimer = 0
-            helgetimer_datid = 0
+            helgetimer_dagtid = 0
             helgedager = 0
             helgetimer_natt = 0
             helgetimer_ettermiddag = 0
@@ -113,8 +113,8 @@ class Turnus():
                                 helgetimer_ettermiddag += saturday_hours
 
                             # Counts daytime hours in weekend
-                            if start.time() < time(12,0):
-                                helgetimer_datid += 1
+                            if start.time() < time(14,0):
+                                helgetimer_dagtid +=  saturday_hours
 
                         elif ukedag == 'Søndag':
                             # counts hours before midnight and excludes hours after midnight in night shifts
@@ -135,9 +135,9 @@ class Turnus():
                                 if start.time() > EVENING:
                                     helgetimer_ettermiddag += sunday_hours
 
-                            # Counts daytime hours in weekend
-                            if start.time() < time(12,0):
-                                helgetimer_datid += 1
+                                # Counts daytime hours in weekend
+                                if start.time() < time(14,0):
+                                    helgetimer_dagtid += sunday_hours
 
                             helgedager += 1
 
@@ -179,11 +179,11 @@ class Turnus():
                 'turnus': [turnus_navn], 
                 'helgetimer': [round(helgetimer,1)], 
                 'helgedager': [helgedager],
-                'helgetimer_dagtid': [helgetimer_datid],
+                'helgetimer_dagtid': [round(helgetimer_dagtid,1)],
                 'helegtimer_natt': [round(helgetimer_natt,1)],
                 'helgetimer_ettermiddag': [round(helgetimer_ettermiddag)],
                 'tidlig': [tidlig],
-                'before_6      ': [before_6],
+                'before_6': [before_6],
                 'ettermiddag' : [afternoon_count],
                 'natt': [night_count],
                 'poeng': 0

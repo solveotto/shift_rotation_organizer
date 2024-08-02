@@ -14,15 +14,17 @@ class DataframeManager():
         self.ettermiddager = 0
         self.ettermiddag_poeng = 0
 
+        self.sort_by = 'poeng'
+        self.ascending = True
+
         self.update_df()
 
-        print(self.df.columns)
 
     def update_df(self):
         self.calc_helgetimer()
         self.calc_ettermiddag_vakter()
         #self.calc_netter()
-        self.df = self.df.sort_values(by='poeng')
+        self.df = self.df.sort_values(by=self.sort_by, ascending=self.ascending)
 
 
     def calc_helgetimer(self):
@@ -40,6 +42,8 @@ class DataframeManager():
             if row['ettermiddag'] > threshold:
                 # Multiply the 'ettermiddag' value by the specified amount
                 self.df.at[index, 'poeng'] += (row['ettermiddag'] - threshold) * multiplier
+
+    
 
 
         
