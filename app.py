@@ -12,6 +12,9 @@ class DataframeManager():
         self.df = pd.read_json('turnus_df_R24.json')
         self.helgetimer_dagtid_multip = 0
 
+        self.sort_by_input = 'turnus'
+        self.sort_by_ascending = True
+
 
 
     def sort_by(self, _type, ascending=True):
@@ -102,6 +105,16 @@ def calulate():
     #return render_template('index.html', helgetimer=helgetimer)
     return redirect(url_for('home'))
 
+@app.route('/sort_by_column')
+def sort_by_column():
+
+    column = request.args.get('column')
+    if column in df_manager.df:
+        df_manager.sort_by(column)
+    else:
+        df_manager.sort_by('poeng')
+        
+    return redirect(url_for('home'))
 
 @app.route('/search')
 def search():
