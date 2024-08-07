@@ -12,12 +12,19 @@ class DataframeManager():
         self.df = pd.read_json('turnus_df_R24.json')
         self.helgetimer_dagtid_multip = 0
 
-        self.sort_by_input = 'turnus'
+        self.sort_by_input = 'Navn'
         self.sort_by_ascending = True
 
 
 
     def sort_by(self, _type, ascending=True):
+
+        if _type == 'turnus':
+            sort_name = 'Navn'
+        else:
+            sort_name = _type.replace("_", " ")
+
+        self.sort_by_input = sort_name.title()
         self.df = self.df.sort_values(by=_type, ascending=ascending)
 
 
@@ -39,7 +46,7 @@ df_manager = DataframeManager()
 @app.route('/')
 def home():
     # Convert DataFrame to a list of dictionaries
-    table_data = df_manager.df.to_dict(orient='records')
+    ## table_data = df_manager.df.to_dict(orient='records')
 
     # Gets the values set by the user 
     helgetimer = session.get('helgetimer', '0')
@@ -49,23 +56,24 @@ def home():
     nights = session.get('nights', '0')
     nights_pts = session.get('nights_pts', '0')
 
-   
-    session.clear()
 
-    # Pass the table data to the template
+    sort_btn_name = df_manager.sort_by_input
+
+     # Pass the table data to the template
     return render_template('index.html', 
-                           table_data = table_data, 
+                           table_data = df_manager.df.to_dict(orient='records'), 
                            helgetimer = helgetimer,
                            helgetimer_dagtid = helgetimer_dagtid,
                            ettermiddager = ettermiddager,
                            ettermiddager_poeng = ettermiddager_poeng,
                            nights = nights,
-                           nights_pts = nights_pts
+                           nights_pts = nights_pts,
+                           sort_by_btn_name = sort_btn_name
                            )
 
 
 @app.route('/submit', methods=['POST'])
-def calulate():
+def calculate():
     # Resets points value
     df_manager.df['poeng'] = 0
     df_manager.sort_by('turnus')
@@ -109,16 +117,24 @@ def calulate():
 def sort_by_column():
 
     column = request.args.get('column')
+    print(column)
     if column in df_manager.df:
         df_manager.sort_by(column)
     else:
         df_manager.sort_by('poeng')
         
+
+    
     return redirect(url_for('home'))
 
-@app.route('/search')
-def search():
-    return render_template('search.html')
+@app.route('/reset')
+def reset():
+    session.clear()
+    df_manager.df['poeng'] = 0
+    df_manager.sort_by('turnus')
+    
+
+    return redirect(url_for('home'))
 
 
 
