@@ -8,7 +8,7 @@ import json
 
 
 class PdfScraper():
-    def __init__(self, data_path) -> None:
+    def __init__(self, pdf_path) -> None:
         
 
         ### Intitial Constants ###
@@ -28,9 +28,9 @@ class PdfScraper():
                             'Turnus:', 'Stasjoneringssted:', 'OSL', 'HLD']
         self.ALLOW_FILTER = [':', 'XX', 'OO', 'TT']
         self.FRIDAG_FILTER = ['XX', 'OO', 'TT']
-        INPUT_PATH = data_path
-        OUTPUT_PATH = 'turnuser_R24.xlsx'
-        PDF = pdfplumber.open(INPUT_PATH)
+        self.INPUT_PATH = pdf_path
+        self.OUTPUT_PATH = 'turnuser_R24.xlsx'
+        PDF = pdfplumber.open(pdf_path)
         self.PAGES_IN_PDF = PDF.pages
 
 
