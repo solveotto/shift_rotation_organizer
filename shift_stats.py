@@ -193,28 +193,6 @@ class Turnus():
             self.stats_df = pd.concat([self.stats_df, new_row], ignore_index=True)
 
 
-        #### FLYTTES TIL ANNEN MODUL #####
-
-    # def add_points_to_stats_df(self):
-
-    #     self.stats_df['poeng'] = self.stats_df.apply(lambda x: 
-    #                                                  x['helgetimer']*1 + 
-    #                                                  x['ettermiddag']*0.5, 
-    #                                                  axis=1)
-        
-    #     # Add points for number of night watches
-    #     self.stats_df.loc[self.stats_df['natt'] > 6, 'poeng'] += 1
-    #     self.stats_df.loc[self.stats_df['natt'] > 10, 'poeng'] += 5
-
-
-        
-
-    # def sort_stats(self, keyword, asc=True):
-    #     self.stats_df = self.stats_df.sort_values(by=keyword, ascending=asc)
-    #     self.stats_df.reset_index(drop=True, inplace=True)
-
-                    
-
 if __name__ == '__main__':
     turnus = Turnus('turnuser_R24.json')
 
