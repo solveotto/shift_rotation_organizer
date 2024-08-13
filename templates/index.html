@@ -120,8 +120,9 @@
             </tr>
           </thead>
           <tbody>
+
             {% for row in table_data %}
-              <tr>
+              <tr class="clickable-row" data-turnus="{{ row.turnus }}">
                 <td>{{ row.turnus }}</td>
                 <td>{{ row.poeng }}</td>
                 <td>{{ row.tidlig }}</td>
@@ -138,6 +139,8 @@
     </div>
   </body>
 </html>
+
+
 
 
 {% endblock %}

@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import pandas as pd
 import json
+
 
 
 app = Flask(__name__)
@@ -37,10 +38,14 @@ class DataframeManager():
             if row[_type] > _th:
                 self.df.at[index, 'poeng'] += (row[_type] - _th) * multip
 
-
+class TurnusManager():
+    def __init__(self) -> None:
+        with open('turnuser_R24.json', 'r') as f:
+            self.data = json.load(f)
         
-
+  
 df_manager = DataframeManager()
+turnus_mangaer = TurnusManager()
 
 
 @app.route('/')
@@ -117,7 +122,6 @@ def calculate():
 def sort_by_column():
 
     column = request.args.get('column')
-    print(column)
     if column in df_manager.df:
         df_manager.sort_by(column)
     else:
@@ -136,6 +140,36 @@ def reset():
 
     return redirect(url_for('home'))
 
+
+
+
+
+@app.route('/api/receive-data', methods=['POST'])
+def receive_data():
+    html_data = request.get_json()
+    selected_shift = html_data.get('turnus')
+    
+    for x in turnus_mangaer.data:
+        for shift_name, shift_data in x.items():
+            if shift_name == selected_shift:
+                print(json.dumps(shift_data, indent=4))
+                session['shift_name'] = shift_name
+                session['shift_data'] = shift_data
+                break
+                
+    return redirect(url_for('display_shift'))
+
+@app.route('/display_shift')
+def display_shift():
+    shift_name = session.get('shift_name')
+    shift_data = session.get('shift_data')
+    
+
+    if shift_name and shift_data:
+        print('test')
+        return render_template('turnus.html', shift_name=shift_name, shift_data=shift_data)
+    else:
+        return "No shift data found", 400
 
 
 if __name__ == '__main__':

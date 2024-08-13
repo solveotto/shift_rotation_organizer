@@ -96,7 +96,6 @@ class ShiftScraper():
                 # men lagres i nåværende dag og uke.
                 if (uke == 1 and dag == 1) or word['text'] in self.ALLOW_FILTER:
                     turnus[uke][dag]['tid'].append(word['text'])
-                    turnus[uke][dag]['x0'].append(word['x0'])
 
                 # Hvis det mandag men ikke uke1.
                 elif uke != 1 and dag == 1:
@@ -109,28 +108,29 @@ class ShiftScraper():
                     # hvis objektet er :, XX, OO eller TT: lagre i nåværede dag og uke
                     elif any(val in turnus[uke-1][7]['tid'] for val in self.ALLOW_FILTER):
                         turnus[uke][dag]['tid'].append(word['text'])
-                        turnus[uke][dag]['x0'].append(word['x0'])
                     # Hvis det bare er et objekt på søndag uke over: legg objekt til søndag
                     elif len(turnus[uke-1][7]['tid']) == 1:
                         turnus[uke-1][7]['tid'].append(word['text'])
-                        turnus[uke-1][7]['x0'].append(word['x0'])
                     else:
                         turnus[uke][dag]['tid'].append(word['text'])
-                        turnus[uke][dag]['x0'].append(word['x0'])
+                        
 
                 # Hvis det ikke er dag1
                 elif uke >= 1 and dag > 1:
                     # Putter objekt i nåværende dag hvis dagen før er :, XX, TT, eller OO.
                     if any(val in turnus[uke][dag-1]['tid'] for val in self.ALLOW_FILTER):
                         turnus[uke][dag]['tid'].append(word['text'])
-                        turnus[uke][dag]['x0'].append(word['x0'])
                     # Putter objekt i dagen før hvis det kun er en verdi der.
                     elif len(turnus[uke][dag-1]['tid']) == 1:
                         turnus[uke][dag-1]['tid'].append(word['text'])
-                        turnus[uke][dag-1]['x0'].append(word['x0'])
                     else:
                         turnus[uke][dag]['tid'].append(word['text'])
-                        turnus[uke][dag]['x0'].append(word['x0'])
+                
+                if len(turnus[uke][dag]['tid']) == 2:
+                    turnus[uke][dag]['start'] = (turnus[uke][dag]['tid'][0])
+                    turnus[uke][dag]['slutt'] = (turnus[uke][dag]['tid'][1])
+                else:
+                    turnus[uke][dag]['start'] = (turnus[uke][dag]['tid'])
 
         def plasseringslogikk_dagsverk(word, uke, dag, turnus):                 
             # Hopper over iterering hvis de inneholder :, XX, OO eller TT.
@@ -164,13 +164,13 @@ class ShiftScraper():
         def generer_turnus_mal():
 
 
-            uke_mal = {1:{'navn':'Mandag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
-                        2:{'navn':'Tirsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
-                        3:{'navn':'Onsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
-                        4:{'navn':'Torsdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
-                        5:{'navn':'Fredag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}, 
-                        6:{'navn':'Lørdag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""},
-                        7:{'navn':'Søndag', 'uke':'Uke1', 'tid':[], 'x0':[], 'dagsverk':""}}
+            uke_mal = {1:{'ukedag':'Mandag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
+                        2:{'ukedag':'Tirsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
+                        3:{'ukedag':'Onsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
+                        4:{'ukedag':'Torsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""},
+                        5:{'ukedag':'Fredag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
+                        6:{'ukedag':'Lørdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""},
+                        7:{'ukedag':'Søndag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}}
             turnus = {}
 
             for uke in range(1,7):
@@ -236,9 +236,9 @@ class ShiftScraper():
                     for uke in turnus_verdi.values():
                         for dag in uke.values():
                             if len(dag['tid']) == 0:
-                                df_data[dag['navn']].append('')
+                                df_data[dag['ukedag']].append('')
                             else:
-                                df_data[dag['navn']].append(" - ".join(dag['tid'])+ " " + dag['dagsverk'])
+                                df_data[dag['ukedag']].append(" - ".join(dag['tid'])+ " " + dag['dagsverk'])
                                 
                     df_dict.update({turnus_navn : pd.DataFrame(df_data)})
 
@@ -340,5 +340,10 @@ class ShiftScraper():
 
 if __name__ == '__main__':
     shift_scraper = ShiftScraper()
-    #shift_scraper.scrape_pdf()
+
+
+
+    shift_scraper.scrape_pdf()
+    #print(json.dumps(shift_scraper.turnuser, indent=4))
+    shift_scraper.create_json()
     #shift_scraper.create_excel()

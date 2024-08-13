@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}DataFrame Manipulation{% endblock %}
+
+{% block content %} 
+
+<div class="container">
+
+    <h1>Turnus Data for {{ shift_name }}</h1>
+    
+    
+    
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th style="border: 1px solid black;">Uke</th>
+                <th style="border: 1px solid black;">Mandag</th>
+                <th style="border: 1px solid black;">Tirsdag</th>
+                <th style="border: 1px solid black;">Onsdag</th>
+                <th style="border: 1px solid black;">Tordag</th>
+                <th style="border: 1px solid black;">Fredag</th>
+                <th style="border: 1px solid black;">Lørdag</th>
+                <th style="border: 1px solid black;">Søndag</th>
+            </tr>
+        </thead>
+        <tbody class="text-center">
+            {% for week_nr, week_data in shift_data.items() %}
+                <tr>
+                    <td style="border: 1px solid black;">{{ week_nr }}</td>
+                    {% for day_nr, day_data in week_data.items() %}
+                        <td id="cell" style="border: 1px solid black;">
+                            {% for time in day_data.tid %}
+                                {% if day_data.tid|length == 2 %}
+                                    {% if loop.first %}
+                                        {{ time }} -
+                                    {% else %}
+                                        {{ time }}
+                                    {% endif %}
+                                {% else %}
+                                    {{ time }}
+
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                              
+
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
