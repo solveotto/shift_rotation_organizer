@@ -3,6 +3,7 @@ from mysql.connector import connect, Error
 
 
 
+
 create_movies_table_query = """
 CREATE TABLE movies(
     id INT AUTO_INCREMENT PRIMARY KEY,

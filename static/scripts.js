@@ -4,12 +4,20 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelectorAll('.clickable-row').forEach(row => {
         row.addEventListener('click', () => {
             const turnus = row.getAttribute('data-turnus');
+            const checkbox = row.querySelector('.prevent-click');
+            const isChecked = checkbox ? checkbox.checked : false;
+
+            if (isChecked) {
+                console.log('Checkbox is checked:', isChecked);
+                console.log('Turnus:', turnus);
+            }
+
             fetch('/api/receive-data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ turnus: turnus })
+                body: JSON.stringify({ turnus: turnus, checked: isChecked })
             })
             .then(response => {
                 if (response.redirected) {
@@ -25,7 +33,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 console.error('Error:', error);
             });
         });
+   
     });
+        // Add click event listener to checkboxes to stop propagation
+        document.querySelectorAll('.prevent-click').forEach(checkbox => {
+            checkbox.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        });
 });
 
 

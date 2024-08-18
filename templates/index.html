@@ -76,7 +76,7 @@
           <div class="row py-2">
             <div class="col-md-4">
               <button type="submit" class="btn btn-primary">Submit</button>
-              <a href="{{ url_for('reset') }}" class="btn btn-warning">Reset</a>
+              <a href="{{ url_for('reset_search') }}" class="btn btn-warning">Reset</a>
             </div>
             <div class="col">
               <div class="dropdown d-flex justify-content-md-end">
@@ -109,28 +109,42 @@
         <table class="table table-striped" style="text-align: center;">
           <thead class="thead-dark">
             <tr>
+              <!-- <th style="text-align: center;">Velg Turnus</th> -->
               <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='turnus') }}">Navn</a></th>
               <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='poeng') }}">Poeng</a></th>
               <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='tidlig') }}">Tidlig</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='before_6') }}">Før 6</a></th>
               <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='ettermiddag') }}">Ettermiddag</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='afternoon_ends_before_20') }}">Slutt før 20</a></th>
               <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='natt') }}">Natt</a></th>
               <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='helgetimer') }}">Helgetimer</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='helgetimer_dagtid') }}">Helgetimer dagtid</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='before_6') }}">Før 6</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='helgetimer_dagtid') }}">Helg dagtid</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='shift_cnt') }}">Sum Dagsverk</a></th>
             </tr>
           </thead>
           <tbody>
 
             {% for row in table_data %}
               <tr class="clickable-row" data-turnus="{{ row.turnus }}">
-                <td>{{ row.turnus }}</td>
+                <!-- <td class="d-flex justify-content-center align-items-center">
+
+                  <div class="form-check">
+                    <input class="form-check-input prevent-click" type="checkbox" value="" id="flexCheckDefault">
+                  </div>
+                </td> -->
+                <td>
+                  {{ row.turnus }}
+                  
+                </td>
                 <td>{{ row.poeng }}</td>
                 <td>{{ row.tidlig }}</td>
+                <td>{{ row.before_6 }}</td>
                 <td>{{ row.ettermiddag }}</td>
+                <td>{{ row.afternoon_ends_before_20 }}</td>
                 <td>{{ row.natt }}</td>
                 <td>{{ row.helgetimer }}</td>
                 <td>{{ row.helgetimer_dagtid }}</td>
-                <td>{{ row.before_6 }}</td>
+                <td>{{ row.shift_cnt }}</td>
               </tr>
             {% endfor %}
           </tbody>

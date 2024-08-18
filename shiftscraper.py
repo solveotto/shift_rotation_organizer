@@ -292,6 +292,9 @@ class ShiftScraper():
                     for col in range(1, 8):  # Columns B(1) through H(7)
                         for row in range(1, 7):  # Rows 2 through 7
                             cell = xlsxwriter.utility.xl_rowcol_to_cell(row, col)
+
+  
+                            
                             
                             ## Formater ##
                             # H-Dager
@@ -305,6 +308,8 @@ class ShiftScraper():
                                                                 'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) < 16)'
                                                                 'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) > 3)',
                                                                 'format': tidlig_format})
+
+
                             # Tidlig og kveld
                             worksheet.conditional_format(cell, {'type': 'formula',
                                                                 'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)'
@@ -345,5 +350,5 @@ if __name__ == '__main__':
 
     shift_scraper.scrape_pdf()
     #print(json.dumps(shift_scraper.turnuser, indent=4))
-    shift_scraper.create_json()
-    #shift_scraper.create_excel()
+    #shift_scraper.create_json()
+    shift_scraper.create_excel()

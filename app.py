@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import pandas as pd
+import user_settings as user_setting
 import json
+import mysql.connector
 
 
 
@@ -15,6 +17,9 @@ class DataframeManager():
 
         self.sort_by_input = 'Navn'
         self.sort_by_ascending = True
+
+
+
 
 
 
@@ -42,19 +47,36 @@ class TurnusManager():
     def __init__(self) -> None:
         with open('turnuser_R24.json', 'r') as f:
             self.data = json.load(f)
-        
+
+class UserSettings():
+    def __init__(self) -> None:
+        self.username = 'user'
+        self.assigned_pts = 0
+
+        mydb = mysql.connector.connect(
+            host='192.168.0.50',
+            user='solve',
+            password='rustmonster'
+        )
+
+    def load_db(self):
+        pass
+
+    def save_db(self):
+        pass
+
   
 df_manager = DataframeManager()
 turnus_mangaer = TurnusManager()
 
 
 @app.route('/')
-def home():
+def home(): 
     # Convert DataFrame to a list of dictionaries
     ## table_data = df_manager.df.to_dict(orient='records')
 
     # Gets the values set by the user 
-    helgetimer = session.get('helgetimer', '0')
+    df_manager.helgetimer = session.get('helgetimer', '0')
     helgetimer_dagtid = session.get('helgetimer_dagtid', '0')
     ettermiddager = session.get('ettermiddager', '0')
     ettermiddager_poeng = session.get('ettermiddager_poeng', '0')
@@ -64,10 +86,11 @@ def home():
 
     sort_btn_name = df_manager.sort_by_input
 
+
      # Pass the table data to the template
     return render_template('index.html', 
                            table_data = df_manager.df.to_dict(orient='records'), 
-                           helgetimer = helgetimer,
+                           helgetimer = df_manager.helgetimer,
                            helgetimer_dagtid = helgetimer_dagtid,
                            ettermiddager = ettermiddager,
                            ettermiddager_poeng = ettermiddager_poeng,
@@ -131,8 +154,8 @@ def sort_by_column():
     
     return redirect(url_for('home'))
 
-@app.route('/reset')
-def reset():
+@app.route('/reset_search')
+def reset_search():
     session.clear()
     df_manager.df['poeng'] = 0
     df_manager.sort_by('turnus')

@@ -7,11 +7,8 @@
 <div class="container">
 
     <h1>Turnus Data for {{ shift_name }}</h1>
-    
-    
-    
-    
-    <table border="1">
+
+    <table border="2">
         <thead>
             <tr>
                 <th style="border: 1px solid black;">Uke</th>
@@ -29,7 +26,7 @@
                 <tr>
                     <td style="border: 1px solid black;">{{ week_nr }}</td>
                     {% for day_nr, day_data in week_data.items() %}
-                        <td id="cell" style="border: 1px solid black;">
+                        <td id="cell" class="min-width-td" style="border: 1px solid black;">
                             {% for time in day_data.tid %}
                                 {% if day_data.tid|length == 2 %}
                                     {% if loop.first %}
