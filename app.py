@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import pandas as pd
-import user_settings as user_setting
+import dbcontrol as db_ctrl
 import json
-import mysql.connector
 
 
 
@@ -10,17 +9,36 @@ app = Flask(__name__)
 app.secret_key = "secret"
 
 
+
 class DataframeManager():
     def __init__(self) -> None:
         self.df = pd.read_json('turnus_df_R24.json')
+        
+        
         self.helgetimer_dagtid_multip = 0
 
         self.sort_by_input = 'Navn'
         self.sort_by_ascending = True
 
+        #self.load_stored_points()
+    
+    def load_stored_points(self):
+        for id, data, in self.df.iterrows():
+            value = data.get('turnus')
+            shift_id = db_ctrl.get_shift_id(value)
+            print(shift_id)
+            # if value:
+                
+            #     shift_id = db_ctrl.get_shift_id(value)
+            #     stored_points = db_ctrl.get_shift_rating(4, shift_id)
+                
+            #     if stored_points:
+            #         if pd.notna(self.df.at[id, 'poeng']):
+            #             self.df.at[id, 'poeng'] += stored_points
+            #         else:
+            #             self.df.at[id, 'poeng'] = stored_points
 
-
-
+                
 
 
     def sort_by(self, _type, ascending=True):
@@ -40,6 +58,7 @@ class DataframeManager():
 
     def calc_thresholds(self, _type, _th, multip):
         for index, row in self.df.iterrows():
+            print(row)
             if row[_type] > _th:
                 self.df.at[index, 'poeng'] += (row[_type] - _th) * multip
 
@@ -53,12 +72,6 @@ class UserSettings():
         self.username = 'user'
         self.assigned_pts = 0
 
-        mydb = mysql.connector.connect(
-            host='192.168.0.50',
-            user='solve',
-            password='rustmonster'
-        )
-
     def load_db(self):
         pass
 
@@ -68,6 +81,7 @@ class UserSettings():
   
 df_manager = DataframeManager()
 turnus_mangaer = TurnusManager()
+
 
 
 @app.route('/')
@@ -163,10 +177,6 @@ def reset_search():
 
     return redirect(url_for('home'))
 
-
-
-
-
 @app.route('/api/receive-data', methods=['POST'])
 def receive_data():
     html_data = request.get_json()
@@ -175,7 +185,6 @@ def receive_data():
     for x in turnus_mangaer.data:
         for shift_name, shift_data in x.items():
             if shift_name == selected_shift:
-                print(json.dumps(shift_data, indent=4))
                 session['shift_name'] = shift_name
                 session['shift_data'] = shift_data
                 break
@@ -186,10 +195,8 @@ def receive_data():
 def display_shift():
     shift_name = session.get('shift_name')
     shift_data = session.get('shift_data')
-    
 
     if shift_name and shift_data:
-        print('test')
         return render_template('turnus.html', shift_name=shift_name, shift_data=shift_data)
     else:
         return "No shift data found", 400

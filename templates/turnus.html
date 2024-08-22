@@ -40,14 +40,22 @@
                                 {% endif %}
                             {% endfor %}
                         </td>
-                              
-
+                        
+                        
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-            {% endfor %}
-            
-        </tbody>
-    </table>
-</div>
+                    
+                </tbody>
+            </table>
+        </div>
+        <hr>
+        
+        <form class="add-points-form">
+            <input type="hidden" name="week_nr" value="{{ week_nr }}">
+            <input type="hidden" name="day_nr" value="{{ day_nr }}">
+            <input type="text" name="points" placeholder="Add points">
+            <button type="submit">Submit</button>
+        </form>
 
 {% endblock %}
