@@ -8,6 +8,45 @@
 
     <h1>Turnus Data for {{ shift_name }}</h1>
 
+
+    <form class="row gy-2 gx-3 align-items-center" action="">
+
+        <div class="shadow-sm p-3 gy-2 bg-body-tertiary rounded">
+            <div class="col-md-2 row py-2">
+                <table class="table">
+                    <thead>
+                      <tr>
+                        <th class="table-success" scope="col">Poeng</th>
+                        <th scope="col">Tidligvakter</th>
+                        <th scope="col">Kveldsvaketer</th>
+                        <th scope="col">Natt</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th class="table-success" scope="row">1</th>
+                        <td>{{ ettermidager }} </td>
+                      </tr>
+
+  
+                    </tbody>
+                  </table>
+
+            </div>
+
+
+            <div class="row py-2">
+                    <div class="col-md-2">
+                        <div class="input-group input-group-sm mb-3">
+                            <span class="input-group-text" id="inputGroup-sizing-sm">Legg til poeng</span>
+                            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" value="10">
+                          </div>
+                    </div>
+            </div>
+        </div>
+        
+    </form>
+
     <table border="2">
         <thead>
             <tr>
@@ -51,11 +90,5 @@
         </div>
         <hr>
         
-        <form class="add-points-form">
-            <input type="hidden" name="week_nr" value="{{ week_nr }}">
-            <input type="hidden" name="day_nr" value="{{ day_nr }}">
-            <input type="text" name="points" placeholder="Add points">
-            <button type="submit">Submit</button>
-        </form>
 
 {% endblock %}

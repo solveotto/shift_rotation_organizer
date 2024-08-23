@@ -145,7 +145,7 @@ if __name__ == '__main__':
     shift_id = get_shift_id(shift_name)
     
     
-    rate_shift(user_id, shift_id, shift_name, 17)
+    #rate_shift(user_id, shift_id, shift_name, 17)
 
     stored_shifts = get_all_ratings(user_id)
     stored_shifts_dict = {}
@@ -153,6 +153,6 @@ if __name__ == '__main__':
     for x in stored_shifts:
         stored_shifts_dict[x[0]] = x[1]
 
+        print(x[0])
 
 
-    print(stored_shifts_dict)

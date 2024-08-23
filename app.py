@@ -13,7 +13,7 @@ app.secret_key = "secret"
 class DataframeManager():
     def __init__(self) -> None:
         self.df = pd.read_json('turnus_df_R24.json')
-        
+        self.username, self.user_id = db_ctrl.login('solve')
         
         self.helgetimer_dagtid_multip = 0
 
@@ -22,22 +22,12 @@ class DataframeManager():
 
         #self.load_stored_points()
     
-    def load_stored_points(self):
-        for id, data, in self.df.iterrows():
-            value = data.get('turnus')
-            shift_id = db_ctrl.get_shift_id(value)
-            print(shift_id)
-            # if value:
-                
-            #     shift_id = db_ctrl.get_shift_id(value)
-            #     stored_points = db_ctrl.get_shift_rating(4, shift_id)
-                
-            #     if stored_points:
-            #         if pd.notna(self.df.at[id, 'poeng']):
-            #             self.df.at[id, 'poeng'] += stored_points
-            #         else:
-            #             self.df.at[id, 'poeng'] = stored_points
-
+    def update_stored_points(self):
+        stored_points = db_ctrl.get_all_ratings(self.user_id)
+        for shift_name, shift_value in stored_points:
+            if shift_name in df_manager.df['turnus'].values:
+                print(shift_name, shift_value)
+                df_manager.df.loc[df_manager.df['turnus'] == shift_name, 'poeng'] = shift_value
                 
 
 
@@ -58,7 +48,7 @@ class DataframeManager():
 
     def calc_thresholds(self, _type, _th, multip):
         for index, row in self.df.iterrows():
-            print(row)
+            #print(row)
             if row[_type] > _th:
                 self.df.at[index, 'poeng'] += (row[_type] - _th) * multip
 
@@ -119,6 +109,9 @@ def calculate():
     # Resets points value
     df_manager.df['poeng'] = 0
     df_manager.sort_by('turnus')
+
+    df_manager.update_stored_points()
+    
    
     helgetimer = request.form.get('helgetimer', '0')
     df_manager.calc_multipliers('helgetimer', float(helgetimer))
@@ -196,8 +189,12 @@ def display_shift():
     shift_name = session.get('shift_name')
     shift_data = session.get('shift_data')
 
+
     if shift_name and shift_data:
-        return render_template('turnus.html', shift_name=shift_name, shift_data=shift_data)
+        return render_template('turnus.html', 
+                               shift_name=shift_name, 
+                               shift_data=shift_data,
+                               ettermiddager = ettermiddager)
     else:
         return "No shift data found", 400
 
