@@ -20,16 +20,19 @@ class DataframeManager():
         self.sort_by_input = 'Navn'
         self.sort_by_ascending = True
 
-        #self.load_stored_points()
-    
-    def update_stored_points(self):
-        stored_points = db_ctrl.get_all_ratings(self.user_id)
-        for shift_name, shift_value in stored_points:
-            if shift_name in df_manager.df['turnus'].values:
-                print(shift_name, shift_value)
-                df_manager.df.loc[df_manager.df['turnus'] == shift_name, 'poeng'] = shift_value
-                
+        self.df['poeng'] = 0
+        self.sort_by('turnus')
+        self.get_all_user_points()
+        
 
+    def get_all_user_points(self):
+        stored_points = db_ctrl.get_all_ratings(self.user_id)
+        print(stored_points)
+        for shift_name, shift_value in stored_points:
+            if shift_name in self.df['turnus'].values:
+                self.df.loc[self.df['turnus'] == shift_name, 'poeng'] += shift_value
+                
+    
 
     def sort_by(self, _type, ascending=True):
 
@@ -44,11 +47,9 @@ class DataframeManager():
 
     def calc_multipliers(self, _type, multip):
         self.df['poeng'] = round(self.df['poeng'] + self.df[_type] * multip, 1)
-        #self.df['poeng'] = round(self.df['poeng'] + self.df['helgetimer_dagtid'] * multip, 1)
 
     def calc_thresholds(self, _type, _th, multip):
         for index, row in self.df.iterrows():
-            #print(row)
             if row[_type] > _th:
                 self.df.at[index, 'poeng'] += (row[_type] - _th) * multip
 
@@ -57,16 +58,7 @@ class TurnusManager():
         with open('turnuser_R24.json', 'r') as f:
             self.data = json.load(f)
 
-class UserSettings():
-    def __init__(self) -> None:
-        self.username = 'user'
-        self.assigned_pts = 0
 
-    def load_db(self):
-        pass
-
-    def save_db(self):
-        pass
 
   
 df_manager = DataframeManager()
@@ -91,6 +83,9 @@ def home():
     sort_btn_name = df_manager.sort_by_input
 
 
+    
+
+
      # Pass the table data to the template
     return render_template('index.html', 
                            table_data = df_manager.df.to_dict(orient='records'), 
@@ -110,9 +105,6 @@ def calculate():
     df_manager.df['poeng'] = 0
     df_manager.sort_by('turnus')
 
-    df_manager.update_stored_points()
-    
-   
     helgetimer = request.form.get('helgetimer', '0')
     df_manager.calc_multipliers('helgetimer', float(helgetimer))
     session['helgetimer'] = helgetimer
@@ -135,36 +127,28 @@ def calculate():
     session['nights'] = nights
     session['nights_pts'] = nights_pts
     df_manager.calc_thresholds('natt', int(nights), int(nights_pts))
-    
-    
-    
     df_manager.sort_by('poeng', True)
-    
-    
-    
-    
 
-
-    #return render_template('index.html', helgetimer=helgetimer)
+    df_manager.get_all_user_points()
+    
     return redirect(url_for('home'))
+
 
 @app.route('/sort_by_column')
 def sort_by_column():
-
     column = request.args.get('column')
     if column in df_manager.df:
         df_manager.sort_by(column)
     else:
         df_manager.sort_by('poeng')
-        
 
-    
     return redirect(url_for('home'))
 
 @app.route('/reset_search')
 def reset_search():
     session.clear()
     df_manager.df['poeng'] = 0
+    df_manager.get_all_user_points()
     df_manager.sort_by('turnus')
     
 
@@ -188,15 +172,33 @@ def receive_data():
 def display_shift():
     shift_name = session.get('shift_name')
     shift_data = session.get('shift_data')
+    ettermiddager = session.get('ettermiddager')
 
+    shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_name)
 
+    
     if shift_name and shift_data:
-        return render_template('turnus.html', 
+        return render_template('turnus.html',
+                               table_data = df_manager.df.to_dict(orient='records'), 
                                shift_name=shift_name, 
                                shift_data=shift_data,
+                               shift_user_points = shift_user_points[1],
                                ettermiddager = ettermiddager)
     else:
         return "No shift data found", 400
+    
+@app.route('/rate_displayed_shift', methods=['POST'])
+def rate_displayed_shift():
+
+    shift_name = session.get('shift_name')
+
+    user_points = request.form.get('user_points')
+    print("route", user_points)
+
+    db_ctrl.rate_shift(df_manager.user_id, shift_name, user_points)
+
+
+    return redirect(url_for('display_shift'))
 
 
 if __name__ == '__main__':

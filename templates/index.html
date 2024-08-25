@@ -9,7 +9,7 @@
       <h1 class="mt-3">Sorter Turnuser</h1>
       <hr>
       
-      <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('calculate') }}" method="post">
+      <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('calculate') }}" method="post" onsubmit="return disableSubmitButton(this);">
 
         <div class="shadow-sm p-3 gy-2 bg-body-tertiary rounded">
           <div class="row py-2">

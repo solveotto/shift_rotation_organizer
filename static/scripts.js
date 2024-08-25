@@ -83,3 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 });
+
+
+
+function disableSubmitButton(form) {
+    form.querySelector('button[type="submit"]').disabled = true;
+    return true;
+  }
