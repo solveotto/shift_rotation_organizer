@@ -17,33 +17,44 @@ class DataframeManager():
         
         self.helgetimer_dagtid_multip = 0
 
-        self.sort_by_input = 'Navn'
+        self.sort_by_btn_txt = 'Navn'
         self.sort_by_ascending = True
+        self.sort_by_prev_type = None
+
 
         self.df['poeng'] = 0
-        self.sort_by('turnus')
+        self.sort_by('turnus', inizialize=True)
         self.get_all_user_points()
         
 
     def get_all_user_points(self):
-        stored_points = db_ctrl.get_all_ratings(self.user_id)
-        print(stored_points)
-        for shift_name, shift_value in stored_points:
-            if shift_name in self.df['turnus'].values:
-                self.df.loc[self.df['turnus'] == shift_name, 'poeng'] += shift_value
+        stored_user_points = db_ctrl.get_all_ratings(self.user_id)
+        
+        for shift_title, shift_value in stored_user_points:
+            if shift_title in self.df['turnus'].values:
+                self.df.loc[self.df['turnus'] == shift_title, 'poeng'] += shift_value
                 
-    
-
-    def sort_by(self, _type, ascending=True):
-
+ 
+    def sort_by(self, _type, inizialize=False):
+        # Alters the name for the button text
         if _type == 'turnus':
             sort_name = 'Navn'
         else:
             sort_name = _type.replace("_", " ")
+        self.sort_by_btn_txt = sort_name.title()
 
-        self.sort_by_input = sort_name.title()
-        self.df = self.df.sort_values(by=_type, ascending=ascending)
+        if inizialize == True:
+            self.sort_by_ascending = True
+        else:
+            if self.sort_by_prev_type == _type:
+                self.sort_by_ascending = not self.sort_by_ascending
+            else:
+                self.sort_by_ascending = True
+            self.sort_by_prev_type = _type
 
+        self.df = self.df.sort_values(by=_type, ascending=self.sort_by_ascending)
+        
+        
 
     def calc_multipliers(self, _type, multip):
         self.df['poeng'] = round(self.df['poeng'] + self.df[_type] * multip, 1)
@@ -79,12 +90,7 @@ def home():
     nights = session.get('nights', '0')
     nights_pts = session.get('nights_pts', '0')
 
-
-    sort_btn_name = df_manager.sort_by_input
-
-
-    
-
+    sort_btn_name = df_manager.sort_by_btn_txt
 
      # Pass the table data to the template
     return render_template('index.html', 
@@ -97,6 +103,12 @@ def home():
                            nights_pts = nights_pts,
                            sort_by_btn_name = sort_btn_name
                            )
+
+
+@app.route('/navigate_home')
+def navigate_home():
+    #df_manager.sort_by('poeng')
+    return redirect(url_for('home'))
 
 
 @app.route('/submit', methods=['POST'])
@@ -127,9 +139,9 @@ def calculate():
     session['nights'] = nights
     session['nights_pts'] = nights_pts
     df_manager.calc_thresholds('natt', int(nights), int(nights_pts))
-    df_manager.sort_by('poeng', True)
 
     df_manager.get_all_user_points()
+    df_manager.sort_by('poeng')
     
     return redirect(url_for('home'))
 
@@ -149,10 +161,9 @@ def reset_search():
     session.clear()
     df_manager.df['poeng'] = 0
     df_manager.get_all_user_points()
-    df_manager.sort_by('turnus')
-    
-
+    df_manager.sort_by('turnus', inizialize=True)
     return redirect(url_for('home'))
+
 
 @app.route('/api/receive-data', methods=['POST'])
 def receive_data():
@@ -160,27 +171,27 @@ def receive_data():
     selected_shift = html_data.get('turnus')
     
     for x in turnus_mangaer.data:
-        for shift_name, shift_data in x.items():
-            if shift_name == selected_shift:
-                session['shift_name'] = shift_name
+        for shift_title, shift_data in x.items():
+            if shift_title == selected_shift:
+                session['shift_title'] = shift_title
                 session['shift_data'] = shift_data
                 break
-                
     return redirect(url_for('display_shift'))
+
 
 @app.route('/display_shift')
 def display_shift():
-    shift_name = session.get('shift_name')
+    shift_title = session.get('shift_title')
     shift_data = session.get('shift_data')
     ettermiddager = session.get('ettermiddager')
 
-    shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_name)
-
+    shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_title)
+    session['current_user_point_input'] = shift_user_points
     
-    if shift_name and shift_data:
+    if shift_title and shift_data:
         return render_template('turnus.html',
                                table_data = df_manager.df.to_dict(orient='records'), 
-                               shift_name=shift_name, 
+                               shift_title=shift_title, 
                                shift_data=shift_data,
                                shift_user_points = shift_user_points[1],
                                ettermiddager = ettermiddager)
@@ -190,13 +201,13 @@ def display_shift():
 @app.route('/rate_displayed_shift', methods=['POST'])
 def rate_displayed_shift():
 
-    shift_name = session.get('shift_name')
+    shift_title = session.get('shift_title')
+    previous_user_point_input = session.get('current_user_point_input')
+    new_user_points_input = int(request.form.get('user_points'))
+    db_ctrl.set_user_points(df_manager.user_id, shift_title, new_user_points_input)
 
-    user_points = request.form.get('user_points')
-    print("route", user_points)
-
-    db_ctrl.rate_shift(df_manager.user_id, shift_name, user_points)
-
+    df_manager.df.loc[df_manager.df['turnus'] == shift_title, 'poeng'] += (new_user_points_input - previous_user_point_input[1])
+   
 
     return redirect(url_for('display_shift'))
 

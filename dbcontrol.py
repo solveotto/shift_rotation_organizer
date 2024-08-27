@@ -80,34 +80,50 @@ def login(username):
         print("Failed to execute login query.")
 
 
-def get_shift_name(shift_name):
+def get_shift_title(shift_title):
     query = """
     SELECT id FROM shifts WHERE title = %s
     """
-    result = execute_query(query, (shift_name, ), fetch=True)
+    result = execute_query(query, (shift_title, ), fetch=True)
     if result:
-        shift_name = result[0][0]
-        return shift_name
+        shift_title = result[0][0]
+        return shift_title
     else:
         print("Shift not found.")
 
 
-def rate_shift(user_id, shift_name, amount):
+
+
+def set_user_points(user_id, shift_title, amount):
     insert_rating_query = """
-    INSERT INTO points (user_id, shift_name, shift_title, points)
-    VALUES (%s, %s, %s, %s)
-    ON DUPLICATE KEY UPDATE points = %s, rated_at = CURRENT_TIMESTAMP
+    INSERT INTO points (user_id, shift_title, user_points)
+    VALUES (%s, %s, %s)
+    ON DUPLICATE KEY UPDATE user_points = %s, rated_at = CURRENT_TIMESTAMP
     """
-    result = execute_query(insert_rating_query, (user_id, shift_name, amount, amount))
+    result = execute_query(insert_rating_query, (user_id, shift_title, amount, amount))
     if result:
         print("Shift points adjusted.")
 
-
-def get_shift_rating(user_id, shift_name):
+def get_user_points(user_id, shift_title):
     query = """
-    SELECT points, shift_title FROM points WHERE user_id = %s AND shift_name = %s
+    SELECT user_points FROM points WHERE user_id = %s AND shift_title = %s
     """
-    result = execute_query(query, (user_id, shift_name), fetch=True)
+    result = execute_query(query, (user_id, shift_title), fetch=True)
+    
+    if result:
+        points = result[0][0]
+        return points
+    else:
+        points = 0
+        return points
+
+
+def get_shift_rating(user_id, shift_title):
+    query = """
+    SELECT user_points, shift_title FROM points WHERE user_id = %s AND shift_title = %s
+    """
+    result = execute_query(query, (user_id, shift_title), fetch=True)
+    
     if result:
         points = result[0][0]
         name = result[0][1]
@@ -119,7 +135,7 @@ def get_shift_rating(user_id, shift_name):
     
 def get_all_ratings(user_id):
     query = """
-    SELECT shift_title, points FROM points WHERE user_id = %s
+    SELECT shift_title, user_points FROM points WHERE user_id = %s
     """
     result = execute_query(query, (user_id, ), fetch=True)
 
@@ -145,86 +161,15 @@ if __name__ == '__main__':
     #add_points_to_user('test1', 10)
     #username, user_id = login('solve')
     #shift_title = 'OSL_03'
-    #shift_name = get_shift_name(shift_title)
+    #shift_title = get_shift_title(shift_title)
     
     
-    #rate_shift(user_id, shift_name, shift_title, 17)
+    set_user_points('4', 'OSL_01', 17)
 
     
-    # query = """
-    #             ALTER TABLE points
-    #             ADD CONSTRAINT fk_user_id
-    #             FOREIGN KEY (user_id)
-    #             REFERENCES users(id)
-    #             ON DELETE CASCADE
-    #         """
-
-    # query = """
-    # SELECT 
-    # CONSTRAINT_NAME, 
-    # COLUMN_NAME, 
-    # REFERENCED_TABLE_NAME, 
-    # REFERENCED_COLUMN_NAME
-    # FROM 
-    # INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-    # WHERE 
-    # TABLE_NAME = 'points'
-    # AND REFERENCED_TABLE_NAME IS NOT NULL;
-    # """
-
-    # query = """
-    # ALTER TABLE points
-    # ADD CONSTRAINT fk_shift_title
-    # FOREIGN KEY (shift_title) REFERENCES shifts(title)
-    # ON DELETE CASCADE
-    # """
-
-    query = """
-    SHOW CREATE TABLE points
-    """
-
-    # query = """
-    # ALTER TABLE points DROP INDEX unique_users
-    # """
-
-
-#     query = """
-#     SELECT 
-#     TABLE_NAME, 
-#     CONSTRAINT_NAME, 
-#     COLUMN_NAME, 
-#     REFERENCED_TABLE_NAME, 
-#     REFERENCED_COLUMN_NAME 
-# FROM 
-#     INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
-# WHERE 
-#     REFERENCED_TABLE_NAME = 'points';
-
-
-#     """
-
-
-    # query = """
-    # CREATE TABLE points (
-    # id INT NOT NULL AUTO_INCREMENT,
-    # user_id INT NOT NULL,
-    # shift_title VARCHAR(20),
-    # points INT NOT NULL,
-    # user_points INT NOT NULL,
-    # PRIMARY KEY (id),
-    # UNIQUE KEY unique_user_shifts (user_id, shift_title),
-    # FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    # FOREIGN KEY (shift_title) REFERENCES shifts(title) ON DELETE CASCADE
-    # ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-    # """
-
-
-    # query = """
-    # DROP TABLE points
-    # """
     
     
-    result = execute_query(query, fetch=True)
-    print(result)
+    # result = execute_query(query, fetch=True)
+    # print(result)
  
 

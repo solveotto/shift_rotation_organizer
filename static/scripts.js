@@ -1,5 +1,5 @@
 
-// Dette scriptet gjør turnusene klikkbare
+// Makes shifts in the index-page clickable
 document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelectorAll('.clickable-row').forEach(row => {
         row.addEventListener('click', () => {
@@ -44,24 +44,25 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 
+// Adds color to the shift table
 document.addEventListener('DOMContentLoaded', function() {
     const tds = document.querySelectorAll('td[id="cell"]');
     tds.forEach(td => {
         const times = td.innerText.split(' - ');
-        const firstTime = times[0].trim();
-        const [hours, minutes] = firstTime.split(':').map(Number);
-        const startTotalMinutes = hours * 60 + minutes;
-        
-        const late_shift = 16 * 60 + 30; // 16:00 in minutes
-        const night_shift = 19 * 60;
         
         if (times.length > 1) {
-            const endTime = times[1].trim();
-            const [hours, minutes] = endTime.split(':').map(Number);
-            const endTotalMinutes = hours * 60 + minutes;
+            const startTime = times[0].trim();
+            const [start_hours, start_minutes] = startTime.split(':').map(Number);
+            const startTotalMinutes = start_hours * 60 + start_minutes;
             
-
-            if (endTotalMinutes < late_shift) {
+            const endTime = times[1].trim();
+            const [end_hours, end_minutes] = endTime.split(':').map(Number);
+            const endTotalMinutes = end_hours * 60 + end_minutes;
+            
+            const late_shift = 16 * 60 + 30; // 16:00 in minutes
+            const night_shift = 19 * 60;
+            
+            if (endTotalMinutes <= late_shift) {
                 td.classList.add('early')
             }
             if (endTotalMinutes >= late_shift) {
@@ -70,13 +71,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (startTotalMinutes > late_shift && endTotalMinutes < startTotalMinutes) {
                 td.classList.add('late');
             }
+            if (startTotalMinutes < late_shift && endTotalMinutes < startTotalMinutes) {
+                td.classList.add('late')
+            }
+
             if (startTotalMinutes >= night_shift) {
                 td.classList.add('night')
             }
         } else {
             const listOfDaysoff = ['XX', 'OO', 'TT']
             td.classList.add('day_off')
-            if (listOfDaysoff.includes(firstTime)) {
+            if (listOfDaysoff.includes(times[0])) {
                 td.classList.add('day_off')
             }
         }
@@ -85,8 +90,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-
+// Makes the submit button not clickable while submitting
 function disableSubmitButton(form) {
     form.querySelector('button[type="submit"]').disabled = true;
-    return true;
-  }
+    return true; }
+
+
+// When i input in the form is changed, it submits
+document.addEventListener('DOMContentLoaded', (event) => {
+    const form = document.getElementById('auto-submit-form');
+    const inputs = form.querySelectorAll('select');
+
+    inputs.forEach(input => {
+        input.addEventListener('change', () => {
+            form.submit();
+        });
+    });
+});
