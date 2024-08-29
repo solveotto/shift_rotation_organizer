@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const [end_hours, end_minutes] = endTime.split(':').map(Number);
             const endTotalMinutes = end_hours * 60 + end_minutes;
             
-            const late_shift = 16 * 60 + 30; // 16:00 in minutes
+            const late_shift = 16 * 60; // 16:00 in minutes
             const night_shift = 19 * 60;
             
             if (endTotalMinutes <= late_shift) {
@@ -96,14 +96,14 @@ function disableSubmitButton(form) {
     return true; }
 
 
-// When i input in the form is changed, it submits
-document.addEventListener('DOMContentLoaded', (event) => {
-    const form = document.getElementById('auto-submit-form');
-    const inputs = form.querySelectorAll('select');
+// // When i input in the form is changed, it submits
+// document.addEventListener('DOMContentLoaded', (event) => {
+//     const form = document.getElementById('auto-submit-form');
+//     const inputs = form.querySelectorAll('select');
 
-    inputs.forEach(input => {
-        input.addEventListener('change', () => {
-            form.submit();
-        });
-    });
-});
+//     inputs.forEach(input => {
+//         input.addEventListener('change', () => {
+//             form.submit();
+//         });
+//     });
+// });

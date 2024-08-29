@@ -147,7 +147,7 @@ class Turnus():
 
 
                         ### ENDS BERFORE 16 ###
-                        if end.time() < time(16,00) and start.time() < time(12,00):
+                        if end.time() <= time(16,00) and start.time() < time(12,00):
                             tidlig += 1
                             ### STARTS BEFORE 6 ####
                             if start.time() < time(6,0):
@@ -159,7 +159,7 @@ class Turnus():
 
 
                         ### AFTERNOONS ENDS AFTER 16 ###(
-                        if end.time() >= time(16,00) or end.date() > start.date():
+                        if end.time() > time(16,00) or end.date() > start.date():
                             if str(end.date()) == '1900-01-02' and end.time() < time(3,0):
                                 afternoon_count += 1
                             elif str(end.date()) == '1900-01-01':
