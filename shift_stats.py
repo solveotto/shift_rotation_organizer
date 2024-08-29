@@ -37,10 +37,10 @@ class Turnus():
                             start_tid = pd.to_datetime("00:00", format='%H:%M')
                             slutt_tid = pd.to_datetime("00:00", format='%H:%M')
                             
-
+                        
                         new_row = {
                             'turnus' : turnus_navn,
-                            'ukedag' : dag_data['navn'],
+                            'ukedag' : dag_data['ukedag'],
                             'dag_nr': dag_nr,
                             'uke_nr'   : uke_nr,
                             'start' : start_tid,
@@ -66,6 +66,7 @@ class Turnus():
             EVENING = time(16,0)
 
             # Adds new stats to dataframe
+            shift_cnt = 0
             helgetimer = 0
             helgetimer_dagtid = 0
             helgedager = 0
@@ -74,6 +75,7 @@ class Turnus():
             tidlig = 0
             before_6 = 0
             afternoon_count = 0
+            afternoon_ends_before_20 = 0
             afternons_in_row = 0
             night_count = 0
             
@@ -82,7 +84,7 @@ class Turnus():
                 if _dagsverk['start'] != _dagsverk['slutt']:     
                     # Checks for bottom of the list
                     if _index + 1 < len(turuns_df_reset):
-                        
+                        shift_cnt += 1
                         start = pd.to_datetime(_dagsverk['start'], format='%H:%M')
                         end = pd.to_datetime(_dagsverk['slutt'], format='%H:%M')
                         ukedag = _dagsverk['ukedag']
@@ -144,8 +146,8 @@ class Turnus():
 
 
 
-                        ### ENDS BERFORE 1630 ###
-                        if end.time() < time(16,20):
+                        ### ENDS BERFORE 16 ###
+                        if end.time() <= time(16,00) and start.time() < time(12,00):
                             tidlig += 1
                             ### STARTS BEFORE 6 ####
                             if start.time() < time(6,0):
@@ -156,19 +158,32 @@ class Turnus():
 
 
 
-                        ### AFTERNOONS ENDS AFTER 1620 ###(
-                        if end.time() >= time(16,20) or end.date() > start.date():
+                        ### AFTERNOONS ENDS AFTER 16 ###(
+                        if end.time() > time(16,00) or end.date() > start.date():
                             if str(end.date()) == '1900-01-02' and end.time() < time(3,0):
                                 afternoon_count += 1
                             elif str(end.date()) == '1900-01-01':
                                 afternoon_count += 1
+                                if end.time() <= time(20):
+                                    afternoon_ends_before_20 += 1
+                                    
+
+
+                            
                                       
                                       
                             # ### Afternoons in row ###
-                            # next_row_value = turuns_df_reset.iloc[_index + 1]['start']
-                            # # Check if the next row's 'column_name' contains a specific value
-                            # if next_row_value > pd.to_datetime('13:00', format='%H:%M'):
-                            #     afternons_in_row += 1
+                            # next_row_cnt = 0
+                            # next_row_is_afternoon = True
+                            # while next_row_is_afternoon == True:
+                            #     next_row_value = turuns_df_reset.iloc[_index + 1]['start']
+                            #     # Check if the next row's 'column_name' contains a specific value
+                            #     if next_row_value > pd.to_datetime('16:00', format='%H:%M'):
+                            #         next_row_cnt += 1
+                            #     else:
+                            #         next_row_is_afternoon = False
+                                    
+                            # afternons_in_row += next_row_cnt
                                 
 
                 #### TEST ####
@@ -177,15 +192,18 @@ class Turnus():
             # Adds shift as new row to dataframe
             new_row = pd.DataFrame({
                 'turnus': [turnus_navn], 
+                'shift_cnt': [shift_cnt],
+                'tidlig': [tidlig],
+                'ettermiddag' : [afternoon_count],
+                'natt': [night_count],
                 'helgetimer': [round(helgetimer,1)], 
                 'helgedager': [helgedager],
                 'helgetimer_dagtid': [round(helgetimer_dagtid,1)],
                 'helegtimer_natt': [round(helgetimer_natt,1)],
                 'helgetimer_ettermiddag': [round(helgetimer_ettermiddag)],
-                'tidlig': [tidlig],
                 'before_6': [before_6],
-                'ettermiddag' : [afternoon_count],
-                'natt': [night_count],
+                'afternoon_ends_before_20': [afternoon_ends_before_20],
+                'afternoons_in_row': [afternons_in_row],
                 'poeng': 0
                 
                 })
@@ -193,31 +211,9 @@ class Turnus():
             self.stats_df = pd.concat([self.stats_df, new_row], ignore_index=True)
 
 
-        #### FLYTTES TIL ANNEN MODUL #####
-
-    # def add_points_to_stats_df(self):
-
-    #     self.stats_df['poeng'] = self.stats_df.apply(lambda x: 
-    #                                                  x['helgetimer']*1 + 
-    #                                                  x['ettermiddag']*0.5, 
-    #                                                  axis=1)
-        
-    #     # Add points for number of night watches
-    #     self.stats_df.loc[self.stats_df['natt'] > 6, 'poeng'] += 1
-    #     self.stats_df.loc[self.stats_df['natt'] > 10, 'poeng'] += 5
-
-
-        
-
-    # def sort_stats(self, keyword, asc=True):
-    #     self.stats_df = self.stats_df.sort_values(by=keyword, ascending=asc)
-    #     self.stats_df.reset_index(drop=True, inplace=True)
-
-                    
-
 if __name__ == '__main__':
     turnus = Turnus('turnuser_R24.json')
 
     turnus.stats_df.to_json('turnus_df_R24.json')
 
-    print(turnus.stats_df)
+    #print(turnus.stats_df)

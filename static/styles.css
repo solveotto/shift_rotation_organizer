@@ -7,9 +7,30 @@
   font-size: 1.25rem; /* Adjust the size as needed */
 }
 
+.min-width-td {
+  min-width: 90px; /* Set your desired minimum width */
+}
 
 
+.clickable-row {
+  cursor: pointer;
+}
 
+.early {
+  background-color: aqua;
+}
+
+.late {
+  background-color: rgb(255, 150, 150);
+}
+
+.night {
+  background-color: rgb(235, 65, 235);
+}
+
+.day_off {
+  background-color: rgb(66, 187, 66);
+}
 
 
 
@@ -25,4 +46,9 @@
 
 .custom-link-color {
   color: black;
+}
+
+
+.table-purple {
+  background-color: purple
 }
