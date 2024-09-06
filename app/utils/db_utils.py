@@ -1,8 +1,8 @@
 import mysql.connector
 from mysql.connector import Error
-import bcrypt
 import configparser
 import json
+import bcrypt
 
 
 
@@ -13,13 +13,7 @@ mysql_user = config['mysql']['user']
 mysql_password = config['mysql']['password']
 mysql_database = config['mysql']['database']
 
-
-def hash_password(password):
-    salt = bcrypt.gensalt()
-    hashed_pw = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_pw.decode('utf-8')
-
-    
+   
 def execute_query(query, params=None, fetch=False):
     try:
         conn = mysql.connector.connect(
@@ -33,6 +27,9 @@ def execute_query(query, params=None, fetch=False):
                 cursor.execute(query, params)
                 if fetch:
                     result = cursor.fetchall()
+                    return result
+                elif fetch == "fetchone":
+                    result = cursor.fetchone()
                     return result
                 else:
                     conn.commit()
@@ -48,52 +45,6 @@ def execute_query(query, params=None, fetch=False):
             conn.close()
 
 
-def create_new_user(username, password):
-    query = """
-    INSERT INTO users (username, password)
-    VALUES (%s, %s)
-    """
-    hashed_password = hash_password(password)
-    result = execute_query(query, (username, hashed_password))
-
-    if result:
-        print(f"User created")
-    else:
-        print('Error creating user')
-
-            
-def login(username):
-    login_user_query = """
-            SELECT *
-            FROM users
-            WHERE username = %s
-            """
-    result = execute_query(login_user_query, (username,), fetch=True)
-    if result:
-        user = result[0][1]
-        user_id = result[0][0]
-        if user:
-            return user, user_id
-        else:
-            print(f"User {username} not found.")
-    else:
-        print("Failed to execute login query.")
-
-
-def get_shift_title(shift_title):
-    query = """
-    SELECT id FROM shifts WHERE title = %s
-    """
-    result = execute_query(query, (shift_title, ), fetch=True)
-    if result:
-        shift_title = result[0][0]
-        return shift_title
-    else:
-        print("Shift not found.")
-
-
-
-
 def set_user_points(user_id, shift_title, amount):
     insert_rating_query = """
     INSERT INTO points (user_id, shift_title, user_points)
@@ -103,6 +54,7 @@ def set_user_points(user_id, shift_title, amount):
     result = execute_query(insert_rating_query, (user_id, shift_title, amount, amount))
     if result:
         print("Shift points adjusted.")
+
 
 def get_user_points(user_id, shift_title):
     query = """
@@ -133,6 +85,7 @@ def get_shift_rating(user_id, shift_title):
         name = ''
         return name, points
     
+    
 def get_all_ratings(user_id):
     query = """
     SELECT shift_title, user_points FROM points WHERE user_id = %s
@@ -154,18 +107,65 @@ def add_shifts_to_database(file_path):
             """
             execute_query(insert_shift, (name, ))
             
-    
+
+
+#### USER LOGIN AND REG ####
+
+def hash_password(password):
+        salt = bcrypt.gensalt()
+        hashed_pw = bcrypt.hashpw(password.encode('utf-8'), salt)
+        return hashed_pw.decode('utf-8')
+
+
+def create_new_user(username, hashed_password):
+    query = """
+    INSERT INTO users (username, password)
+    VALUES (%s, %s)
+    """
+    result = execute_query(query, (username, hash_password(hashed_password)))
+
+    if result:
+        print(f"User created")
+    else:
+        print('Error creating user')
+
+            
+def get_user_data(username):
+    login_user_query = """
+            SELECT *
+            FROM users
+            WHERE username = %s
+            """
+    result = execute_query(login_user_query, (username,), fetch=True)
+    if result:
+        user = result[0][1]
+        user_id = result[0][0]
+        user_psw =result[0][2]
+        return result
+    else:
+        print("Failed to execute login query!")
+
+def get_user_password(username):
+    query = """
+    SELECT password FROM users WHERE username = %s
+    """
+    result = execute_query(query, (username, ), fetch='fetchone')
+    return result
+
+
+
 if __name__ == '__main__':
-    #register_points(10)
-    #create_new_user('test3', 'test3')       
+    create_new_user('testuser', 'testuser')       
     #add_points_to_user('test1', 10)
     #username, user_id = login('solve')
-    #shift_title = 'OSL_03'
-    #shift_title = get_shift_title(shift_title)
-    
-    
-    set_user_points('4', 'OSL_01', 17)
 
+    #set_user_points('4', 'OSL_01', 17)
+
+    try:
+        username, user_id, user_pwd = get_user_data('solve')
+        print(username)
+    except TypeError:
+        print("User Does Not Exsist")
     
     
     

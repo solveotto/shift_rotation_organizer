@@ -1,86 +1,50 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-import pandas as pd
-import dbcontrol as db_ctrl
+import os
 import json
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask_login import LoginManager, login_user, login_required, current_user
+from flask_login import login_user as flask_login_user
+from mysql.connector import Error
+
+from config import Config
+from app.utils import df_utils, db_utils
+from app.forms import LoginForm, User
 
 
-
-app = Flask(__name__)
-app.secret_key = "secret"
+main = Blueprint('main', __name__)
 
 
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.home'))
 
-class DataframeManager():
-    def __init__(self) -> None:
-        self.df = pd.read_json('turnus_df_R24.json')
-        self.username, self.user_id = db_ctrl.login('solve')
-        
-        self.helgetimer_dagtid_multip = 0
-
-        self.sort_by_btn_txt = 'Navn'
-        self.sort_by_ascending = True
-        self.sort_by_prev_type = None
-
-
-        self.df['poeng'] = 0
-        self.sort_by('turnus', inizialize=True)
-        self.get_all_user_points()
-        
-
-    def get_all_user_points(self):
-        stored_user_points = db_ctrl.get_all_ratings(self.user_id)
-        
-        for shift_title, shift_value in stored_user_points:
-            if shift_title in self.df['turnus'].values:
-                self.df.loc[self.df['turnus'] == shift_title, 'poeng'] += shift_value
-                
- 
-    def sort_by(self, _type, inizialize=False):
-        # Alters the name for the button text
-        if _type == 'turnus':
-            sort_name = 'Navn'
-        else:
-            sort_name = _type.replace("_", " ")
-        self.sort_by_btn_txt = sort_name.title()
-
-        if inizialize == True:
-            self.sort_by_ascending = True
-        else:
-            if self.sort_by_prev_type == _type:
-                self.sort_by_ascending = not self.sort_by_ascending
+    form = LoginForm()
+    if form.validate_on_submit():
+        try:
+            user_data = db_utils.get_user_data(form.username.data)
+            if user_data and User.verify_password(user_data[0][2], form.password.data):
+                print('LOGIN ATTEMT')
+                user = User(form.username.data)
+                flask_login_user(user)
+                #flash('Login successful!', 'success')
+                return redirect(url_for('main.home'))
             else:
-                self.sort_by_ascending = True
-            self.sort_by_prev_type = _type
+                flash('Login unsuccessful. Please check username and password', 'danger')
+        except Error as e:
+            print(f'Error: {e}')
 
-        self.df = self.df.sort_values(by=_type, ascending=self.sort_by_ascending)
-        
-        
-
-    def calc_multipliers(self, _type, multip):
-        self.df['poeng'] = round(self.df['poeng'] + self.df[_type] * multip, 1)
-
-    def calc_thresholds(self, _type, _th, multip):
-        for index, row in self.df.iterrows():
-            if row[_type] > _th:
-                self.df.at[index, 'poeng'] += (row[_type] - _th) * multip
-
-class TurnusManager():
-    def __init__(self) -> None:
-        with open('turnuser_R24.json', 'r') as f:
-            self.data = json.load(f)
+    else:
+        print("ERROR", form.errors)
+    return render_template('login.html', form=form)
+            
 
 
-
-  
-df_manager = DataframeManager()
-turnus_mangaer = TurnusManager()
-
-
-
-@app.route('/')
+@main.route('/')
+@login_required
 def home(): 
     # Convert DataFrame to a list of dictionaries
     ## table_data = df_manager.df.to_dict(orient='records')
+
 
     # Gets the values set by the user 
     df_manager.helgetimer = session.get('helgetimer', '0')
@@ -93,7 +57,7 @@ def home():
     sort_btn_name = df_manager.sort_by_btn_txt
 
      # Pass the table data to the template
-    return render_template('index.html', 
+    return render_template('sort_shifts.html', 
                            table_data = df_manager.df.to_dict(orient='records'), 
                            helgetimer = df_manager.helgetimer,
                            helgetimer_dagtid = helgetimer_dagtid,
@@ -105,13 +69,15 @@ def home():
                            )
 
 
-@app.route('/navigate_home')
+@main.route('/navigate_home')
+@login_required
 def navigate_home():
     #df_manager.sort_by('poeng')
-    return redirect(url_for('home'))
+    return redirect(url_for('main.home'))
 
 
-@app.route('/submit', methods=['POST'])
+@main.route('/submit', methods=['POST'])
+@login_required
 def calculate():
     # Resets points value
     df_manager.df['poeng'] = 0
@@ -143,10 +109,11 @@ def calculate():
     df_manager.get_all_user_points()
     df_manager.sort_by('poeng')
     
-    return redirect(url_for('home'))
+    return redirect(url_for('main.home'))
 
 
-@app.route('/sort_by_column')
+@main.route('/sort_by_column')
+@login_required
 def sort_by_column():
     column = request.args.get('column')
     if column in df_manager.df:
@@ -154,32 +121,39 @@ def sort_by_column():
     else:
         df_manager.sort_by('poeng')
 
-    return redirect(url_for('home'))
+    return redirect(url_for('main.home'))
 
-@app.route('/reset_search')
+
+@main.route('/reset_search')
+@login_required
 def reset_search():
     session.clear()
     df_manager.df['poeng'] = 0
     df_manager.get_all_user_points()
     df_manager.sort_by('turnus', inizialize=True)
-    return redirect(url_for('home'))
+    return redirect(url_for('main.home'))
 
 
-@app.route('/api/receive-data', methods=['POST'])
+@main.route('/api/receive-data', methods=['POST'])
+@login_required
 def receive_data():
     html_data = request.get_json()
     selected_shift = html_data.get('turnus')
+
+    with open(os.path.join(Config.static_dir, 'turnuser_R24.json'), 'r') as f:
+            turnus_data = json.load(f)
     
-    for x in turnus_mangaer.data:
+    for x in turnus_data:
         for shift_title, shift_data in x.items():
             if shift_title == selected_shift:
                 session['shift_title'] = shift_title
                 session['shift_data'] = shift_data
                 break
-    return redirect(url_for('display_shift'))
+    return redirect(url_for('main.display_shift'))
 
 
-@app.route('/display_shift')
+@main.route('/display_shift')
+@login_required
 def display_shift():
     shift_title = session.get('shift_title')
     shift_data = session.get('shift_data')
@@ -198,7 +172,8 @@ def display_shift():
     else:
         return "No shift data found", 400
     
-@app.route('/rate_displayed_shift', methods=['POST'])
+@main.route('/rate_displayed_shift', methods=['POST'])
+@login_required
 def rate_displayed_shift():
 
     shift_title = session.get('shift_title')
@@ -209,8 +184,9 @@ def rate_displayed_shift():
     df_manager.df.loc[df_manager.df['turnus'] == shift_title, 'poeng'] += (new_user_points_input - previous_user_point_input[1])
    
 
-    return redirect(url_for('display_shift'))
+    return redirect(url_for('main.display_shift'))
 
 
-if __name__ == '__main__':
-    app.run(port=8080, debug=True)
+
+df_manager = df_utils.DataframeManager()
+db_ctrl = db_utils

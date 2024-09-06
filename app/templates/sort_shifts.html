@@ -8,8 +8,8 @@
     <div class="container">
       <h1 class="mt-3">Sorter Turnuser</h1>
       <hr>
-      
-      <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('calculate') }}" method="post" onsubmit="return disableSubmitButton(this);">
+
+      <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('main.calculate') }}" method="post" onsubmit="return disableSubmitButton(this);">
 
         <div class="shadow-sm p-3 gy-2 bg-body-tertiary rounded">
           <div class="row py-2">
@@ -75,7 +75,7 @@
           <div class="row py-2">
             <div class="col-md-4">
               <button type="submit" class="btn btn-primary">Submit</button>
-              <a href="{{ url_for('reset_search') }}" class="btn btn-warning">Reset</a>
+              <a href="{{ url_for('main.reset_search') }}" class="btn btn-warning">Reset</a>
             </div>
           </form>
           
@@ -86,13 +86,13 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-dark">
                   <li><a class="dropdown-item" href="#">Navn</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('sort_by_column', column='poeng') }}">Poeng</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('sort_by_column', column='tidlig') }}">Tidligvakter</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('sort_by_column', column='ettermiddag') }}">Ettermiddagsvakter</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('sort_by_column', column='natt') }}">Nattevakter</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('sort_by_column', column='helgetimer') }}">Heletimer</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('sort_by_column', column='helgetimer_dagtid') }}">Helgetimer dagtid</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('sort_by_column', column='before_6') }}">Vakter som starter før 6</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('main.sort_by_column', column='poeng') }}">Poeng</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('main.sort_by_column', column='tidlig') }}">Tidligvakter</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('main.sort_by_column', column='ettermiddag') }}">Ettermiddagsvakter</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('main.sort_by_column', column='natt') }}">Nattevakter</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('main.sort_by_column', column='helgetimer') }}">Heletimer</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('main.sort_by_column', column='helgetimer_dagtid') }}">Helgetimer dagtid</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('main.sort_by_column', column='before_6') }}">Vakter som starter før 6</a></li>
                   <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item" href="#">Sigende</a></li>
                 </ul>
@@ -111,16 +111,16 @@
           <thead class="thead-dark">
             <tr>
               <!-- <th style="text-align: center;">Velg Turnus</th> -->
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='turnus') }}">Navn</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='poeng') }}">Poeng</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='tidlig') }}">Tidlig</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='before_6') }}">Før 6</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='ettermiddag') }}">Ettermiddag</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='afternoon_ends_before_20') }}">Slutt før 20</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='natt') }}">Natt</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='helgetimer') }}">Helgetimer</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='helgetimer_dagtid') }}">Helg dagtid</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('sort_by_column', column='shift_cnt') }}">Sum Dagsverk</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='turnus') }}">Navn</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='poeng') }}">Poeng</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='tidlig') }}">Tidlig</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='before_6') }}">Før 6</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='ettermiddag') }}">Ettermiddag</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='afternoon_ends_before_20') }}">Slutt før 20</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='natt') }}">Natt</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='helgetimer') }}">Helgetimer</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='helgetimer_dagtid') }}">Helg dagtid</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='shift_cnt') }}">Sum Dagsverk</a></th>
             </tr>
           </thead>
           <tbody>
