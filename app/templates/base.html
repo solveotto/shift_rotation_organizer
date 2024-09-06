@@ -20,9 +20,11 @@
 
 </head>
 <body>
+
+
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-          <a class="navbar-brand" href="{{ url_for('navigate_home') }}">Home</a>
+          <a class="navbar-brand" href="{{ url_for('main.navigate_home') }}">Home</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -33,9 +35,9 @@
                       Turnuser
                     </a>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="{{ url_for('reset_search') }}">Sorter turnuser</a></li>
+                      <li><a class="dropdown-item" href="{{ url_for('main.reset_search') }}">Sorter turnuser</a></li>
                       <li><a class="dropdown-item" href="#">Last inn nye turnuser</a></li>
-                      <li><a class="dropdown-item" href="{{ url_for('display_shift') }}">Se dagsverk</a></li>
+                      <li><a class="dropdown-item" href="{{ url_for('main.display_shift') }}">Se dagsverk</a></li>
                     </ul>
                 </li>
           
@@ -45,6 +47,7 @@
       </nav>
 
     <div class="content">
+        
         {% block content %}{% endblock %}
     </div>
 </body>

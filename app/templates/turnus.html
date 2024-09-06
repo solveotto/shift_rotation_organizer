@@ -55,7 +55,7 @@
 
                 <div class="row py-2">
                         <div class="col-md-3 row py-1">
-                            <form action="{{ url_for('rate_displayed_shift') }}" method="POST">
+                            <form action="{{ url_for('main.rate_displayed_shift') }}" method="POST">
                                 <div class="input-group input-group-sm mb-3">
                                     <button class="btn btn-primary" type="submit" id="button-addon1">Legg til poeng</button>
                                     <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" id="user_points" name="user_points" value="{{ shift_user_points }}">
@@ -64,7 +64,7 @@
                         </div>
                 </div class=" row py-2">
                     <div class="col-md-2">
-                        <a href="{{ url_for('navigate_home') }}" class="btn btn-success">OK</a>
+                        <a href="{{ url_for('main.navigate_home') }}" class="btn btn-success">OK</a>
                     </div>
                 </div>
             </div>
