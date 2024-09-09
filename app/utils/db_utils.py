@@ -136,12 +136,11 @@ def get_user_data(username):
             FROM users
             WHERE username = %s
             """
-    result = execute_query(login_user_query, (username,), fetch=True)
+    print("inside db", username)
+    result = execute_query(login_user_query, (username, ), fetch=True)
     if result:
-        user = result[0][1]
-        user_id = result[0][0]
-        user_psw =result[0][2]
-        return result
+        data = {'username': result[0][1], 'id': result[0][0], 'password': result[0][2], 'is_auth': result[0][5]}
+        return data
     else:
         print("Failed to execute login query!")
 
@@ -155,14 +154,14 @@ def get_user_password(username):
 
 
 if __name__ == '__main__':
-    create_new_user('testuser', 'testuser')       
+    #create_new_user('testuser', 'testuser')       
     #add_points_to_user('test1', 10)
     #username, user_id = login('solve')
 
     #set_user_points('4', 'OSL_01', 17)
 
     try:
-        username, user_id, user_pwd = get_user_data('solve')
+        username = get_user_data('testuser')
         print(username)
     except TypeError:
         print("User Does Not Exsist")

@@ -1,13 +1,14 @@
 import os
 import json
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from flask_login import LoginManager, login_user, login_required, current_user
+from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user as flask_login_user
 from mysql.connector import Error
 
 from config import Config
 from app.utils import df_utils, db_utils
-from app.forms import LoginForm, User
+from app.forms import LoginForm
+from app.models import User
 
 
 main = Blueprint('main', __name__)
@@ -21,12 +22,10 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         try:
-            user_data = db_utils.get_user_data(form.username.data)
-            if user_data and User.verify_password(user_data[0][2], form.password.data):
-                print('LOGIN ATTEMT')
-                user = User(form.username.data)
+            db_user_data = db_utils.get_user_data(form.username.data)
+            if db_user_data and User.verify_password(db_user_data['password'], form.password.data):
+                user = User(db_user_data['id'], form.username.data, db_user_data['is_auth'])
                 flask_login_user(user)
-                #flash('Login successful!', 'success')
                 return redirect(url_for('main.home'))
             else:
                 flash('Login unsuccessful. Please check username and password', 'danger')
@@ -36,8 +35,12 @@ def login():
     else:
         print("ERROR", form.errors)
     return render_template('login.html', form=form)
-            
 
+@main.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('main.login'))
 
 @main.route('/')
 @login_required

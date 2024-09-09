@@ -12,43 +12,77 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
         <script src="{{ url_for('static', filename='scripts.js') }}" defer></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+        
         <title>Turnuser R24</title>
-
-
-
-    <title>{% block title %}My Flask App{% endblock %}</title>
-
-</head>
-<body>
-
-
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="{{ url_for('main.navigate_home') }}">Home</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Turnuser
-                    </a>
-                    <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="{{ url_for('main.reset_search') }}">Sorter turnuser</a></li>
-                      <li><a class="dropdown-item" href="#">Last inn nye turnuser</a></li>
-                      <li><a class="dropdown-item" href="{{ url_for('main.display_shift') }}">Se dagsverk</a></li>
-                    </ul>
-                </li>
-          
-            </ul>
-          </div>
+        
+      
+    <!-- <title>{% block title %}My Flask App{% endblock %}</title> -->
+    
+  </head>
+  <body>
+    
+    
+<!--     
+    <nav class="navbar fixed-top bg-body-tertiary">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('main.navigate_home') }}">Home</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Turnuser
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('main.reset_search') }}">Sorter turnuser</a></li>
+                <li><a class="dropdown-item" href="#">Last inn nye turnuser</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('main.display_shift') }}">Se dagsverk</a></li>
+              </ul>
+            </li>
+            
+          </ul>
         </div>
-      </nav>
+        
+        <img src="{{ url_for('static', filename='img/person.svg') }}" alt="Description of the image" style="width: 30px; height: 30px;">   
+      </div>
+    </nav> -->  
+
+
+    <nav class="navbar bg-body-tertiary styick-top rounded">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('main.navigate_home') }}">Hjem</a>
+        
+      
+        <div class="dropdown-center">
+          <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="{{ url_for('static', filename='img/person.svg') }}" alt="Description of the image" style="width: 30px; height: 30px;">
+            <div class="span fs-6">{{ current_user.username | capitalize }}</div>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a class="dropdown-item" href="{{ url_for('main.logout') }}">
+                
+                <span>
+                  <img src="{{ url_for('static', filename='img/box-arrow-right.svg') }}" alt="Description of the image" style="width: 20px; height: 20px;">
+                </span>
+                Logg ut</a>
+            </li>
+          </ul>
+        </div>
+
+
+
+
+      </div>
+    </nav>
+
+
 
     <div class="content">
-        
-        {% block content %}{% endblock %}
+        {% block content %}
+        {% endblock %}
     </div>
 </body>
 </html>

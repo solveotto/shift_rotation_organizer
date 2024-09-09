@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_login import LoginManager
 from config import Config
-from app.forms import User
+from app.models import User
 
 
 
@@ -18,8 +18,9 @@ def create_app():
 
 
     @login_manager.user_loader
-    def load_user(user_id):
-        return User.get(user_id)
+    def load_user(username):
+        print("inside create_app", username)
+        return User.get(username)
 
     from app.routes import main
     app.register_blueprint(main, url_prefix='/')

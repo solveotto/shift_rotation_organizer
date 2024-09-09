@@ -1,0 +1,1 @@
+Overflødig: henter inn database info to ganger
