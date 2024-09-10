@@ -107,3 +107,25 @@ function disableSubmitButton(form) {
 //         });
 //     });
 // });
+
+
+// Funksjon for å lagre og hente opp hvor lang brukeren har scrollet på siden
+const indexRoute = '/'
+
+// Save the scroll position before the user navigates away
+if (window.location.pathname === indexRoute){
+    window.addEventListener('beforeunload', function () {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    }); 
+
+    // Restore the scroll position after the page has fully loaded
+    window.onload = function () {
+        setTimeout(function () {
+            const savedPosition = localStorage.getItem('scrollPosition-' + specificRoute);
+            if (savedPosition) {
+                window.scrollTo(0, parseInt(savedPosition));
+            }
+        }, 100);  // Delay restoration slightly to ensure content has loaded
+    };
+
+}

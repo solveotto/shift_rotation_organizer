@@ -68,7 +68,8 @@ def home():
                            ettermiddager_poeng = ettermiddager_poeng,
                            nights = nights,
                            nights_pts = nights_pts,
-                           sort_by_btn_name = sort_btn_name
+                           sort_by_btn_name = sort_btn_name,
+                           page_name = 'Sorter turnuser'
                            )
 
 
@@ -146,11 +147,13 @@ def receive_data():
     with open(os.path.join(Config.static_dir, 'turnuser_R24.json'), 'r') as f:
             turnus_data = json.load(f)
     
-    for x in turnus_data:
+    for index, x in enumerate(turnus_data):
         for shift_title, shift_data in x.items():
             if shift_title == selected_shift:
+                print()
                 session['shift_title'] = shift_title
                 session['shift_data'] = shift_data
+                session['shift_index'] = index
                 break
     return redirect(url_for('main.display_shift'))
 
@@ -171,10 +174,46 @@ def display_shift():
                                shift_title=shift_title, 
                                shift_data=shift_data,
                                shift_user_points = shift_user_points[1],
-                               ettermiddager = ettermiddager)
+                               ettermiddager = ettermiddager,
+                               page_name = 'Turnusdata for ' + shift_title)
     else:
         return "No shift data found", 400
     
+
+@main.route('next_shift', methods=['POST'])
+@login_required
+def next_shift():
+    shift_index = session['shift_index']
+    direction = request.form.get('direction')
+
+
+
+    if shift_index is None:
+        return "Shift index not found in session", 400
+
+    with open(os.path.join(Config.static_dir, 'turnuser_R24.json'), 'r') as f:
+            turnus_data = json.load(f)
+
+    if direction == 'next':
+        next_index = shift_index + 1
+    elif direction == 'prev':
+        next_index = shift_index - 1
+    else:
+        return "Invalid direction", 400
+
+
+    if next_index >= len(turnus_data):
+        return "No next shift avalible", 400
+    
+    next_shift_data = turnus_data[next_index]
+    next_shift_title, next_shift_details = next(iter(next_shift_data.items()))
+
+    session['shift_title'] = next_shift_title
+    session['shift_data'] = next_shift_details
+    session['shift_index'] = next_index
+    
+    return redirect(url_for('main.display_shift'))
+
 @main.route('/rate_displayed_shift', methods=['POST'])
 @login_required
 def rate_displayed_shift():
