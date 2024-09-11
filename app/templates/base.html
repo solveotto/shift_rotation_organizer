@@ -24,7 +24,7 @@
     <header>
       <nav class="navbar navbar-custom-color">
         <div class="container px-4">
-          <a class="navbar-brand" href="{{ url_for('main.navigate_home') }}">Hjem</a>
+          <a class="navbar-brand" href="{{ url_for('main.navigate_home') }}">Sorter</a>
           
           <h2>{{ page_name.replace('_', ' ') }}</h2>
         
@@ -35,13 +35,15 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
+                <a class="dropdown-item" href="{{ url_for('main.download_excel') }}">Download Excel-file</a>
+              </li>
+              <li>
                 <a class="dropdown-item" href="{{ url_for('main.logout') }}">
-                  
                   <span>
                     <img src="{{ url_for('static', filename='img/box-arrow-right.svg') }}" alt="Description of the image" style="width: 20px; height: 20px;">
-                  </span>
-                  Logg ut</a>
+                  </span>Logg ut</a>
               </li>
+              
             </ul>
           </div>
 

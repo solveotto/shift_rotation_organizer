@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user as flask_login_user
 from mysql.connector import Error
@@ -227,6 +227,14 @@ def rate_displayed_shift():
    
 
     return redirect(url_for('main.display_shift'))
+
+
+
+
+@main.route('/download_excel')
+def download_excel():
+    filename = 'turnuser_R24.xlsx'  # Replace with your actual file name
+    return send_from_directory(Config.static_dir, filename, as_attachment=True)
 
 
 
