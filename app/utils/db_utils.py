@@ -15,6 +15,7 @@ mysql_database = config['mysql']['database']
 
    
 def execute_query(query, params=None, fetch=False):
+    conn = None
     try:
         conn = mysql.connector.connect(
                 host = mysql_host,
@@ -39,6 +40,7 @@ def execute_query(query, params=None, fetch=False):
             return False
     except Error as e:
         print(f"Error executing query: {e}")
+        
         return False
     finally:
         if conn and conn.is_connected():
