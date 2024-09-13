@@ -137,7 +137,7 @@ def reset_search():
     df_manager.sort_by('turnus', inizialize=True)
     return redirect(url_for('main.home'))
 
-
+# This function is used by a javascript to make every line clickeable in the sorting view
 @main.route('/api/receive-data', methods=['POST'])
 @login_required
 def receive_data():
@@ -150,7 +150,6 @@ def receive_data():
     for index, x in enumerate(turnus_data):
         for shift_title, shift_data in x.items():
             if shift_title == selected_shift:
-                print()
                 session['shift_title'] = shift_title
                 session['shift_data'] = shift_data
                 session['shift_index'] = index
