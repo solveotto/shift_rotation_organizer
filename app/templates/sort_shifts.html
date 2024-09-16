@@ -6,79 +6,116 @@
 {% block content %} 
 
     <div class="container-fluid mt-3">
+      
+      
+      
       <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('main.calculate') }}" method="post" onsubmit="return disableSubmitButton(this);">
 
         <div class="shadow-sm p-3 gy-2 bg-body-tertiary rounded">
           <div class="row py-2">
             <h5 style="text-decoration: underline;">Tildel poeng (mindre poeng er bedre):</h6>
-              <div class="col-md-2">
+              <div class="col-md-1">
                 <h6 class="fw-lighter fst-italic">Multipliser helgetimer med:</h6>
                   <select class="form-select-sm" aria-label="Default select example" id="helgetimer" name="helgetimer">
-                    <option value="0" {% if helgetimer == '0' %}selected{% endif %}>0</option>
-                    <option value="0.5" {% if helgetimer == '0.5' %}selected{% endif %}>0.5</option>
-                    <option value="1" {% if helgetimer == '1' %}selected{% endif %}>1</option>
-                    <option value="1.5" {% if helgetimer == '1.5' %}selected{% endif %}>1.5</option>
+                    <option value="0" {% if helgetimer == '0' %}selected{% endif %}>0p</option>
+                    <option value="0.5" {% if helgetimer == '0.5' %}selected{% endif %}>0.5p</option>
+                    <option value="1" {% if helgetimer == '1' %}selected{% endif %}>1.0p</option>
+                    <option value="1.5" {% if helgetimer == '1.5' %}selected{% endif %}>1.5p</option>
                   </select>
               </div>
 
 
-              <div class="col-md-3">
+              <div class="col-md-1">
                 <h6 class="fw-lighter fst-italic">Multipliser helgetimer på dagtid med:</h6>
                   <select class="form-select-sm" aria-label="Default select example" id="helgetimer_dagtid" name="helgetimer_dagtid">
-                    <option value="0" {% if helgetimer_dagtid == '0' %}selected{% endif %}>0</option>
-                    <option value="0.5" {% if helgetimer_dagtid == '0.5' %}selected{% endif %}>0.5</option>
-                    <option value="1" {% if helgetimer_dagtid == '1' %}selected{% endif %}>1</option>
-                    <option value="1.5" {% if helgetimer_dagtid == '1.5' %}selected{% endif %}>1.5</option>
+                    <option value="0" {% if helgetimer_dagtid == '0' %}selected{% endif %}>0p</option>
+                    <option value="0.5" {% if helgetimer_dagtid == '0.5' %}selected{% endif %}>0.5p</option>
+                    <option value="1" {% if helgetimer_dagtid == '1' %}selected{% endif %}>1.0p</option>
+                    <option value="1.5" {% if helgetimer_dagtid == '1.5' %}selected{% endif %}>1.5p</option>
                   </select>
               </div>
             
+
             <div class="col-md-2">
-              <h6 class="fw-lighter fst-italic">Gi poeng kveldsvakter</h6>
+              <div class="row-md-1">
+                <h6 class="fw-lighter fst-italic">Tidligvakter:</h6>
+              <select class="form-select-sm" aria-label="Default select example" id="tidlig" name="tidlig">
+                {% for i in range(0,11, 1) %}
+                  <option value="{{ i }}" {% if tidlig == i|string %}selected{% endif %}>>{{ i }} vakter</option>
+                {% endfor %}
+              </select>
+
+              <select class="form-select-sm" id="tidlig_poeng" name="tidlig_poeng">
+                {% for i in range(0, 55, 5) %}
+                  <option value="{{ i }}" {% if tidlig_poeng == i|string %}selected{% endif %}>{{ i }}p</option>
+                {% endfor %}
+              </select>
+              </div>
+              
+              <div class="row-md-1">
+                <h6 class="fw-lighter fst-italic">Starter før 6:</h6>
+                <select class="form-select-sm" id="before_6" name="before_6">
+                  {% for i in range(11) %}
+                    <option value="{{ i }}" {% if before_6 == i|string %}selected{% endif %}>{{ i }}p</option>
+                  {% endfor %}
+                </select>
+              </div> 
+            </div>
+            
+            
+            <div class="col-md-2">
+              <div class="row-md-1">
+                <h6 class="fw-lighter fst-italic">Ettermiddag:</h6>
               <select class="form-select-sm" aria-label="Default select example" id="ettermiddager" name="ettermiddager">
-                <option value="0" {% if ettermiddager == '0' %}selected{% endif %}>> 0 vakter</option>
-                <option value="1" {% if ettermiddager == '1' %}selected{% endif %}>> 1 vakter </option>
-                <option value="2" {% if ettermiddager == '2' %}selected{% endif %}>> 2 vakter </option>
-                <option value="3" {% if ettermiddager == '3' %}selected{% endif %}>> 3 vakter </option>
-                <option value="4" {% if ettermiddager == '4' %}selected{% endif %}>> 4 vakter </option>
-                <option value="5" {% if ettermiddager == '5' %}selected{% endif %}>> 5 vakter </option>
-                <option value="6" {% if ettermiddager == '6' %}selected{% endif %}>> 6 vakter </option>
-                <option value="7" {% if ettermiddager == '7' %}selected{% endif %}>> 7 vakter </option>
-                <option value="8" {% if ettermiddager == '8' %}selected{% endif %}>> 8 vakter </option>
-                <option value="9" {% if ettermiddager == '9' %}selected{% endif %}>> 9 vakter </option>
-                <option value="10" {% if ettermiddager == '10' %}selected{% endif %}>> 10 vakter</option>
+                {% for i in range(0,22, 2) %}
+                  <option value="{{ i }}" {% if ettermiddager == i|string %}selected{% endif %}>> {{ i }} vakter</option>
+                {% endfor %}
               </select>
 
               <select class="form-select-sm" id="ettermiddager_poeng" name="ettermiddager_poeng">
-                <option value="0" {% if ettermiddager_poeng == '0' %}selected{% endif %}>0p</option>
-                <option value="1" {% if ettermiddager_poeng == '1' %}selected{% endif %}>1p</option>
-                <option value="2" {% if ettermiddager_poeng == '2' %}selected{% endif %}>2p</option>
-                <option value="3" {% if ettermiddager_poeng == '3' %}selected{% endif %}>3p</option>
-                <option value="4" {% if ettermiddager_poeng == '4' %}selected{% endif %}>4p</option>
-                <option value="5" {% if ettermiddager_poeng == '5' %}selected{% endif %}>5p</option>
-                <option value="6" {% if ettermiddager_poeng == '6' %}selected{% endif %}>6p</option>
-                <option value="7" {% if ettermiddager_poeng == '7' %}selected{% endif %}>7p</option>
-                <option value="8" {% if ettermiddager_poeng == '8' %}selected{% endif %}>8p</option>
-                <option value="9" {% if ettermiddager_poeng == '9' %}selected{% endif %}>9p</option>
-                <option value="10" {% if ettermiddager_poeng == '10' %}selected{% endif %}>10p</option>
+                {% for i in range(0, 55, 5) %}
+                  <option value="{{ i }}" {% if ettermiddager_poeng == i|string %}selected{% endif %}>{{ i }}p</option>
+                {% endfor %}
               </select>
+              </div>
+              
+              <div class="row-md-1">
+                <h6 class="fw-lighter fst-italic">Slutter før 20:</h6>
+                <select class="form-select-sm" id="slutt_for_20" name="slutt_for_20">
+                  {% for i in range(11) %}
+                    <option value="{{ i }}" {% if slutt_for_20 == i|string %}selected{% endif %}>-{{ i }}p</option>
+                  {% endfor %}
+                </select>
+              </div> 
             </div>
 
 
 
             <div class="col-md-3">
-              <h6 class="fw-lighter fst-italic">Gi poeng nattevakter</h6>
-              <select class="form-select-sm" aria-label="Default select example" id="nights" name="nights">
-                <option value="0" {% if nights == '0' %}selected{% endif %}>> 0 vakter</option>
-                <option value="5" {% if nights == '5' %}selected{% endif %}>> 5 vakter </option>
-                <option value="10" {% if nights == '10' %}selected{% endif %}>> 10 vakter</option>
-              </select>
+              <div class="row-md-1">
+                <h6 class="fw-lighter fst-italic">Nattevakter</h6>
+                <select class="form-select-sm" aria-label="Default select example" id="nights" name="nights">
+                  {% for i in range(0,22, 2) %}
+                    <option value="{{ i }}" {% if nights == i|string %}selected{% endif %}>> {{ i }} vakter</option>
+                  {% endfor %}
+                </select>
+  
+                <select class="form-select-sm" id="nights_pts" name="nights_pts">
+                  {% for i in range(0, 55, 5) %}
+                    <option value="{{ i }}" {% if nights_pts == i|string %}selected{% endif %}>{{ i }}p</option>
+                  {% endfor %}
+                </select>
+              </div>
 
-              <select class="form-select-sm" id="nights_pts" name="nights_pts">
-                <option value="0" {% if nights_pts == '0' %}selected{% endif %}>0p</option>
-                <option value="1" {% if nights_pts == '1' %}selected{% endif %}>1p</option>
-                <option value="5" {% if nights_pts == '5' %}selected{% endif %}>5p</option>
-                <option value="10" {% if nights_pts == '10' %}selected{% endif %}>10p</option>
-              </select>
+
+              <div class="row-md-1">
+                <h6 class="fw-lighter fst-italic">Natt i helg:</h6>
+                <select class="form-select-sm" id="natt_helg" name="natt_helg">
+                  {% for i in range(11) %}
+                    <option value="{{ i }}" {% if natt_helg == i|string %}selected{% endif %}>-{{ i }}p</option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
             
 
@@ -113,7 +150,13 @@
           </div>
         </div>
       <hr>
-   
+      
+
+
+
+
+
+      <!-- Table content -->
 
       <div class="mt-3">
         <table class="table table-striped" style="text-align: center;">
@@ -127,9 +170,10 @@
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='ettermiddag') }}">Ettermiddag</a></th>
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='afternoon_ends_before_20') }}">Slutt før 20</a></th>
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='natt') }}">Natt</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='natt_helg') }}">Natt i helg</a></th>
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='helgetimer') }}">Helgetimer</a></th>
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='helgetimer_dagtid') }}">Helg dagtid</a></th>
-              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='shift_cnt') }}">Sum Dagsverk</a></th>
+              <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='shift_cnt') }}">Dagsverk</a></th>
             </tr>
           </thead>
           <tbody>
@@ -146,12 +190,13 @@
                   {{ row.turnus }}
                   
                 </td>
-                <td>{{ row.poeng }}</td>
+                <td>{{ row.poeng | int }}</td>
                 <td>{{ row.tidlig }}</td>
                 <td>{{ row.before_6 }}</td>
                 <td>{{ row.ettermiddag }}</td>
                 <td>{{ row.afternoon_ends_before_20 }}</td>
                 <td>{{ row.natt }}</td>
+                <td>{{ row.natt_helg }}</td>
                 <td>{{ row.helgetimer }}</td>
                 <td>{{ row.helgetimer_dagtid }}</td>
                 <td>{{ row.shift_cnt }}</td>

@@ -1,13 +1,13 @@
 import os
 import pandas as pd
 import app.utils.db_utils as _db_utils
-from config import Config
+from config import conf
 
 
 
 class DataframeManager():
     def __init__(self) -> None:
-        self.df = pd.read_json(os.path.join(Config.static_dir, 'turnus_df_R24.json'))
+        self.df = pd.read_json(os.path.join(conf.static_dir, 'turnus_df_R24.json'))
         self.username, self.user_id = 'solve', 4
         
         self.helgetimer_dagtid_multip = 0

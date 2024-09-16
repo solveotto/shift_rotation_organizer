@@ -1,7 +1,15 @@
-from datetime import datetime, time
+import sys
+import os
+
+# Add the root directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+
+from datetime import time
 import pandas as pd
 import numpy as np
 import json
+from config import conf
 
 '''
 - Fridays that goes over 2 hours into saturay counts as weekend days.
@@ -70,7 +78,7 @@ class Turnus():
             helgetimer = 0
             helgetimer_dagtid = 0
             helgedager = 0
-            helgetimer_natt = 0
+            natt_helg = 0
             helgetimer_ettermiddag = 0
             tidlig = 0
             before_6 = 0
@@ -88,6 +96,7 @@ class Turnus():
                         start = pd.to_datetime(_dagsverk['start'], format='%H:%M')
                         end = pd.to_datetime(_dagsverk['slutt'], format='%H:%M')
                         ukedag = _dagsverk['ukedag']
+                        weekend_days = ['Fredag', 'Lørdag', 'Søndag']
                         midnight = start.replace(hour=23, minute=59, second=59)
 
                         # Adjust end time if it's on the next day
@@ -96,6 +105,10 @@ class Turnus():
                             # Counts night shifts
                             if _dagsverk['slutt'] > pd.to_datetime('03:00', format='%H:%M'):
                                 night_count += 1
+                                # Natt i helg
+                                if ukedag in weekend_days:
+                                    #natt_helg += (end - start).total_seconds() / 3600
+                                    natt_helg += 1
 
 
                         ### WEEKENDS ###
@@ -105,6 +118,7 @@ class Turnus():
                             # fridays over 2 hours into saturday
                             if saturday_hours > 0:
                                 helgedager += 1
+
 
                         elif ukedag == 'Lørdag':
                             saturday_hours = (end - start).total_seconds() / 3600
@@ -117,6 +131,8 @@ class Turnus():
                             # Counts daytime hours in weekend
                             if start.time() < time(14,0):
                                 helgetimer_dagtid +=  saturday_hours
+
+
 
                         elif ukedag == 'Søndag':
                             # counts hours before midnight and excludes hours after midnight in night shifts
@@ -144,8 +160,6 @@ class Turnus():
                             helgedager += 1
 
 
-
-
                         ### ENDS BERFORE 16 ###
                         if end.time() <= time(16,00) and start.time() < time(12,00):
                             tidlig += 1
@@ -153,10 +167,6 @@ class Turnus():
                             if start.time() < time(6,0):
                                 before_6 += 1
                             
-                            if _dagsverk['ukedag'] == 'Lørdag':
-                                helgetimer_natt += (end - start).total_seconds() / 3600
-
-
 
                         ### AFTERNOONS ENDS AFTER 16 ###(
                         if end.time() > time(16,00) or end.date() > start.date():
@@ -196,10 +206,10 @@ class Turnus():
                 'tidlig': [tidlig],
                 'ettermiddag' : [afternoon_count],
                 'natt': [night_count],
+                'natt_helg': [round(natt_helg,1)],
                 'helgetimer': [round(helgetimer,1)], 
                 'helgedager': [helgedager],
                 'helgetimer_dagtid': [round(helgetimer_dagtid,1)],
-                'helegtimer_natt': [round(helgetimer_natt,1)],
                 'helgetimer_ettermiddag': [round(helgetimer_ettermiddag)],
                 'before_6': [before_6],
                 'afternoon_ends_before_20': [afternoon_ends_before_20],
@@ -212,8 +222,8 @@ class Turnus():
 
 
 if __name__ == '__main__':
-    turnus = Turnus('turnuser_R24.json')
+    turnus = Turnus(conf.static_dir+'\\turnuser_R24.json')
 
-    turnus.stats_df.to_json('turnus_df_R24.json')
+    turnus.stats_df.to_json(conf.static_dir+'\\turnus_df_R24.json')
 
-    #print(turnus.stats_df)
+    print(turnus.stats_df[['turnus', 'natt_helg', 'helgetimer']])

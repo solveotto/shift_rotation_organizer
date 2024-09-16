@@ -5,13 +5,15 @@ from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user as flask_login_user
 from mysql.connector import Error
 
-from config import Config
+from config import conf
 from app.utils import df_utils, db_utils
 from app.forms import LoginForm
 from app.models import User
 
 
 main = Blueprint('main', __name__)
+with open(os.path.join(conf.static_dir, 'turnuser_R24.json'), 'r') as f:
+            stats_df = json.load(f)
 
 
 @main.route('/login', methods=['GET', 'POST'])
@@ -50,10 +52,15 @@ def home():
 
 
     # Gets the values set by the user 
-    df_manager.helgetimer = session.get('helgetimer', '0')
+    helgetimer = session.get('helgetimer', '0')
     helgetimer_dagtid = session.get('helgetimer_dagtid', '0')
+    natt_helg = session.get('natt_helg', '0')
+    tidlig = session.get('tidlig', '0')
+    tidlig_poeng = session.get('tidlig_poeng', '0')
+    before_6 = session.get('before_6', '0')
     ettermiddager = session.get('ettermiddager', '0')
     ettermiddager_poeng = session.get('ettermiddager_poeng', '0')
+    slutt_for_20 = session.get('slutt_for_20')
     nights = session.get('nights', '0')
     nights_pts = session.get('nights_pts', '0')
 
@@ -62,10 +69,15 @@ def home():
      # Pass the table data to the template
     return render_template('sort_shifts.html', 
                            table_data = df_manager.df.to_dict(orient='records'), 
-                           helgetimer = df_manager.helgetimer,
+                           helgetimer = helgetimer,
                            helgetimer_dagtid = helgetimer_dagtid,
+                           natt_helg = natt_helg,
+                           tidlig = tidlig,
+                           tidlig_poeng = tidlig_poeng,
+                           before_6 = before_6,
                            ettermiddager = ettermiddager,
                            ettermiddager_poeng = ettermiddager_poeng,
+                           slutt_for_20 = slutt_for_20,
                            nights = nights,
                            nights_pts = nights_pts,
                            sort_by_btn_name = sort_btn_name,
@@ -78,6 +90,33 @@ def home():
 def navigate_home():
     #df_manager.sort_by('poeng')
     return redirect(url_for('main.home'))
+
+
+@main.route('/reset_search')
+@login_required
+def reset_search():
+    
+
+    df_manager.df['poeng'] = 0
+
+    session['helgetimer'] = 0
+    session['helgetimer_dagtid'] = 0
+    session['natt_helg'] = 0
+    session['tidlig'] = 0
+    session['tidlig_poeng'] = 0
+    session['before_6'] = 0
+    session['ettermiddager'] = 0
+    session['ettermiddager_poeng'] = 0
+    session['slutt_for_20'] = 0
+    session['nights'] = 0
+    session['nights_pts'] = 0
+    
+    df_manager.get_all_user_points()
+    df_manager.sort_by('turnus', inizialize=True)
+    
+
+    return redirect(url_for('main.home'))
+
 
 
 @main.route('/submit', methods=['POST'])
@@ -94,6 +133,20 @@ def calculate():
     helgetimer_dagtid = request.form.get('helgetimer_dagtid', '0')
     df_manager.calc_multipliers('helgetimer_dagtid', float(helgetimer_dagtid))
     session['helgetimer_dagtid'] = helgetimer_dagtid
+    
+    natt_helg = request.form.get('natt_helg', '0')
+    session['natt_helg'] = natt_helg
+    df_manager.calc_multipliers('natt_helg', -float(natt_helg))
+
+    tidlig = request.form.get('tidlig')
+    tidlig_poeng = request.form.get('tidlig_poeng')
+    session['tidlig']= tidlig
+    session['tidlig_poeng'] = tidlig_poeng
+    df_manager.calc_thresholds('tidlig', int(tidlig), int(tidlig_poeng))
+
+    before_6 = request.form.get('before_6')
+    session['before_6'] = before_6
+    df_manager.calc_multipliers('before_6', int(before_6))
 
     # calculate points for ettermiddager
     ettermiddager = request.form.get('ettermiddager', '0')
@@ -101,7 +154,11 @@ def calculate():
     session['ettermiddager'] = ettermiddager
     session['ettermiddager_poeng'] = ettermiddager_pts
     df_manager.calc_thresholds('ettermiddag', int(ettermiddager), int(ettermiddager_pts))
-    
+
+    # Slutt før 20
+    slutt_for_20 = request.form.get('slutt_for_20', '0')
+    session['slutt_for_20'] = slutt_for_20
+    df_manager.calc_multipliers('afternoon_ends_before_20', -int(slutt_for_20))
 
     # caluclate points for nights
     nights = request.form.get('nights', '0')
@@ -128,14 +185,6 @@ def sort_by_column():
     return redirect(url_for('main.home'))
 
 
-@main.route('/reset_search')
-@login_required
-def reset_search():
-    session.clear()
-    df_manager.df['poeng'] = 0
-    df_manager.get_all_user_points()
-    df_manager.sort_by('turnus', inizialize=True)
-    return redirect(url_for('main.home'))
 
 # This function is used by a javascript to make every line clickeable in the sorting view
 @main.route('/api/receive-data', methods=['POST'])
@@ -143,33 +192,31 @@ def reset_search():
 def receive_data():
     html_data = request.get_json()
     selected_shift = html_data.get('turnus')
-
-    with open(os.path.join(Config.static_dir, 'turnuser_R24.json'), 'r') as f:
-            turnus_data = json.load(f)
-    
-    for index, x in enumerate(turnus_data):
-        for shift_title, shift_data in x.items():
-            if shift_title == selected_shift:
-                session['shift_title'] = shift_title
-                session['shift_data'] = shift_data
-                session['shift_index'] = index
-                break
+    session['selected_shift'] = selected_shift
     return redirect(url_for('main.display_shift'))
 
 
 @main.route('/display_shift')
 @login_required
 def display_shift():
-    shift_title = session.get('shift_title')
-    shift_data = session.get('shift_data')
     ettermiddager = session.get('ettermiddager')
+    selected_shift = session.get('selected_shift')
 
+    selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
+    for x in stats_df:
+        for title, data in x.items():
+            if title == selected_shift:
+                shift_title = title
+                shift_data = data
+   
     shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_title)
     session['current_user_point_input'] = shift_user_points
     
+
+
     if shift_title and shift_data:
         return render_template('turnus.html',
-                               table_data = df_manager.df.to_dict(orient='records'), 
+                               table_data = selected_shift_df.to_dict(orient='records'), 
                                shift_title=shift_title, 
                                shift_data=shift_data,
                                shift_user_points = shift_user_points[1],
@@ -182,34 +229,38 @@ def display_shift():
 @main.route('next_shift', methods=['POST'])
 @login_required
 def next_shift():
-    shift_index = session['shift_index']
     direction = request.form.get('direction')
 
+    
+    selected_shift = session.get('selected_shift')
+    selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
 
 
-    if shift_index is None:
-        return "Shift index not found in session", 400
+    # Select the row after the filtered row
+    df_manager.df = df_manager.df.reset_index(drop=True)
+    selected_shift = session.get('selected_shift')
+    next_row_index = selected_shift_df.index[0] + 1 if not selected_shift_df.empty else None
+    
 
-    with open(os.path.join(Config.static_dir, 'turnuser_R24.json'), 'r') as f:
-            turnus_data = json.load(f)
 
+
+    # if shift_index is None:
+    #     return "Shift index not found in session", 400
+
+   
     if direction == 'next':
-        next_index = shift_index + 1
+        next_row_index = selected_shift_df.index[0] + 1 if not selected_shift_df.empty else None
     elif direction == 'prev':
-        next_index = shift_index - 1
+        next_row_index = selected_shift_df.index[0] - 1 if not selected_shift_df.empty else None
     else:
         return "Invalid direction", 400
 
 
-    if next_index >= len(turnus_data):
-        return "No next shift avalible", 400
-    
-    next_shift_data = turnus_data[next_index]
-    next_shift_title, next_shift_details = next(iter(next_shift_data.items()))
+    next_row = df_manager.df.iloc[next_row_index] if next_row_index is not None and next_row_index < len(df_manager.df) else None
 
-    session['shift_title'] = next_shift_title
-    session['shift_data'] = next_shift_details
-    session['shift_index'] = next_index
+
+
+    session['selected_shift'] = next_row['turnus']
     
     return redirect(url_for('main.display_shift'))
 
@@ -233,7 +284,7 @@ def rate_displayed_shift():
 @main.route('/download_excel')
 def download_excel():
     filename = 'turnuser_R24.xlsx'  # Replace with your actual file name
-    return send_from_directory(Config.static_dir, filename, as_attachment=True)
+    return send_from_directory(conf.static_dir, filename, as_attachment=True)
 
 
 
