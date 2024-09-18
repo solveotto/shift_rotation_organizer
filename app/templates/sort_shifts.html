@@ -8,8 +8,8 @@
       <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('main.calculate') }}" method="post" onsubmit="return disableSubmitButton(this);">
         <div class="shadow-sm p-3 gy-2 bg-body-tertiary rounded">
           <div class="row py-2">
-            <div class="col-md-1">
             <h5 style="text-decoration: underline;">Tildel poeng (mindre poeng er bedre):</h6>
+            <div class="col-md-1">
                 <h6 class="fw-lighter fst-italic">Multipliser helgetimer med:</h6>
                   <select class="form-select-sm" aria-label="Default select example" id="helgetimer" name="helgetimer">
                     <option value="0" {% if helgetimer == '0' %}selected{% endif %}>0p</option>

@@ -227,11 +227,11 @@ def display_shift():
         return "No shift data found", 400
     
 
-@main.route('next_shift', methods=['POST'])
+@main.route('next_shift')
 @login_required
 def next_shift():
     selected_shift = session.get('selected_shift')
-    direction = request.form.get('direction')
+    direction = request.args.get('direction')
 
     df_manager.df = df_manager.df.reset_index(drop=True)
     selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]

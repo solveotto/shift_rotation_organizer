@@ -3,22 +3,21 @@
 {% block title %}DataFrame Manipulation{% endblock %}
 
 <!-- Previous and next buttons for selected shift view -->
+
+
 {% block prev_btn %}
-    <form action="{{ url_for('main.next_shift') }}" method="POST">
-        <input type="hidden" name="direction" value="next">
-        <button type="submit"><i class="bi bi-caret-left-fill"></i></button>
+<a href="{{ url_for('main.next_shift', direction='prev') }}"><i class="bi bi-caret-left-fill"></i></a>
+{% endblock %}
 
-    </form>
-    {% endblock %}
-
-
-
-{% block next_btn %}<i class="bi bi-caret-right-fill"></i>{% endblock %}
+{% block next_btn %}
+<a href="{{ url_for('main.next_shift', direction='next') }}"><i class="bi bi-caret-right-fill"></i></a>
+{% endblock %}
 
 
 
 
 {% block content %} 
+
 
 
 <div class="container-fluid">
@@ -146,23 +145,9 @@
         <div class="d-flex justify-content-center align-items-center w-100">
             
             <div class="mx-2">
-                <form action="{{ url_for('main.next_shift') }}" method="POST">
-                    <input type="hidden" name="direction" value="prev">
-                    <button class="btn btn-primary" type="submit">Prev</button>
-                </form>
-            </div>
-            
-            <div class="mx-2">
                 <a href="{{ url_for('main.navigate_home') }}" class="btn btn-success">OK</a>
             </div>
-            
-            <div class="mx-2">
-                <form action="{{ url_for('main.next_shift') }}" method="POST">
-                    <input type="hidden" name="direction" value="next">
-                    <button class="btn btn-primary" type="submit">Next</button>
-
-                </form>
-            </div>
+   
         </div>
     </nav>
 </div>
