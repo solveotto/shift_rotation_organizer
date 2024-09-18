@@ -2,7 +2,24 @@
 
 {% block title %}DataFrame Manipulation{% endblock %}
 
+<!-- Previous and next buttons for selected shift view -->
+{% block prev_btn %}
+    <form action="{{ url_for('main.next_shift') }}" method="POST">
+        <input type="hidden" name="direction" value="next">
+        <button type="submit"><i class="bi bi-caret-left-fill"></i></button>
+
+    </form>
+    {% endblock %}
+
+
+
+{% block next_btn %}<i class="bi bi-caret-right-fill"></i>{% endblock %}
+
+
+
+
 {% block content %} 
+
 
 <div class="container-fluid">
     <div class="shadow-sm p-4 gy-2 bg-body-tertiary rounded">
