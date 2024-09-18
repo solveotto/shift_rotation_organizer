@@ -187,9 +187,9 @@ def sort_by_column():
 
 
 # This function is used by a javascript to make every line clickeable in the sorting view
-@main.route('/api/receive-data', methods=['POST'])
+@main.route('/api/select_shift', methods=['POST'])
 @login_required
-def receive_data():
+def select_shift():
     html_data = request.get_json()
     selected_shift = html_data.get('turnus')
     session['selected_shift'] = selected_shift
@@ -211,11 +211,12 @@ def display_shift():
    
     shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_title)
     session['current_user_point_input'] = shift_user_points
+    session['shift_title'] =shift_title
     
 
 
     if shift_title and shift_data:
-        return render_template('turnus.html',
+        return render_template('selected_shift.html',
                                table_data = selected_shift_df.to_dict(orient='records'), 
                                shift_title=shift_title, 
                                shift_data=shift_data,
@@ -230,24 +231,13 @@ def display_shift():
 @login_required
 def next_shift():
     direction = request.form.get('direction')
-
-    
-    selected_shift = session.get('selected_shift')
     selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
-
 
     # Select the row after the filtered row
     df_manager.df = df_manager.df.reset_index(drop=True)
     selected_shift = session.get('selected_shift')
     next_row_index = selected_shift_df.index[0] + 1 if not selected_shift_df.empty else None
     
-
-
-
-    # if shift_index is None:
-    #     return "Shift index not found in session", 400
-
-   
     if direction == 'next':
         next_row_index = selected_shift_df.index[0] + 1 if not selected_shift_df.empty else None
     elif direction == 'prev':
@@ -255,14 +245,11 @@ def next_shift():
     else:
         return "Invalid direction", 400
 
-
     next_row = df_manager.df.iloc[next_row_index] if next_row_index is not None and next_row_index < len(df_manager.df) else None
-
-
-
     session['selected_shift'] = next_row['turnus']
     
     return redirect(url_for('main.display_shift'))
+
 
 @main.route('/rate_displayed_shift', methods=['POST'])
 @login_required
@@ -272,7 +259,7 @@ def rate_displayed_shift():
     previous_user_point_input = session.get('current_user_point_input')
     new_user_points_input = int(request.form.get('user_points'))
     db_ctrl.set_user_points(df_manager.user_id, shift_title, new_user_points_input)
-
+ 
     df_manager.df.loc[df_manager.df['turnus'] == shift_title, 'poeng'] += (new_user_points_input - previous_user_point_input[1])
    
 

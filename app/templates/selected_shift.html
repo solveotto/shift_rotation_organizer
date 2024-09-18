@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}DataFrame Manipulation{% endblock %}
+
+{% block content %} 
+
+<div class="container px-3">
+        
+        <div class="shadow-sm p-4 gy-2 bg-body-tertiary rounded">
+            
+          
+            
+            <div class="row justify-content-center">
+                <div class="col-auto">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                
+                                <tr>
+                                    <th style="border: 1px solid black;">Uke</th>
+                                    <th style="border: 1px solid black;">Mandag</th>
+                                    <th style="border: 1px solid black;">Tirsdag</th>
+                                    <th style="border: 1px solid black;">Onsdag</th>
+                                    <th style="border: 1px solid black;">Tordag</th>
+                                    <th style="border: 1px solid black;">Fredag</th>
+                                    <th style="border: 1px solid black;">Lørdag</th>
+                                    <th style="border: 1px solid black;">Søndag</th>
+                                </tr>
+                            </thead>
+                            
+                
+                            <tbody class="text-center">
+                                {% for week_nr, week_data in shift_data.items() %}
+                                    <tr>
+                                        <td style="border: 1px solid black;">{{ week_nr }}</td>
+    
+                                        {% for day_nr, day_data in week_data.items() %}
+                                            <td id="cell" class="min-width-td" style="border: 1px solid black;">
+                                                {% for time in day_data.tid %}
+                                                    {% if day_data.tid|length == 2 %}
+                                                        {% if loop.first %}
+                                                            {{ time }} -
+                                                        {% else %}
+                                                            {{ time }}
+                                                        {% endif %}
+                                                    {% else %}
+                                                        {{ time }}
+                    
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </td>
+                                            
+                                            
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+
+            
+
+
+
+            <div class="container text-center">
+                <div class="row py-3">
+                  <div class="col">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Poeng</th>
+                                    <th scope="col">Tidligvakter</th>
+                                    <th scope="col">Før 6</th>
+                                    <th scope="col">Ettermiddag</th>
+                                    <th scope="col">Ettermiddag (før 20)</th>
+                                    <th scope="col">Natt</th>
+                                    <th scope="col">Helgetimer</th>
+                                    <th scope="col">Helgetimer Dagtid</th>
+                                    <th scope="col">Antall vakter</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    {% for row in table_data %}
+                                        {% if row.turnus == shift_title %}
+                                                <td>{{ row.poeng }}</td>
+                                                <td>{{ row.tidlig }}</td>
+                                                <td>{{ row.before_6 }}</td>
+                                                <td>{{ row.ettermiddag }}</td>
+                                                <td>{{ row.afternoon_ends_before_20 }}</td>
+                                                <td>{{ row.natt }}</td>
+                                                <td>{{ row.helgetimer }}</td>
+                                                <td>{{ row.helgetimer_dagtid }}</td>
+                                                <td>{{ row.shift_cnt }}</td>
+                                           
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                  </div>
+                  
+              </div>
+        
+
+            <div class="row py-2">
+                    <div class="col-md-3 row py-1">
+                        <form action="{{ url_for('main.rate_displayed_shift') }}" method="POST">
+                            <div class="input-group input-group-sm mb-3">
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" id="user_points" name="user_points" value="{{ shift_user_points }}">
+                                <button class="btn btn-primary" type="submit" id="button-addon1">Legg til poeng</button>
+                            </div>
+                        </form>
+                    </div>
+            </div>
+            
+        </div>
+
+</div>
+
+
+
+
+<nav class="navbar navbar-custom-color fixed-bottom">
+        <div class="container justify-content-center">
+            <div class="row">
+                <div class="col">
+                    <form action="{{ url_for('main.next_shift') }}" method="POST">
+                        <input type="hidden" name="direction" value="prev">
+                        <button class="btn btn-primary" type="submit">Prev</button>
+
+                    </form>
+                </div>
+                <div class="col">
+                    <a href="{{ url_for('main.navigate_home') }}" class="btn btn-success">OK</a>
+                </div>
+                <div class="col">
+                    <form action="{{ url_for('main.next_shift') }}" method="POST">
+                        <input type="hidden" name="direction" value="next">
+                        <button class="btn btn-primary" type="submit">Next</button>
+
+                    </form>
+                </div>
+            </div>
+    
+        </div>
+</nav>
+
+
+
+
+
+{% endblock %}

@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 console.log('Turnus:', turnus);
             }
 
-            fetch('/api/receive-data', {
+            fetch('/api/select_shift', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
