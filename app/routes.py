@@ -230,12 +230,13 @@ def display_shift():
 @main.route('next_shift', methods=['POST'])
 @login_required
 def next_shift():
+    selected_shift = session.get('selected_shift')
     direction = request.form.get('direction')
-    selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
 
+    selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
+    
     # Select the row after the filtered row
     df_manager.df = df_manager.df.reset_index(drop=True)
-    selected_shift = session.get('selected_shift')
     next_row_index = selected_shift_df.index[0] + 1 if not selected_shift_df.empty else None
     
     if direction == 'next':
