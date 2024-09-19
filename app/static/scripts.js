@@ -59,13 +59,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const [end_hours, end_minutes] = endTime.split(':').map(Number);
             const endTotalMinutes = end_hours * 60 + end_minutes;
             
-            const late_shift = 16 * 60; // 16:00 in minutes
+            const late_shift = 16 * 60; // 16:01 in minutes
             const night_shift = 19 * 60;
             
             if (endTotalMinutes <= late_shift) {
                 td.classList.add('early')
             }
-            if (endTotalMinutes >= late_shift) {
+            if (endTotalMinutes > late_shift) {
                 td.classList.add('late');
             }
             if (startTotalMinutes > late_shift && endTotalMinutes < startTotalMinutes) {
