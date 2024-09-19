@@ -13,7 +13,7 @@ from app.models import User
 
 main = Blueprint('main', __name__)
 with open(os.path.join(conf.static_dir, 'turnuser_R24.json'), 'r') as f:
-            stats_df = json.load(f)
+            turnus_data = json.load(f)
 
 
 @main.route('/login', methods=['GET', 'POST'])
@@ -63,6 +63,7 @@ def home():
     slutt_for_20 = session.get('slutt_for_20')
     nights = session.get('nights', '0')
     nights_pts = session.get('nights_pts', '0')
+
 
     sort_btn_name = df_manager.sort_by_btn_txt
 
@@ -138,13 +139,13 @@ def calculate():
     session['natt_helg'] = natt_helg
     df_manager.calc_multipliers('natt_helg', -float(natt_helg))
 
-    tidlig = request.form.get('tidlig')
-    tidlig_poeng = request.form.get('tidlig_poeng')
+    tidlig = request.form.get('tidlig', '0')
+    tidlig_poeng = request.form.get('tidlig_poeng', '0')
     session['tidlig']= tidlig
     session['tidlig_poeng'] = tidlig_poeng
     df_manager.calc_thresholds('tidlig', int(tidlig), int(tidlig_poeng))
 
-    before_6 = request.form.get('before_6')
+    before_6 = request.form.get('before_6', '0')
     session['before_6'] = before_6
     df_manager.calc_multipliers('before_6', int(before_6))
 
@@ -162,7 +163,7 @@ def calculate():
 
     # caluclate points for nights
     nights = request.form.get('nights', '0')
-    nights_pts = request.form.get('nights_pts')
+    nights_pts = request.form.get('nights_pts', '0')
     session['nights'] = nights
     session['nights_pts'] = nights_pts
     df_manager.calc_thresholds('natt', int(nights), int(nights_pts))
@@ -203,7 +204,7 @@ def display_shift():
     selected_shift = session.get('selected_shift')
 
     selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
-    for x in stats_df:
+    for x in turnus_data:
         for title, data in x.items():
             if title == selected_shift:
                 shift_title = title
@@ -267,12 +268,27 @@ def rate_displayed_shift():
     return redirect(url_for('main.display_shift'))
 
 
-
-
 @main.route('/download_excel')
 def download_excel():
     filename = 'turnuser_R24.xlsx'  # Replace with your actual file name
     return send_from_directory(conf.static_dir, filename, as_attachment=True)
+
+
+
+@main.route('/favorites')
+def favorites():
+    favorites_lst = ['OSL_05', 'OSL_10']
+    fav_lst = {}
+    for x in turnus_data:
+        for name, data in x.items():
+            if name in favorites_lst:
+                fav_lst.update({name:data})
+
+    print(fav_lst)
+    return render_template('favorites.html',
+                           page_name = 'Favorites',
+                           favorites_lst = fav_lst,
+                           dataframe = data)
 
 
 

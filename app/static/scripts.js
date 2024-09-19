@@ -129,3 +129,12 @@ if (window.location.pathname === indexRoute){
     };
 
 }
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    var sortableList = document.getElementById('sortable-list');
+    Sortable.create(sortableList, {
+        animation: 150,
+        ghostClass: 'sortable-ghost'
+    });
+});
