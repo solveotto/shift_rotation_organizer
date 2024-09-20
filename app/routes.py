@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user as flask_login_user
 from mysql.connector import Error
@@ -277,19 +277,30 @@ def download_excel():
 
 @main.route('/favorites')
 def favorites():
-    favorites_lst = ['OSL_05', 'OSL_10']
-    fav_lst = {}
+    favorites_lst = ['OSL_05', 'OSL_10', 'OSL_15']
+    fav_lst = []
     for x in turnus_data:
         for name, data in x.items():
             if name in favorites_lst:
-                fav_lst.update({name:data})
+                fav_lst.append({name:data})
 
-    print(fav_lst)
     return render_template('favorites.html',
                            page_name = 'Favorites',
-                           favorites_lst = fav_lst,
+                           favorites = fav_lst,
                            dataframe = data)
 
+@main.route('/update-order', methods=['POST'])
+def update_order():
+    data = request.get_json()
+    new_order = data.get('order', [])
+    
+    # Process the new order as needed, for example, save it to a database
+    #print(f'New order received: {new_order}')
+    print('New order')
+
+
+    # Return a JSON response
+    return jsonify({'status': 'success', 'new_order': new_order})
 
 
 df_manager = df_utils.DataframeManager()

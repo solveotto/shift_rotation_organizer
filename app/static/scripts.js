@@ -135,6 +135,33 @@ document.addEventListener('DOMContentLoaded', function () {
     var sortableList = document.getElementById('sortable-list');
     Sortable.create(sortableList, {
         animation: 150,
-        ghostClass: 'sortable-ghost'
+        ghostClass: 'sortable-ghost',
+
+        onEnd: function(/** */evt) {
+            // Oppdaterer rekkefølgen av listen når bruker endrer den
+            var order = []
+            var getItems = sortableList.querySelectorAll('#turnus-navn');
+            // var items = getItems.getAttribute('turnus-value');
+            // items.forEach(function (item) {
+            //     order.push(item.textContent.trim());
+            // });
+
+            console.log(getItems);
+            
+            // Sender innholdet i listen til Flask server
+            fetch('/update-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({order:order})
+            }).then(response => {
+                if (response.ok) {
+                    console.log('Order updated successfully!'); 
+                } else {
+                    console.error('Failed to update order.');
+                }
+            });
+        }
     });
 });
