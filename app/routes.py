@@ -82,7 +82,7 @@ def home():
                            nights = nights,
                            nights_pts = nights_pts,
                            sort_by_btn_name = sort_btn_name,
-                           page_name = 'Sorter turnuser'
+                           page_name = 'Filtrer Turnuser'
                            )
 
 
@@ -285,7 +285,7 @@ def favorites():
                 fav_lst.append({name:data})
 
     return render_template('favorites.html',
-                           page_name = 'Favorites',
+                           page_name = 'Favoritter',
                            favorites = fav_lst,
                            dataframe = data)
 
