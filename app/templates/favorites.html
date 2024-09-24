@@ -10,9 +10,9 @@
     <ul id="sortable-list" class="list-group">
         {% for turnus in favorites %}
             {% for name, data in turnus.items() %}
-            <li class="list-group-item"> 
+            <li class="list-group-item" data-name="{{ name }}"> 
                 <table class="justify-content-center">
-                    <div class="center-text" id="turnus-navn" turnus-value="{{name}}">{{name}}</div>
+                    <div class="center-text">{{name}}</div>
                     
                     <thead>
                         <tr>

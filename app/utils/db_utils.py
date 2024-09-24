@@ -155,6 +155,16 @@ def get_user_password(username):
 
 
 
+### FAVORITES ###
+
+def get_shift_id(shift_title):
+    query = """
+    SELECT id FROM shift WHERE shift_title = %s
+    """
+
+
+
+
 if __name__ == '__main__':
     #create_new_user('testuser', 'testuser')       
     #add_points_to_user('test1', 10)

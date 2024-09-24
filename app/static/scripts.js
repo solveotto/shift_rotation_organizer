@@ -140,14 +140,11 @@ document.addEventListener('DOMContentLoaded', function () {
         onEnd: function(/** */evt) {
             // Oppdaterer rekkefølgen av listen når bruker endrer den
             var order = []
-            var getItems = sortableList.querySelectorAll('#turnus-navn');
-            // var items = getItems.getAttribute('turnus-value');
-            // items.forEach(function (item) {
-            //     order.push(item.textContent.trim());
-            // });
+            var items = sortableList.querySelectorAll('.list-group-item');
+            items.forEach(function (item) {
+                order.push(item.getAttribute('data-name').trim());
+            });
 
-            console.log(getItems);
-            
             // Sender innholdet i listen til Flask server
             fetch('/update-order', {
                 method: 'POST',

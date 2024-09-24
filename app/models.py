@@ -12,6 +12,9 @@ class User(UserMixin):
     
     def get_id(self):
         return self.id
+    
+    def get_username(self):
+        return self.username
 
     @staticmethod
     def get(username):
