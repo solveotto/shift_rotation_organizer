@@ -3,6 +3,7 @@ from mysql.connector import Error
 import configparser
 import json
 import bcrypt
+from flask import flash
 
 
 
@@ -138,7 +139,7 @@ def get_user_data(username):
             FROM users
             WHERE username = %s
             """
-    print("inside db", username)
+    print("DATABASE: get_user_data", username)
     result = execute_query(login_user_query, (username, ), fetch=True)
     if result:
         data = {'username': result[0][1], 'id': result[0][0], 'password': result[0][2], 'is_auth': result[0][5]}
@@ -157,12 +158,62 @@ def get_user_password(username):
 
 ### FAVORITES ###
 
-def get_shift_id(shift_title):
-    query = """
-    SELECT id FROM shift WHERE shift_title = %s
+def get_favorite_lst(user_id):
+    query_fetch_order = """
+        SELECT id, shift_title FROM favorites WHERE user_id = %s
+        """
+    result = execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
+    shift_titles = [item[1] for item in result]
+    return shift_titles
+
+def update_favorite_order(user_id):
+    try:
+        # Fetch the current order of the favorites
+        query_fetch_order = """
+        SELECT id, shift_title FROM favorites WHERE user_id = %s
+        """
+        current_database_order = execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
+        current_shift_titles = {shift[1] for shift in current_database_order}
+
+        # update curent favorties order in database
+        for index, shift_title in enumerate(current_shift_titles):
+            query_update_order = """
+            INSERT INTO favorites (shift_title, user_id, order_index)
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE order_index = VALUES(order_index)
+            """
+
+            execute_query(query_update_order, (shift_title, user_id, index))
+    except Error as e:
+        print(f"Failed to modify database. Changes only stored localy. Error = {e}")
+        flash(f'Failed to modify database. Changes only stored localy. Error = {e}', 'danger')
+
+
+def get_max_ordered_index(user_id):
+    query_max_index = """
+        SELECT MAX(order_index) FROM favorites WHERE user_id = %s
     """
+    result = execute_query(query_max_index, (user_id, ), fetch='fetchone')
+    print('get_max_index', result[0][0])
+    return result[0][0] if result[0][0] is not None else 0
 
 
+def add_favorite(user_id, title, order_index):
+    print('ADD FAVORITE EXECUTED')
+    query_add_title = """
+        INSERT INTO favorites (user_id, shift_title, order_index)
+        VALUES (%s, %s, %s)
+    """
+    execute_query(query_add_title, (user_id, title, order_index))
+
+def remove_favorite(user_id, title):
+    query_remove_title = """
+        DELETE FROM favorites
+        WHERE user_id = %s AND shift_title = %s
+    """
+    execute_query(query_remove_title, (user_id, title))
+
+    update_favorite_order(user_id)
 
 
 if __name__ == '__main__':

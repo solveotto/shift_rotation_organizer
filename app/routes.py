@@ -1,20 +1,19 @@
 import os
+import time
 import json
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user as flask_login_user
 from mysql.connector import Error
-
 from config import conf
 from app.utils import df_utils, db_utils
 from app.forms import LoginForm
 from app.models import User
 
-
 main = Blueprint('main', __name__)
+
 with open(os.path.join(conf.static_dir, 'turnuser_R24.json'), 'r') as f:
             turnus_data = json.load(f)
-
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
@@ -28,6 +27,7 @@ def login():
             if db_user_data and User.verify_password(db_user_data['password'], form.password.data):
                 user = User(db_user_data['id'], form.username.data, db_user_data['is_auth'])
                 flask_login_user(user)
+                print('Flask Login')
                 return redirect(url_for('main.home'))
             else:
                 flash('Login unsuccessful. Please check username and password', 'danger')
@@ -36,7 +36,9 @@ def login():
 
     else:
         print("ERROR", form.errors)
-    return render_template('login.html', form=form)
+    return render_template('login.html', 
+                           form=form,
+                            )
 
 @main.route('/logout')
 @login_required
@@ -44,13 +46,10 @@ def logout():
     logout_user()
     return redirect(url_for('main.login'))
 
+ 
 @main.route('/')
 @login_required
 def home(): 
-    # Convert DataFrame to a list of dictionaries
-    ## table_data = df_manager.df.to_dict(orient='records')
-
-
     # Gets the values set by the user 
     helgetimer = session.get('helgetimer', '0')
     helgetimer_dagtid = session.get('helgetimer_dagtid', '0')
@@ -66,6 +65,7 @@ def home():
 
 
     sort_btn_name = df_manager.sort_by_btn_txt
+    favorites = db_utils.get_favorite_lst(current_user.get_id())
 
      # Pass the table data to the template
     return render_template('sort_shifts.html', 
@@ -82,22 +82,13 @@ def home():
                            nights = nights,
                            nights_pts = nights_pts,
                            sort_by_btn_name = sort_btn_name,
-                           page_name = 'Filtrer Turnuser'
+                           page_name = 'Filtrer Turnuser',
+                           favorites = favorites
                            )
 
 
-@main.route('/navigate_home')
-@login_required
-def navigate_home():
-    #df_manager.sort_by('poeng')
-    return redirect(url_for('main.home'))
-
-
 @main.route('/reset_search')
-@login_required
 def reset_search():
-    
-
     df_manager.df['poeng'] = 0
 
     session['helgetimer'] = 0
@@ -114,14 +105,11 @@ def reset_search():
     
     df_manager.get_all_user_points()
     df_manager.sort_by('turnus', inizialize=True)
-    
 
     return redirect(url_for('main.home'))
 
 
-
 @main.route('/submit', methods=['POST'])
-@login_required
 def calculate():
     # Resets points value
     df_manager.df['poeng'] = 0
@@ -175,7 +163,6 @@ def calculate():
 
 
 @main.route('/sort_by_column')
-@login_required
 def sort_by_column():
     column = request.args.get('column')
     if column in df_manager.df:
@@ -189,7 +176,6 @@ def sort_by_column():
 
 # This function is used by a javascript to make every line clickeable in the sorting view
 @main.route('/api/select_shift', methods=['POST'])
-@login_required
 def select_shift():
     html_data = request.get_json()
     selected_shift = html_data.get('turnus')
@@ -203,6 +189,8 @@ def display_shift():
     ettermiddager = session.get('ettermiddager')
     selected_shift = session.get('selected_shift')
 
+
+
     selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
     for x in turnus_data:
         for title, data in x.items():
@@ -212,9 +200,15 @@ def display_shift():
    
     shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_title)
     session['current_user_point_input'] = shift_user_points
-    session['shift_title'] =shift_title
+    session['shift_title'] = shift_title
     
+    # Denne listen burde kanskje lagres lokalt
+    favorites_lst = db_utils.get_favorite_lst(current_user.get_id())
 
+    if shift_title in favorites_lst:
+        favoritt = 'checked'
+    else:
+        favoritt = ''
 
     if shift_title and shift_data:
         return render_template('selected_shift.html',
@@ -223,13 +217,13 @@ def display_shift():
                                shift_data=shift_data,
                                shift_user_points = shift_user_points[1],
                                ettermiddager = ettermiddager,
+                               favoritt = favoritt,
                                page_name = 'Turnusdata for ' + shift_title)
     else:
         return "No shift data found", 400
     
 
 @main.route('next_shift')
-@login_required
 def next_shift():
     selected_shift = session.get('selected_shift')
     direction = request.args.get('direction')
@@ -254,7 +248,6 @@ def next_shift():
 
 
 @main.route('/rate_displayed_shift', methods=['POST'])
-@login_required
 def rate_displayed_shift():
 
     shift_title = session.get('shift_title')
@@ -276,17 +269,20 @@ def download_excel():
 
 
 @main.route('/favorites')
+@login_required
 def favorites():
-    favorites_input = ['OSL_01', 'OSL_02', 'OSL_15', 'OSL_20']
-    fav_lst = []
+    
+    favorites_input = db_utils.get_favorite_lst(current_user.get_id())
+
+    fav_dict = []
     for x in turnus_data:
         for name, data in x.items():
             if name in favorites_input:
-                fav_lst.append({name:data})
+                fav_dict.append({name:data})
 
     return render_template('favorites.html',
                            page_name = 'Favoritter',
-                           favorites = fav_lst,
+                           favorites = fav_dict,
                            dataframe = data)
 
 
@@ -298,52 +294,80 @@ def update_order():
     shifts_to_add = None
     shifts_to_remove = None
     
-    # Process the new order as needed, for example, save it to a database
-    print(f'New order received: {new_order}')
 
-    # Fetch the current order of the favorites
-    query_fetch_order = """
-    SELECT id, shift_title FROM favorites WHERE user_id = %s
-    """
-    current_database_order = db_utils.execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
-    current_shift_titles = {shift[1] for shift in current_database_order}
-    print(current_shift_titles)
-
-    # Determine which shift titles are missing in the new order
-    new_shift_titles = set(new_order)
-    shifts_to_remove = current_shift_titles - new_shift_titles
-    shifts_to_add = new_shift_titles - current_shift_titles
-    
-
-    # Remove missing shift titles from the database
-    if shifts_to_remove:
-        query_delete_shifts = """
-        DELETE FROM favorites WHERE user_id = %s AND shift_title IN (%s)
-        """ % (user_id, ','.join(['%s'] * len(shifts_to_remove)))
-        db_utils.execute_query(query_delete_shifts, tuple(shifts_to_remove))
-    
-    for shift_title in shifts_to_add:
-        query_add_shift = """
-        INSERT INTO favorites (shift_title, user_id, order_index)
-        VALUES (%s, %s, %s)
+    try:
+        # Fetch the current order of the favorites
+        query_fetch_order = """
+        SELECT id, shift_title FROM favorites WHERE user_id = %s
         """
-        db_utils.execute_query(query_add_shift, (shift_title, user_id, new_order.index(shift_title)))
+        current_database_order = db_utils.execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
+        current_shift_titles = {shift[1] for shift in current_database_order}
+        print('current db order', current_database_order)
 
+        # Determine which shift titles are missing in the new order
+        new_shift_titles = set(new_order)
+        shifts_to_remove = current_shift_titles - new_shift_titles
+        shifts_to_add = new_shift_titles - current_shift_titles
+        
 
-    # update curent favorties order in database
-    for index, shift_title in enumerate(new_order):
-        query_update_order = """
-        INSERT INTO favorites (shift_title, user_id, order_index)
-        VALUES (%s, %s, %s)
-        ON DUPLICATE KEY UPDATE order_index = VALUES(order_index)
-        """
+        # Remove missing shift titles from the database
+        if shifts_to_remove:
+            query_delete_shifts = """
+            DELETE FROM favorites WHERE user_id = %s AND shift_title IN (%s)
+            """ % (user_id, ','.join(['%s'] * len(shifts_to_remove)))
+            db_utils.execute_query(query_delete_shifts, tuple(shifts_to_remove))
+        
+        for shift_title in shifts_to_add:
+            query_add_shift = """
+            INSERT INTO favorites (shift_title, user_id, order_index)
+            VALUES (%s, %s, %s)
+            """
+            db_utils.execute_query(query_add_shift, (shift_title, user_id, new_order.index(shift_title)))
 
-        db_utils.execute_query(query_update_order, (shift_title, user_id, index))
-
-
+        # update curent favorties order in database
+        for index, shift_title in enumerate(new_order):
+            query_update_order = """
+            INSERT INTO favorites (shift_title, user_id, order_index)
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE order_index = VALUES(order_index)
+            """
+            db_utils.execute_query(query_update_order, (shift_title, user_id, index))
+    except Error as e:
+        print(f"Failed to modify database. Changes only stored localy.")
+        flash('Failed to modify database. Changes only stored localy. Error: {e}', 'danger')
 
     # Return a JSON response
     return jsonify({'status': 'success', 'new_order': new_order})
+
+
+@main.route('/remove_favorite/<shift_title>', methods=['GET'])
+def remove_favorite(shift_title):
+    try:
+        db_utils.remove_favorite(current_user.get_id(), shift_title)
+    except ValueError:
+        print('Not a favorite')
+    return redirect(url_for('main.favorites'))
+
+
+
+@main.route('/toggle_favorite', methods=['POST'])
+def toggle_favorite():
+    data = request.get_json()
+    favorite = data.get('favorite')
+    shift_title = data.get('shift_title')
+
+
+    if favorite:
+        max_order_index = db_utils.get_max_ordered_index(current_user.get_id())
+        new_order_index = max_order_index +1 if max_order_index is not None else 1
+        db_utils.add_favorite(current_user.get_id(),shift_title, new_order_index)
+    else:
+        print(f"Checkbox is unchecked. Title: {shift_title}.")
+        try:
+            db_utils.remove_favorite(current_user.get_id(), shift_title)
+        except ValueError:
+            print('Not a favorite')
+    return jsonify({'status': 'success'})
 
 
 df_manager = df_utils.DataframeManager()

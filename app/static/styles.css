@@ -15,6 +15,13 @@ body, html {
 
 
 
+@media (max-width: 576px) {
+  .form-label {
+      font-size: 0.875rem; /* Adjust the font size as needed */
+  }
+}
+
+
 .navbar-custom-color {
   background-color: #7cb1d6;;
 }
@@ -99,3 +106,51 @@ a{
 }
 
 
+
+/* Favorites Star */
+
+
+label {
+  font-size: 48px
+}
+
+.yellow-star {
+  color: gold;
+}
+
+label input[type="checkbox"] {
+  display: none;
+}
+
+.custom-checkbox {
+  margin-left: 2em;
+  position: relative;
+  cursor: pointer;
+}
+
+.custom-checkbox .bi {
+  color: gold;
+  position: absolute;
+  top: -0.2em;
+  left: -1.25em;
+  font-size: 0.35em;
+}
+
+.custom-checkbox .bi-star {
+  color: gray;
+}
+
+.custom-checkbox .bi-star-fill{
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.custom-checkbox:hover .bi-star-fill{
+  opacity: 0.5;
+}
+
+.custom-checkbox input[type="checkbox"]:checked ~ .bi-star-fill {
+  opacity: 1;
+}
+
+/* Favorites star end */

@@ -158,6 +158,7 @@
           <thead class="thead-dark">
             <tr>
               <!-- <th style="text-align: center;">Velg Turnus</th> -->
+              <th>Favoritt</th>
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='turnus') }}">Navn</a></th>
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='poeng') }}">Poeng</a></th>
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='tidlig') }}">Tidlig</a></th>
@@ -182,9 +183,13 @@
                   </div>
                 </td> -->
                 <td>
-                  {{ row.turnus }}
-                  
+                  {% if row.turnus in favorites %}
+                    <i class="bi bi-star-fill yellow-star"></i>
+                  {% else %}
+                    <i class="bi bi-star"></i>
+                  {% endif %}
                 </td>
+                <td>{{ row.turnus }}</td>
                 <td>{{ row.poeng | int }}</td>
                 <td>{{ row.tidlig }}</td>
                 <td>{{ row.before_6 }}</td>

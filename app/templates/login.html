@@ -11,7 +11,7 @@
       <script src="{{ url_for('static', filename='scripts.js') }}" defer></script>
       <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
-<div class="container">
+<div class="container-md">
     <div class="row">
       <div class="col-md-5 offset-md-3">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -32,7 +32,7 @@
             {{ form.hidden_tag() }}
             
             <div class="text-center">
-              <img src="static\img\artybadger.png" class="img-fluid profile-image-pic img-thumbnail rounded-circle my-3"
+              <img src="static\img\artybadger.png" class="img-fluid profile-image-pic img-thumbnail rounded-circle my-1"
                 width="200px" alt="profile">
             </div>
 

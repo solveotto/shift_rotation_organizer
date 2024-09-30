@@ -23,12 +23,16 @@ class DataframeManager():
         
 
     def get_all_user_points(self):
-        stored_user_points = _db_utils.get_all_ratings(self.user_id)
-        
-        for shift_title, shift_value in stored_user_points:
-            if shift_title in self.df['turnus'].values:
-                self.df.loc[self.df['turnus'] == shift_title, 'poeng'] += shift_value
-                
+        try:
+            stored_user_points = _db_utils.get_all_ratings(self.user_id)
+            
+            for shift_title, shift_value in stored_user_points:
+                if shift_title in self.df['turnus'].values:
+                    self.df.loc[self.df['turnus'] == shift_title, 'poeng'] += shift_value
+        except TypeError:
+            pass
+
+
  
     def sort_by(self, _type, inizialize=False):
         # Alters the name for the button text

@@ -25,7 +25,6 @@
     <header>
       <nav class="navbar navbar-custom-color">
         <div class="container px-4 ms-auto">
-          <!-- <a class="navbar-brand" href="{{ url_for('main.navigate_home') }}">Sorter</a> -->
 
           <h3>
             <span>{% block prev_btn %}{% endblock %} </span>
@@ -62,18 +61,21 @@
 
     <footer>
       
-      <div class="container py-3">
+      <div class="container py-5">
         <nav class="navbar navbar-custom-color fixed-bottom">
             <div class="d-flex justify-content-center align-items-center w-100">
                 
-                <div class="mx-2">
-                    <a href="{{ url_for('main.navigate_home') }}" class="btn btn-success">Filtrer</a>
-                </div><div class="mx-2">
+              <div class="mx-5">
+                <a href="{{ url_for('main.home') }}" class="{% if request.endpoint == 'main.home' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Turnusliste</a>
+              </div>
 
-                  
-                </div>
-                    <a href="{{ url_for('main.favorites') }}" class="btn btn-danger">Favoritter</a>
-                </div>
+              <div class="mx-5">
+                <a href="{{ url_for('main.display_shift') }}" class="{% if request.endpoint == 'main.display_shift' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Enkeltturnus</a>
+              </div> 
+              
+              <div class="mx-5">
+                <a href="{{ url_for('main.favorites') }}" class="{% if request.endpoint == 'main.favorites' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Favoritter</a>
+              </div>
       
             </div>
         </nav>

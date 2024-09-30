@@ -162,3 +162,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+
+
+// FOR Å DETEKTERE FAVORITT
+document.getElementById('id-of-input').addEventListener('change', function() {
+    const isChecked = this.checked;
+    const shiftTitle = this.getAttribute('shift_title')
+    
+
+    fetch('/toggle_favorite', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ favorite: isChecked, shift_title: shiftTitle })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+});
