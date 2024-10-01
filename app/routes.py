@@ -188,10 +188,8 @@ def select_shift():
 def display_shift():
     ettermiddager = session.get('ettermiddager')
     selected_shift = session.get('selected_shift')
-
-
-
     selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
+
     for x in turnus_data:
         for title, data in x.items():
             if title == selected_shift:
@@ -267,22 +265,21 @@ def download_excel():
     return send_from_directory(conf.static_dir, filename, as_attachment=True)
 
 
-
 @main.route('/favorites')
 @login_required
 def favorites():
+    fav_order_lst = db_utils.get_favorite_lst(current_user.get_id())
+    fav_dict_lookup = {}
     
-    favorites_input = db_utils.get_favorite_lst(current_user.get_id())
-
-    fav_dict = []
     for x in turnus_data:
         for name, data in x.items():
-            if name in favorites_input:
-                fav_dict.append({name:data})
+            if name in fav_order_lst:
+                fav_dict_lookup[name] = data
+    fav_dict_sorted = [{name: fav_dict_lookup[name]} for name in fav_order_lst if name in fav_dict_lookup]
 
     return render_template('favorites.html',
                            page_name = 'Favoritter',
-                           favorites = fav_dict,
+                           favorites = fav_dict_sorted,
                            dataframe = data)
 
 

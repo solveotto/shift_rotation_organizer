@@ -6,12 +6,16 @@
 
 <!-- Previous and next buttons for selected shift view -->
 {% block prev_btn %}
-<a href="{{ url_for('main.next_shift', direction='prev') }}"><i class="bi bi-caret-left-fill"></i></a>
+    <a href="{{ url_for('main.next_shift', direction='prev') }}"><i class="bi bi-caret-left-fill"></i></a>
 {% endblock %}
 
+
+
 {% block next_btn %}
-<a href="{{ url_for('main.next_shift', direction='next') }}"><i class="bi bi-caret-right-fill"></i></a>
+    <a href="{{ url_for('main.next_shift', direction='next') }}"><i class="bi bi-caret-right-fill"></i></a>
 {% endblock %}
+
+
 
 
 
@@ -85,6 +89,7 @@
                     <table class="table">
                         <thead>
                             <tr>
+                                <th scope="col">Favoritt</th>
                                 <th scope="col">Poeng</th>
                                 <th scope="col">Tidligvakter</th>
                                 <th scope="col">Før 6</th>
@@ -100,6 +105,14 @@
                             <tr>
                                 {% for row in table_data %}
                                     {% if row.turnus == shift_title %}
+                                            <td>
+                                                <label for="id-of-input" class="custom-checkbox">
+                                                    <input type="checkbox" id="id-of-input" shift_title="{{ shift_title }}" {% if favoritt %}checked{% endif %}>
+                                                        <i class="bi bi-star"></i>
+                                                        <i class="bi bi-star-fill"></i>
+                                                </label>
+                                            </div>
+                                            </td>
                                             <td>{{ row.poeng }}</td>
                                             <td>{{ row.tidlig }}</td>
                                             <td>{{ row.before_6 }}</td>
@@ -122,26 +135,13 @@
             </div>
     
         
-        <div class="row py-2 ">
-                <div class="col">
+        <div class="d-flex justify-content-center py-2 ">
                     <form action="{{ url_for('main.rate_displayed_shift') }}" method="POST">
                         <div class="input-group input-group-sm mb-3">
                             <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" id="user_points" name="user_points" value="{{ shift_user_points }}" style="max-width: 50px;">
                             <button class="btn btn-primary" type="submit" id="button-addon1">Legg til poeng</button>
                         </div>
                     </form>
-                </div>
-
-                
-                <div class="col">
-                    <label for="id-of-input" class="custom-checkbox">
-                        <input type="checkbox" id="id-of-input" shift_title="{{ shift_title }}" {% if favoritt %}checked{% endif %}>
-                            <i class="bi bi-star"></i>
-                            <i class="bi bi-star-fill"></i>
-                        <h1 style="font-size: 0.35em">Favorite</h1>
-                    </label>
-                </div>
-         
         </div>
             
         </div>

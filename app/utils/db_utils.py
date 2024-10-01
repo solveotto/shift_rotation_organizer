@@ -160,11 +160,12 @@ def get_user_password(username):
 
 def get_favorite_lst(user_id):
     query_fetch_order = """
-        SELECT id, shift_title FROM favorites WHERE user_id = %s
+        SELECT id, shift_title FROM favorites WHERE user_id = %s ORDER BY order_index
         """
     result = execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
     shift_titles = [item[1] for item in result]
     return shift_titles
+
 
 def update_favorite_order(user_id):
     try:

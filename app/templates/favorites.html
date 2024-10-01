@@ -26,60 +26,58 @@
     <ul id="sortable-list" class="list-group py-2">
         {% for turnus in favorites %}
             {% for name, data in turnus.items() %}
+                <li class="list-group-item mb-1 rounded" data-name="{{ name }}" style="border: 1px solid black;"> 
+                    <table>
+                        <div class="d-flex align-items-center justify-content-between py-1">
+                            <h4>{{name}}</h4>
+                            <a href="{{ url_for('main.remove_favorite', shift_title=name) }}" class="btn btn-outline-danger">x</a>
+                        
+                        </div>
+                        
+                        <thead>
+                            <tr>
+                                <th style="border: 1px solid black;">Uke</th>
+                                <th style="border: 1px solid black;">Mandag</th>
+                                <th style="border: 1px solid black;">Tirsdag</th>
+                                <th style="border: 1px solid black;">Onsdag</th>
+                                <th style="border: 1px solid black;">Tordag</th>
+                                <th style="border: 1px solid black;">Fredag</th>
+                                <th style="border: 1px solid black;">Lørdag</th>
+                                <th style="border: 1px solid black;">Søndag</th>
+                            </tr>
+                        </thead>
+                        
+                                    
+                        <tbody class="text-center">
+                            {% for week_nr, week_data in data.items() %}
+                                <tr class="align-middle text-nowrap">
+                                    <td style="border: 1px solid black;">{{ week_nr }}</td>
 
-
-                    <li class="list-group-item mb-1 rounded" data-name="{{ name }}" style="border: 1px solid black;"> 
-                        <table>
-                            <div class="d-flex align-items-center justify-content-between py-1">
-                                <h4>{{name}}</h4>
-                                <a href="{{ url_for('main.remove_favorite', shift_title=name) }}" class="btn btn-outline-danger">x</a>
-                            
-                            </div>
-                            
-                            <thead>
-                                <tr>
-                                    <th style="border: 1px solid black;">Uke</th>
-                                    <th style="border: 1px solid black;">Mandag</th>
-                                    <th style="border: 1px solid black;">Tirsdag</th>
-                                    <th style="border: 1px solid black;">Onsdag</th>
-                                    <th style="border: 1px solid black;">Tordag</th>
-                                    <th style="border: 1px solid black;">Fredag</th>
-                                    <th style="border: 1px solid black;">Lørdag</th>
-                                    <th style="border: 1px solid black;">Søndag</th>
-                                </tr>
-                            </thead>
-                            
-                                        
-                            <tbody class="text-center">
-                                {% for week_nr, week_data in data.items() %}
-                                    <tr class="align-middle text-nowrap">
-                                        <td style="border: 1px solid black;">{{ week_nr }}</td>
-
-                                        {% for day_nr, day_data in week_data.items() %}
-                                            <td id="cell" class="min-width-td" style="border: 1px solid black;">
-                                                {% for time in day_data.tid %}
-                                                    {% if day_data.tid|length == 2 %}
-                                                        {% if loop.first %}
-                                                            {{ time }} -
-                                                        {% else %}
-                                                            {{ time }}
-                                                        {% endif %}
+                                    {% for day_nr, day_data in week_data.items() %}
+                                        <td id="cell" class="min-width-td" style="border: 1px solid black;">
+                                            {% for time in day_data.tid %}
+                                                {% if day_data.tid|length == 2 %}
+                                                    {% if loop.first %}
+                                                        {{ time }} -
                                                     {% else %}
                                                         {{ time }}
-                    
                                                     {% endif %}
-                                                {% endfor %}
-                                            </td>
-                                            
-                                            
-                                        {% endfor %}
-                                        </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>   
-                        </li>
-                        {% endfor %}
-                    {% endfor %}
+                                                {% else %}
+                                                    {{ time }}
+                
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        
+                                        
+                                    {% endfor %}
+                                    </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>   
+                </li>
+            {% endfor %}
+        {% endfor %}
 
             
 

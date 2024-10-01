@@ -131,8 +131,8 @@ label input[type="checkbox"] {
 .custom-checkbox .bi {
   color: gold;
   position: absolute;
-  top: -0.2em;
-  left: -1.25em;
+  top: -1.2em;
+  left: -3.25em;
   font-size: 0.35em;
 }
 
