@@ -24,14 +24,21 @@
 <div class="d-flex justify-content-center">
 
     <ul id="sortable-list" class="list-group py-2">
+        {% if favorites|length == 0 %}
+            <h5>VELG FAVORITTER HER</h5>
+        {%endif%}
         {% for turnus in favorites %}
             {% for name, data in turnus.items() %}
-                <li class="list-group-item mb-1 rounded" data-name="{{ name }}" style="border: 1px solid black;"> 
+                 
+                <li class="list-group-item mb-2 rounded p-2 small" data-name="{{ name }}" style="border: 1px solid black; background-color: rgb(255, 255, 240);"> 
                     <table>
                         <div class="d-flex align-items-center justify-content-between py-1">
-                            <h4>{{name}}</h4>
-                            <a href="{{ url_for('main.remove_favorite', shift_title=name) }}" class="btn btn-outline-danger">x</a>
-                        
+                            <div class="clickable-row" data-turnus="{{name}}">
+                                <h4 class="h4-hover">{{name}} <i class="bi bi-info-circle"></i></h4>
+
+                            </div>
+                            
+                            <a href="{{ url_for('main.remove_favorite', shift_title=name) }}" class="btn btn-outline-danger btn-sm custom-remove-btn">x</a>
                         </div>
                         
                         <thead>

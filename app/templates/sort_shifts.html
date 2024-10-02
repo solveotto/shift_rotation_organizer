@@ -157,7 +157,6 @@
         <table class="table table-striped" style="text-align: center;">
           <thead class="thead-dark">
             <tr>
-              <!-- <th style="text-align: center;">Velg Turnus</th> -->
               <th>Favoritt</th>
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='turnus') }}">Navn</a></th>
               <th><a class="custom-link-color" href="{{ url_for('main.sort_by_column', column='poeng') }}">Poeng</a></th>
@@ -176,12 +175,6 @@
 
             {% for row in table_data %}
               <tr class="clickable-row" data-turnus="{{ row.turnus }}">
-                <!-- <td class="d-flex justify-content-center align-items-center">
-
-                  <div class="form-check">
-                    <input class="form-check-input prevent-click" type="checkbox" value="" id="flexCheckDefault">
-                  </div>
-                </td> -->
                 <td>
                   {% if row.turnus in favorites %}
                     <i class="bi bi-star-fill yellow-star"></i>

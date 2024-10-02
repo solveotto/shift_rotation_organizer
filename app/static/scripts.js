@@ -1,5 +1,5 @@
 
-// Makes shifts in the index-page clickable
+// Makes shifts checkbox in the index-page clickable
 document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelectorAll('.clickable-row').forEach(row => {
         row.addEventListener('click', () => {
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 console.log('Turnus:', turnus);
             }
 
-            fetch('/api/select_shift', {
+            fetch('/api/js_select_shift', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

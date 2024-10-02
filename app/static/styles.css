@@ -89,16 +89,26 @@ body, html {
   
 }
 
+
+/* LOGIN PAGE */
 .profile-image-pic{
-  height: 200px;
-  width: 200px;
+  height: 120px;
+  width: 120px;
   object-fit: cover;
 }
 
-
-
 .cardbody-color{
   background-color: #ebf2fa;
+}
+
+.custom-card {
+  max-width: 400px; /* Adjust the width as needed */
+  max-height: 600px; /* Adjust the height as needed */
+  margin: auto; /* Center the card */
+}
+
+.form-label-sm {
+  font-size: 1rem;
 }
 
 a{
@@ -108,8 +118,6 @@ a{
 
 
 /* Favorites Star */
-
-
 label {
   font-size: 48px
 }
@@ -154,3 +162,20 @@ label input[type="checkbox"] {
 }
 
 /* Favorites star end */
+
+
+
+
+.bi-info-circle {
+  color: lightblue;
+}
+
+.h4-hover:hover .bi-info-circle {
+  color: blue; /* Change the color as needed */
+  transform: scale(1.2); /* Example transformation */
+  transition: transform 0.2s, color 0.2s; /* Smooth transition */
+}
+
+.custom-remove-btn {
+  margin-top: -10px; /* Adjust the value as needed */
+}

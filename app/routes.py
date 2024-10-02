@@ -175,7 +175,7 @@ def sort_by_column():
 
 
 # This function is used by a javascript to make every line clickeable in the sorting view
-@main.route('/api/select_shift', methods=['POST'])
+@main.route('/api/js_select_shift', methods=['POST'])
 def select_shift():
     html_data = request.get_json()
     selected_shift = html_data.get('turnus')
@@ -183,11 +183,15 @@ def select_shift():
     return redirect(url_for('main.display_shift'))
 
 
+
 @main.route('/display_shift')
 @login_required
 def display_shift():
-    ettermiddager = session.get('ettermiddager')
     selected_shift = session.get('selected_shift')
+    print('SELECTED SHIFT', selected_shift)
+    
+    if not selected_shift:
+        selected_shift = 'OSL_01'
     selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
 
     for x in turnus_data:
@@ -195,8 +199,9 @@ def display_shift():
             if title == selected_shift:
                 shift_title = title
                 shift_data = data
-   
+    
     shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_title)
+
     session['current_user_point_input'] = shift_user_points
     session['shift_title'] = shift_title
     
@@ -214,7 +219,6 @@ def display_shift():
                                shift_title=shift_title, 
                                shift_data=shift_data,
                                shift_user_points = shift_user_points[1],
-                               ettermiddager = ettermiddager,
                                favoritt = favoritt,
                                page_name = 'Turnusdata for ' + shift_title)
     else:
@@ -270,7 +274,7 @@ def download_excel():
 def favorites():
     fav_order_lst = db_utils.get_favorite_lst(current_user.get_id())
     fav_dict_lookup = {}
-    
+
     for x in turnus_data:
         for name, data in x.items():
             if name in fav_order_lst:
