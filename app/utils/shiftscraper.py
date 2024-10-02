@@ -43,7 +43,7 @@ class ShiftScraper():
 
 
     # Scraper og sorterer pdf med turnuser
-    def scrape_pdf(self, pdf_path='turnuser_R24.pdf'):
+    def scrape_pdf(self, pdf_path='turnuser_R25.pdf'):
         
         pdf = pdfplumber.open(pdf_path)
         pages_in_pdf = pdf.pages
@@ -350,5 +350,5 @@ if __name__ == '__main__':
 
     shift_scraper.scrape_pdf()
     #print(json.dumps(shift_scraper.turnuser, indent=4))
-    #shift_scraper.create_json()
+    shift_scraper.create_json()
     shift_scraper.create_excel()
