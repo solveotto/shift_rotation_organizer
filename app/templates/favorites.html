@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Favorits{% endblock %}
+
+
+
+{% block content %}
+
+
+<div class="col-md-5 offset-md-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flashes">
+                {% for category, message in messages %}
+                    {% if message == 'Failed to modify database. Changes only stored localy.' %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
+
+
+<div class="d-flex justify-content-center">
+
+    <ul id="sortable-list" class="list-group py-2">
+        {% if favorites|length == 0 %}
+            <h5>VELG FAVORITTER HER</h5>
+        {%endif%}
+        {% for turnus in favorites %}
+            {% for name, data in turnus.items() %}
+                 
+                <li class="list-group-item mb-2 rounded p-2 small" data-name="{{ name }}" style="border: 1px solid black; background-color: rgb(255, 255, 240);"> 
+                    <table>
+                        <div class="d-flex align-items-center justify-content-between py-1">
+                            <div class="clickable-row" data-turnus="{{name}}">
+                                <h4 class="h4-hover">{{name}} <i class="bi bi-info-circle"></i></h4>
+
+                            </div>
+                            
+                            <a href="{{ url_for('main.remove_favorite', shift_title=name) }}" class="btn btn-outline-danger btn-sm custom-remove-btn">x</a>
+                        </div>
+                        
+                        <thead>
+                            <tr>
+                                <th style="border: 1px solid black;">Uke</th>
+                                <th style="border: 1px solid black;">Mandag</th>
+                                <th style="border: 1px solid black;">Tirsdag</th>
+                                <th style="border: 1px solid black;">Onsdag</th>
+                                <th style="border: 1px solid black;">Tordag</th>
+                                <th style="border: 1px solid black;">Fredag</th>
+                                <th style="border: 1px solid black;">Lørdag</th>
+                                <th style="border: 1px solid black;">Søndag</th>
+                            </tr>
+                        </thead>
+                        
+                                    
+                        <tbody class="text-center">
+                            {% for week_nr, week_data in data.items() %}
+                                <tr class="align-middle text-nowrap">
+                                    <td style="border: 1px solid black;">{{ week_nr }}</td>
+
+                                    {% for day_nr, day_data in week_data.items() %}
+                                        <td id="cell" class="min-width-td" style="border: 1px solid black;">
+                                            {% for time in day_data.tid %}
+                                                {% if day_data.tid|length == 2 %}
+                                                    {% if loop.first %}
+                                                        {{ time }} -
+                                                    {% else %}
+                                                        {{ time }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    {{ time }}
+                
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        
+                                        
+                                    {% endfor %}
+                                    </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>   
+                </li>
+            {% endfor %}
+        {% endfor %}
+
+            
+
+        
+        
+    </ul>
+</div>
+
+
+</div>
+
+{% endblock %}

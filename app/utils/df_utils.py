@@ -1,13 +1,13 @@
 import os
 import pandas as pd
 import app.utils.db_utils as _db_utils
-from config import Config
+from config import conf
 
 
 
 class DataframeManager():
     def __init__(self) -> None:
-        self.df = pd.read_json(os.path.join(Config.static_dir, 'turnus_df_R24.json'))
+        self.df = pd.read_json(os.path.join(conf.static_dir, 'turnus_df_R24.json'))
         self.username, self.user_id = 'solve', 4
         
         self.helgetimer_dagtid_multip = 0
@@ -23,12 +23,16 @@ class DataframeManager():
         
 
     def get_all_user_points(self):
-        stored_user_points = _db_utils.get_all_ratings(self.user_id)
-        
-        for shift_title, shift_value in stored_user_points:
-            if shift_title in self.df['turnus'].values:
-                self.df.loc[self.df['turnus'] == shift_title, 'poeng'] += shift_value
-                
+        try:
+            stored_user_points = _db_utils.get_all_ratings(self.user_id)
+            
+            for shift_title, shift_value in stored_user_points:
+                if shift_title in self.df['turnus'].values:
+                    self.df.loc[self.df['turnus'] == shift_title, 'poeng'] += shift_value
+        except TypeError:
+            pass
+
+
  
     def sort_by(self, _type, inizialize=False):
         # Alters the name for the button text

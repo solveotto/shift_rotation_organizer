@@ -1,5 +1,5 @@
 
-// Makes shifts in the index-page clickable
+// Makes shifts checkbox in the index-page clickable
 document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelectorAll('.clickable-row').forEach(row => {
         row.addEventListener('click', () => {
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 console.log('Turnus:', turnus);
             }
 
-            fetch('/api/receive-data', {
+            fetch('/api/js_select_shift', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -59,13 +59,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const [end_hours, end_minutes] = endTime.split(':').map(Number);
             const endTotalMinutes = end_hours * 60 + end_minutes;
             
-            const late_shift = 16 * 60; // 16:00 in minutes
+            const late_shift = 16 * 60; // 16:01 in minutes
             const night_shift = 19 * 60;
             
             if (endTotalMinutes <= late_shift) {
                 td.classList.add('early')
             }
-            if (endTotalMinutes >= late_shift) {
+            if (endTotalMinutes > late_shift) {
                 td.classList.add('late');
             }
             if (startTotalMinutes > late_shift && endTotalMinutes < startTotalMinutes) {
@@ -129,3 +129,60 @@ if (window.location.pathname === indexRoute){
     };
 
 }
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    var sortableList = document.getElementById('sortable-list');
+    Sortable.create(sortableList, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+
+        onEnd: function(/** */evt) {
+            // Oppdaterer rekkefølgen av listen når bruker endrer den
+            var order = []
+            var items = sortableList.querySelectorAll('.list-group-item');
+            items.forEach(function (item) {
+                order.push(item.getAttribute('data-name').trim());
+            });
+
+            // Sender innholdet i listen til Flask server
+            fetch('/update-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({order:order})
+            }).then(response => {
+                if (response.ok) {
+                    console.log('Order updated successfully!'); 
+                } else {
+                    console.error('Failed to update order.');
+                }
+            });
+        }
+    });
+});
+
+
+
+// FOR Å DETEKTERE FAVORITT
+document.getElementById('id-of-input').addEventListener('change', function() {
+    const isChecked = this.checked;
+    const shiftTitle = this.getAttribute('shift_title')
+    
+
+    fetch('/toggle_favorite', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ favorite: isChecked, shift_title: shiftTitle })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+});
