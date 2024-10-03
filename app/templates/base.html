@@ -71,15 +71,15 @@
         <nav class="navbar navbar-custom-color fixed-bottom">
             <div class="d-flex justify-content-center align-items-center w-100">
                 
-              <div class="mx-5">
+              <div class="mx-1 mx-md-3 mx-lg-5">
                 <a href="{{ url_for('main.home') }}" class="{% if request.endpoint == 'main.home' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Turnusliste</a>
               </div>
 
-              <div class="mx-5">
+              <div class="mx-1 mx-md-3 mx-lg-5">
                 <a href="{{ url_for('main.display_shift') }}" class="{% if request.endpoint == 'main.display_shift' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Enkeltturnus</a>
               </div> 
               
-              <div class="mx-5">
+              <div class="mx-1 mx-md-3 mx-lg-5">
                 <a href="{{ url_for('main.favorites') }}" class="{% if request.endpoint == 'main.favorites' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Favoritter</a>
               </div>
       
