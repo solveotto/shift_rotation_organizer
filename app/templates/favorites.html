@@ -24,9 +24,13 @@
 <div class="d-flex justify-content-center">
 
     <ul id="sortable-list" class="list-group py-2">
-        {% if favorites|length == 0 %}
-            <h5>VELG FAVORITTER HER</h5>
-        {%endif%}
+        <div class="container">
+
+            {% if favorites|length == 0 %}
+            <br><br><br><br><br><br><br><br><br>
+                <h5>Ingen favoritter er valg.</h5>
+            {%endif%}
+        </div>
         {% for turnus in favorites %}
             {% for name, data in turnus.items() %}
                  

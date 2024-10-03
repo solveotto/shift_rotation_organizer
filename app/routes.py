@@ -82,7 +82,7 @@ def home():
                            nights = nights,
                            nights_pts = nights_pts,
                            sort_by_btn_name = sort_btn_name,
-                           page_name = 'Filtrer Turnuser',
+                           page_name = 'Turnusliste',
                            favorites = favorites
                            )
 
