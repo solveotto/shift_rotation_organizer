@@ -12,7 +12,7 @@ from app.models import User
 
 main = Blueprint('main', __name__)
 
-with open(os.path.join(conf.static_dir, 'turnuser_R24.json'), 'r') as f:
+with open(os.path.join(conf.static_dir, 'turnuser_R25.json'), 'r') as f:
             turnus_data = json.load(f)
 
 @main.route('/login', methods=['GET', 'POST'])
@@ -265,7 +265,7 @@ def rate_displayed_shift():
 
 @main.route('/download_excel')
 def download_excel():
-    filename = 'turnuser_R24.xlsx'  # Replace with your actual file name
+    filename = 'turnuser_R25.xlsx'  # Replace with your actual file name
     return send_from_directory(conf.static_dir, filename, as_attachment=True)
 
 
