@@ -183,24 +183,33 @@ class ShiftScraper():
         # Henter ut alle objektene i pdf-en
         text_objects = page.extract_words(x_tolerance = 1, y_tolerance = 1)
 
+        
+
         # Finne og navgi turns.
         for turnus_name in text_objects:
             word_pos = text_objects.index(turnus_name)
             
-            if turnus_name["text"] == 'OSL':
+            if turnus_name["text"] in ['OSL']:
+               
                 if turnus_name['top'] > 0 and turnus_name['top'] < 70:
                     if text_objects[word_pos+1]['text'] in ['Ramme', 'RAMME', 'Utland', 'UTLAND']:
                         turnus_1_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+text_objects[word_pos+2]['text']
+                    elif text_objects[word_pos+2]['text'] in ['Gjøvik', 'ERTMS']:
+                        turnus_1_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+text_objects[word_pos+2]['text']
                     else:
                         turnus_1_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']
+                        
                     
                 elif turnus_name['top'] > 340 and turnus_name['top'] < 360:
                     if text_objects[word_pos+1]['text'] in ['Ramme', 'RAMME', 'Utland', 'UTLAND']:
                         turnus_2_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+text_objects[word_pos+2]['text']
+                    elif text_objects[word_pos+2]['text'] in ['Gjøvik', 'ERTMS']:
+                        turnus_2_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+ text_objects[word_pos+2]['text']
                     else:
                         turnus_2_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']
             else:
                 pass
+
 
         turnus1 = generer_turnus_mal()
         turnus2 = generer_turnus_mal()
@@ -224,7 +233,7 @@ class ShiftScraper():
     def create_excel(self):
             # Lager et DataFrame av turnusene som er lagret i en Dict.
             df_dict = {}
-            output_path = 'turnuser_R24.xlsx'
+            output_path = 'turnuser_R25.xlsx'
             
             for turnus in self.turnuser:
                 for turnus_navn, turnus_verdi in turnus.items():
@@ -337,7 +346,7 @@ class ShiftScraper():
                                                                 'format': turnusfri_format})
 
     def create_json(self):
-        with open('turnuser_R24.json', 'w') as f:
+        with open('turnuser_R25.json', 'w') as f:
             json.dump(self.turnuser, f, indent=4)
 
     def create_database(self):

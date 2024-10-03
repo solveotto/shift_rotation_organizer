@@ -222,8 +222,8 @@ class Turnus():
 
 
 if __name__ == '__main__':
-    turnus = Turnus(conf.static_dir+'\\turnuser_R24.json')
+    turnus = Turnus(conf.static_dir+'\\turnuser_R25.json')
 
-    turnus.stats_df.to_json(conf.static_dir+'\\turnus_df_R24.json')
+    turnus.stats_df.to_json(conf.static_dir+'\\turnus_df_R25.json')
 
     print(turnus.stats_df[['turnus', 'natt_helg', 'helgetimer']])
