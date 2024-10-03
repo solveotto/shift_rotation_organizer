@@ -218,17 +218,17 @@ def remove_favorite(user_id, title):
 
 
 if __name__ == '__main__':
-    #create_new_user('testuser', 'testuser')       
+    create_new_user('bård', 'førsterad')
     #add_points_to_user('test1', 10)
     #username, user_id = login('solve')
 
     #set_user_points('4', 'OSL_01', 17)
 
-    try:
-        username = get_user_data('testuser')
-        print(username)
-    except TypeError:
-        print("User Does Not Exsist")
+    #try:
+    #    username = get_user_data('testuser')
+    #    print(username)
+    #except TypeError:
+    #    print("User Does Not Exsist")
     
     
     
