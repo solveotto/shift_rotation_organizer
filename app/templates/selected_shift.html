@@ -48,22 +48,26 @@
                         <tbody class="text-center">
                             {% for week_nr, week_data in shift_data.items() %}
                                 <tr class="align-middle text-nowrap">
-                                    <td style="border: 1px solid black;">{{ week_nr }}</td>
+                                    <td style="border: 1px solid black; font-size: small;">{{ week_nr }}</td>
 
                                     {% for day_nr, day_data in week_data.items() %}
                                         <td id="cell" class="min-width-td" style="border: 1px solid black;">
-                                            {% for time in day_data.tid %}
-                                                {% if day_data.tid|length == 2 %}
-                                                    {% if loop.first %}
-                                                        {{ time }} -
+                                            <div class="custom-text" style="font-size: xx-small;">{{day_data.dagsverk}}</div>
+                                            <div class="time-text" style="font-size: small;">
+                                                {% for time in day_data.tid %}
+                                                    
+                                                    {% if day_data.tid|length == 2 %}
+                                                        {% if loop.first %}
+                                                            {{ time }} -
+                                                        {% else %}
+                                                            {{ time }}
+                                                        {% endif %}
                                                     {% else %}
                                                         {{ time }}
+                    
                                                     {% endif %}
-                                                {% else %}
-                                                    {{ time }}
-                
-                                                {% endif %}
-                                            {% endfor %}
+                                                {% endfor %}
+                                            </div>
                                         </td>
                                         
                                         
