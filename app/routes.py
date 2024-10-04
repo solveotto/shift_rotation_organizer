@@ -199,7 +199,7 @@ def display_shift():
             if title == selected_shift:
                 shift_title = title
                 shift_data = data
-    
+    print(shift_data)
     shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_title)
 
     session['current_user_point_input'] = shift_user_points

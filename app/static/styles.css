@@ -61,6 +61,13 @@ body, html {
   background-color: rgb(66, 187, 66);
 }
 
+.h-dag {
+  background-color: gold;
+}
+
+.early-and-late {
+  background-color: rgb(204, 92, 92);
+}
 
 
 .square-button {

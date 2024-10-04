@@ -43,52 +43,73 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
 });
 
-
 // Adds color to the shift table
 document.addEventListener('DOMContentLoaded', function() {
     const tds = document.querySelectorAll('td[id="cell"]');
     tds.forEach(td => {
-        const times = td.innerText.split(' - ');
-        
-        if (times.length > 1) {
-            const startTime = times[0].trim();
-            const [start_hours, start_minutes] = startTime.split(':').map(Number);
-            const startTotalMinutes = start_hours * 60 + start_minutes;
-            
-            const endTime = times[1].trim();
-            const [end_hours, end_minutes] = endTime.split(':').map(Number);
-            const endTotalMinutes = end_hours * 60 + end_minutes;
-            
-            const late_shift = 16 * 60; // 16:01 in minutes
-            const night_shift = 19 * 60;
-            
-            if (endTotalMinutes <= late_shift) {
-                td.classList.add('early')
-            }
-            if (endTotalMinutes > late_shift) {
-                td.classList.add('late');
-            }
-            if (startTotalMinutes > late_shift && endTotalMinutes < startTotalMinutes) {
-                td.classList.add('late');
-            }
-            if (startTotalMinutes < late_shift && endTotalMinutes < startTotalMinutes) {
-                td.classList.add('late')
+        const timeTextElement = td.querySelector('.time-text');
+        if (timeTextElement) {
+            // Clean up the timeText by removing newline characters and extra spaces
+            let timeText = timeTextElement.textContent.trim();
+            timeText = timeText.replace(/\s+/g, ' '); // Replace multiple spaces with a single space
+
+            const times = timeText.split(' - ').map(time => time.trim());
+            const customTextElement = td.querySelector('.custom-text');
+
+            // Check if custom text ends with 'H' and add 'yellow' class
+            if (customTextElement && customTextElement.textContent.trim().endsWith('H')) {
+                td.classList.add('h-dag');
+                return;
             }
 
-            if (startTotalMinutes >= night_shift) {
-                td.classList.add('night')
+            if (times.length > 1) {
+                const startTime = times[0];
+                const [start_hours, start_minutes] = startTime.split(':').map(Number);
+                const startTotalMinutes = start_hours * 60 + start_minutes;
+
+                const endTime = times[1];
+                const [end_hours, end_minutes] = endTime.split(':').map(Number);
+                const endTotalMinutes = end_hours * 60 + end_minutes;
+
+                const late_shift = 16 * 60; // 16:01 in minutes
+                const night_shift = 19 * 60;
+
+                if (endTotalMinutes <= late_shift) {
+                    td.classList.add('early');
+                }
+                if (endTotalMinutes > late_shift) {
+                    td.classList.add('late');
+                }
+                if (startTotalMinutes > late_shift && endTotalMinutes < startTotalMinutes) {
+                    td.classList.add('late');
+                }
+                if (startTotalMinutes < late_shift && endTotalMinutes < startTotalMinutes) {
+                    td.classList.add('late');
+                }
+                if (startTotalMinutes >= night_shift) {
+                    td.classList.add('night');
+                }
+
+                
+                if (startTotalMinutes > endTotalMinutes){
+                    td.classList.add('late')
+                }
+
+                if (start_hours > 6 && start_hours < 9 && end_hours > 16 && end_hours < 18){
+                    td.classList.add('early-and-late')
+                }
+
+            } else {
+                const listOfDaysoff = ['XX', 'OO', 'TT', ''];
+                if (listOfDaysoff.includes(times[0])) {
+                    td.classList.add('day_off');
+                }
             }
         } else {
-            const listOfDaysoff = ['XX', 'OO', 'TT']
-            td.classList.add('day_off')
-            if (listOfDaysoff.includes(times[0])) {
-                td.classList.add('day_off')
-            }
+            console.log('No .time-text element found in td:', td); // Debugging statement
         }
-
     });
 });
-
 
 // Makes the submit button not clickable while submitting
 function disableSubmitButton(form) {
