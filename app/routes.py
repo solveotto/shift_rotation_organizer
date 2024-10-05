@@ -106,6 +106,8 @@ def reset_search():
     df_manager.get_all_user_points()
     df_manager.sort_by('turnus', inizialize=True)
 
+    time.sleep(0.5)
+
     return redirect(url_for('main.home'))
 
 
@@ -158,7 +160,7 @@ def calculate():
 
     df_manager.get_all_user_points()
     df_manager.sort_by('poeng')
-    
+    time.sleep(0.5)
     return redirect(url_for('main.home'))
 
 
