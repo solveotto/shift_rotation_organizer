@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import logging
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user as flask_login_user
@@ -11,6 +12,8 @@ from app.forms import LoginForm
 from app.models import User
 
 main = Blueprint('main', __name__)
+
+logging.basicConfig(level=logging.DEBUG)
 
 with open(os.path.join(conf.static_dir, 'turnuser_R25.json'), 'r') as f:
             turnus_data = json.load(f)
@@ -103,10 +106,12 @@ def reset_search():
     session['nights'] = 0
     session['nights_pts'] = 0
     
+    logging.debug(f"Session data after reset: {session}")
+
     df_manager.get_all_user_points()
     df_manager.sort_by('turnus', inizialize=True)
 
-    time.sleep(0.5)
+    time.sleep(1)
 
     return redirect(url_for('main.home'))
 
@@ -120,6 +125,7 @@ def calculate():
     helgetimer = request.form.get('helgetimer', '0')
     df_manager.calc_multipliers('helgetimer', float(helgetimer))
     session['helgetimer'] = helgetimer
+    
     
     helgetimer_dagtid = request.form.get('helgetimer_dagtid', '0')
     df_manager.calc_multipliers('helgetimer_dagtid', float(helgetimer_dagtid))
@@ -157,10 +163,13 @@ def calculate():
     session['nights'] = nights
     session['nights_pts'] = nights_pts
     df_manager.calc_thresholds('natt', int(nights), int(nights_pts))
-
+    
+    logging.debug(f"Session data after calculation: {session}")
+    
     df_manager.get_all_user_points()
     df_manager.sort_by('poeng')
-    time.sleep(0.5)
+    time.sleep(1)
+
     return redirect(url_for('main.home'))
 
 
