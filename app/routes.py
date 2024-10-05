@@ -13,7 +13,12 @@ from app.models import User
 
 main = Blueprint('main', __name__)
 
-logging.basicConfig(level=logging.DEBUG)
+log_file_path = os.getenv('LOG_FILE_PATH', 'app.log')  # Default to 'app.log' if not set
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s', handlers=[
+    logging.FileHandler(log_file_path),
+    logging.StreamHandler()
+])
 
 with open(os.path.join(conf.static_dir, 'turnuser_R25.json'), 'r') as f:
             turnus_data = json.load(f)
