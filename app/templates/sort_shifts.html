@@ -5,7 +5,7 @@
 {% block content %} 
 
     <div class="container mt-3">
-      <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('main.calculate') }}" method="post">
+      <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('main.calculate') }}" method="post" onsubmit="return disableSubmitButton(this);">
         <div class="shadow-sm p-3 gy-2 bg-body-tertiary rounded">
           <div class="row py-2">
             <h5 style="text-decoration: underline;">Tildel poeng (mindre poeng er bedre):</h6>

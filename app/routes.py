@@ -126,6 +126,7 @@ def reset_search():
 
 @main.route('/submit', methods=['POST'])
 def calculate():
+    time.sleep(1)
     # Resets points value
     df_manager.df['poeng'] = 0
     df_manager.sort_by('turnus')
@@ -172,11 +173,11 @@ def calculate():
     session['nights_pts'] = nights_pts
     df_manager.calc_thresholds('natt', int(nights), int(nights_pts))
     
+    session.modified = True
     logging.warning(f"Session data after calculation: {session}")
     
     df_manager.get_all_user_points()
     df_manager.sort_by('poeng')
-    time.sleep(1)
 
     return redirect(url_for('main.home'))
 
