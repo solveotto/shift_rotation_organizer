@@ -2,6 +2,7 @@ import os
 import time
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user as flask_login_user
@@ -13,7 +14,16 @@ from app.models import User
 
 main = Blueprint('main', __name__)
 
-logging.basicConfig(level=logging.DEBUG)
+# Configure logging
+log_file_path = os.path.join(conf.log_dir, 'app.log')
+rotating_handler = RotatingFileHandler(log_file_path, maxBytes=10*1024*1024, backupCount=5)  # 10 MB per file, keep 5 backups
+rotating_handler.setLevel(logging.WARNING)
+rotating_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+
+logging.basicConfig(level=logging.WARNING, handlers=[
+    rotating_handler,
+    logging.StreamHandler()
+])
 
 with open(os.path.join(conf.static_dir, 'turnuser_R25.json'), 'r') as f:
             turnus_data = json.load(f)
@@ -51,7 +61,7 @@ def logout():
  
 @main.route('/')
 @login_required
-def home(): 
+def home():
     # Gets the values set by the user 
     helgetimer = session.get('helgetimer', '0')
     helgetimer_dagtid = session.get('helgetimer_dagtid', '0')
@@ -65,6 +75,7 @@ def home():
     nights = session.get('nights', '0')
     nights_pts = session.get('nights_pts', '0')
 
+    logging.warning(f"Session data in home: {session}")
 
     sort_btn_name = df_manager.sort_by_btn_txt
     favorites = db_utils.get_favorite_lst(current_user.get_id())
@@ -105,12 +116,10 @@ def reset_search():
     session['nights'] = 0
     session['nights_pts'] = 0
     
-    logging.debug(f"Session data after reset: {session}")
+    logging.warning(f"Session data after reset: {session}")
 
     df_manager.get_all_user_points()
     df_manager.sort_by('turnus', inizialize=True)
-
-    time.sleep(1)
 
     return redirect(url_for('main.home'))
 
@@ -163,7 +172,7 @@ def calculate():
     session['nights_pts'] = nights_pts
     df_manager.calc_thresholds('natt', int(nights), int(nights_pts))
     
-    logging.debug(f"Session data after calculation: {session}")
+    logging.warning(f"Session data after calculation: {session}")
     
     df_manager.get_all_user_points()
     df_manager.sort_by('poeng')
