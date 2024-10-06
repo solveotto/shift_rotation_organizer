@@ -79,7 +79,9 @@ def home():
 
     sort_btn_name = df_manager.sort_by_btn_txt
     favorites = db_utils.get_favorite_lst(current_user.get_id())
-
+    
+    time.sleep(1)
+    
      # Pass the table data to the template
     return render_template('sort_shifts.html', 
                            table_data = df_manager.df.to_dict(orient='records'), 
@@ -126,7 +128,6 @@ def reset_search():
 
 @main.route('/submit', methods=['POST'])
 def calculate():
-    time.sleep(1)
     # Resets points value
     df_manager.df['poeng'] = 0
     df_manager.sort_by('turnus')
