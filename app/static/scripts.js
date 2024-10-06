@@ -113,21 +113,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Makes the submit button not clickable while submitting
 function disableSubmitButton(form) {
-    form.querySelector('button[type="submit"]').disabled = true;
-    return true; }
-
-
-// // When i input in the form is changed, it submits
-// document.addEventListener('DOMContentLoaded', (event) => {
-//     const form = document.getElementById('auto-submit-form');
-//     const inputs = form.querySelectorAll('select');
-
-//     inputs.forEach(input => {
-//         input.addEventListener('change', () => {
-//             form.submit();
-//         });
-//     });
-// });
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerText = 'Submitting...';
+    }
+    return true;  // Ensure the form is submitted
+}
 
 
 // Funksjon for å lagre og hente opp hvor lang brukeren har scrollet på siden

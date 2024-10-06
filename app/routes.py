@@ -30,7 +30,6 @@ def login():
             if db_user_data and User.verify_password(db_user_data['password'], form.password.data):
                 user = User(db_user_data['id'], form.username.data, db_user_data['is_auth'])
                 flask_login_user(user)
-                print('Flask Login')
                 return redirect(url_for('main.home'))
             else:
                 flash('Login unsuccessful. Please check username and password', 'danger')
@@ -199,7 +198,6 @@ def select_shift():
 @login_required
 def display_shift():
     selected_shift = session.get('selected_shift')
-    print('SELECTED SHIFT', selected_shift)
     
     if not selected_shift:
         selected_shift = 'OSL_01'
@@ -210,7 +208,7 @@ def display_shift():
             if title == selected_shift:
                 shift_title = title
                 shift_data = data
-    print(shift_data)
+
     shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_title)
 
     session['current_user_point_input'] = shift_user_points
@@ -254,7 +252,6 @@ def next_shift():
         return "Invalid direction", 400
 
     next_row = df_manager.df.iloc[next_row_index] if next_row_index is not None and next_row_index < len(df_manager.df) else None
-    print(session.get('selected_shift'), next_row['turnus'])
     session['selected_shift'] = next_row['turnus']
     
     return redirect(url_for('main.display_shift'))
@@ -314,7 +311,6 @@ def update_order():
         """
         current_database_order = db_utils.execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
         current_shift_titles = {shift[1] for shift in current_database_order}
-        print('current db order', current_database_order)
 
         # Determine which shift titles are missing in the new order
         new_shift_titles = set(new_order)
@@ -374,7 +370,6 @@ def toggle_favorite():
         new_order_index = max_order_index +1 if max_order_index is not None else 1
         db_utils.add_favorite(current_user.get_id(),shift_title, new_order_index)
     else:
-        print(f"Checkbox is unchecked. Title: {shift_title}.")
         try:
             db_utils.remove_favorite(current_user.get_id(), shift_title)
         except ValueError:
