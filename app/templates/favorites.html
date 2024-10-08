@@ -42,13 +42,15 @@
                         </div>
                         
                         {% for turnus in favorites %}
+                            {% set outer_index = loop.index0 %}
                             {% for name, data in turnus.items() %}
                                 
-                                <li class="list-group-item mb-2 rounded p-2 small" data-name="{{ name }}" style="border: 1px solid black;"> 
+                                <li class="list-group-item mb-2 rounded p-2 small" data-name="{{ name }}" style="border: 1px solid black;" data-bs-toggle="tooltip" data-bs-placement="top" title="Klikk og dra for å endre rekkefølge."> 
                                     <table>
                                         <div class="d-flex align-items-center justify-content-between py-1">
+                                            <h5 class="t-num">#{{ outer_index+1 }}</h5>
                                             <div class="clickable-row" data-turnus="{{name}}">
-                                                <h5 class="h4-hover">{{name}} <i class="bi bi-info-circle"></i></h5>
+                                                <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
 
                                             </div>
                                             

@@ -77,7 +77,7 @@ def home():
     form.nights.data = session.get('nights', '0')
     form.nights_pts.data = session.get('nights_pts', '0')
 
-    logging.warning(f"Session data in home: {session}")
+    #logging.warning(f"Session data in home: {session}")
 
     sort_btn_name = df_manager.sort_by_btn_txt
     favorites = db_utils.get_favorite_lst(current_user.get_id())
@@ -110,7 +110,7 @@ def reset_search():
     session['nights'] = 0
     session['nights_pts'] = 0
     
-    logging.warning(f"Session data after reset: {session}")
+    #logging.warning(f"Session data after reset: {session}")
 
     df_manager.get_all_user_points()
     df_manager.sort_by('turnus', inizialize=True)
@@ -360,7 +360,6 @@ def update_order():
         print(f"Failed to modify database. Changes only stored localy.")
         flash('Failed to modify database. Changes only stored localy. Error: {e}', 'danger')
 
-    # Return a JSON response
     return jsonify({'status': 'success', 'new_order': new_order})
 
 

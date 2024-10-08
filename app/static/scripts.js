@@ -148,31 +148,44 @@ if (window.location.pathname === indexRoute){
 document.addEventListener('DOMContentLoaded', function () {
     var sortableList = document.getElementById('sortable-list');
     if (sortableList) {
-        Sortable.create(sortableList, {
+        var sortable = Sortable.create(sortableList, {
             animation: 150,
             ghostClass: 'sortable-ghost',
     
             onEnd: function(/** */evt) {
+                // Disable sorting until the response is received
+                sortable.option("disabled", true);
+                document.body.style.cursor = 'wait';
                 // Oppdaterer rekkefølgen av listen når bruker endrer den
                 var order = []
                 var items = sortableList.querySelectorAll('.list-group-item');
                 items.forEach(function (item) {
                     order.push(item.getAttribute('data-name').trim());
                 });
-    
                 // Sender innholdet i listen til Flask server
+                
                 fetch('/update-order', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({order:order})
+                
                 }).then(response => {
                     if (response.ok) {
-                        console.log('Order updated successfully!'); 
+                        sortable.option("disabled", false);
+                        console.log('Order updated successfully!');
+                        window.location.reload();
                     } else {
                         console.error('Failed to update order.');
+                        sortable.option("disabled", false);
+                        document.body.style.cursor = 'default';
                     }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    // Re-enable sorting if there is an error
+                    sortable.option("disabled", false);
+                    document.body.style.cursor = 'default';
                 });
             }
         });
@@ -217,8 +230,9 @@ function printTables() {
     var printContents = '';
     var tables = document.querySelectorAll('table');
     tables.forEach(function(table) {
-        var name = table.closest('li').querySelector('h5').innerText;
-        printContents += '<div class="print-frame"><h5>' + name + '</h5>' + table.outerHTML + '</div><br>';
+        var number =  table.closest('li').querySelector('.t-num').innerText;
+        var name = table.closest('li').querySelector('.t-name').innerText;
+        printContents += '<div class="print-frame"><h5>' + number +' - '+ name + '</h5>' + table.outerHTML + '</div><br>';
     });
 
     var originalContents = document.body.innerHTML;

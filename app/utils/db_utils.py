@@ -139,7 +139,6 @@ def get_user_data(username):
             FROM users
             WHERE username = %s
             """
-    print("DATABASE: get_user_data", username)
     result = execute_query(login_user_query, (username, ), fetch=True)
     if result:
         data = {'username': result[0][1], 'id': result[0][0], 'password': result[0][2], 'is_auth': result[0][5]}
