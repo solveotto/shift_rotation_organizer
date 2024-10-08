@@ -253,16 +253,22 @@ def next_shift():
     selected_shift_df = df_manager.df[df_manager.df['turnus'] == selected_shift]
     
     # Select the row after the filtered row
-    
     if direction == 'next':
         next_row_index = selected_shift_df.index[0] + 1 if not selected_shift_df.empty else None
     elif direction == 'prev':
         next_row_index = selected_shift_df.index[0] - 1 if not selected_shift_df.empty else None
     else:
         return "Invalid direction", 400
-
-    next_row = df_manager.df.iloc[next_row_index] if next_row_index is not None and next_row_index < len(df_manager.df) else None
-    session['selected_shift'] = next_row['turnus']
+    print(next_row_index, len(df_manager.df), 'iloc=', df_manager.df.iloc[0]['turnus'])
+    # Check if next_row_index is within the valid range
+    if next_row_index is not None and 0 <= next_row_index < len(df_manager.df):
+        next_row = df_manager.df.iloc[next_row_index]
+        session['selected_shift'] = next_row['turnus']
+    # Handle the case where next_row_index is out of bounds
+    elif next_row_index == len(df_manager.df):
+        session['selected_shift'] = df_manager.df.iloc[0]['turnus']
+    else:
+        session['selected_shift'] = df_manager.df.iloc[-1]['turnus']
     
     return redirect(url_for('main.display_shift'))
 
