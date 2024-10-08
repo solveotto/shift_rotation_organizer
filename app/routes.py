@@ -1,6 +1,8 @@
 import os
 import time
 import json
+import logging
+from logging.handlers import RotatingFileHandler
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from flask_login import LoginManager, logout_user, login_required, current_user
 from flask_login import login_user as flask_login_user
@@ -11,6 +13,17 @@ from app.forms import LoginForm, CalculationForm
 from app.models import User
 
 main = Blueprint('main', __name__)
+
+# Configure logging
+log_file_path = os.path.join(conf.log_dir, 'app.log')
+rotating_handler = RotatingFileHandler(log_file_path, maxBytes=10*1024*1024, backupCount=5)  # 10 MB per file, keep 5 backups
+rotating_handler.setLevel(logging.WARNING)
+rotating_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+
+logging.basicConfig(level=logging.WARNING, handlers=[
+    rotating_handler,
+    logging.StreamHandler()
+])
 
 with open(os.path.join(conf.static_dir, 'turnuser_R25.json'), 'r') as f:
             turnus_data = json.load(f)
@@ -27,7 +40,6 @@ def login():
             if db_user_data and User.verify_password(db_user_data['password'], form.password.data):
                 user = User(db_user_data['id'], form.username.data, db_user_data['is_auth'])
                 flask_login_user(user)
-                print('Flask Login')
                 return redirect(url_for('main.home'))
             else:
                 flash('Login unsuccessful. Please check username and password', 'danger')
@@ -51,6 +63,7 @@ def logout():
 @login_required
 def home(): 
     form = CalculationForm()
+
     # Gets the values set by the user 
     form.helgetimer.data = session.get('helgetimer', '0')
     form.helgetimer_dagtid.data = session.get('helgetimer_dagtid', '0')
@@ -64,10 +77,13 @@ def home():
     form.nights.data = session.get('nights', '0')
     form.nights_pts.data = session.get('nights_pts', '0')
 
+    logging.warning(f"Session data in home: {session}")
 
     sort_btn_name = df_manager.sort_by_btn_txt
     favorites = db_utils.get_favorite_lst(current_user.get_id())
-
+    
+    time.sleep(1)
+    
      # Pass the table data to the template
     return render_template('sort_shifts.html', 
                            table_data = df_manager.df.to_dict(orient='records'),
@@ -94,6 +110,8 @@ def reset_search():
     session['nights'] = 0
     session['nights_pts'] = 0
     
+    logging.warning(f"Session data after reset: {session}")
+
     df_manager.get_all_user_points()
     df_manager.sort_by('turnus', inizialize=True)
 
@@ -163,6 +181,7 @@ def calculate():
         return redirect(url_for('main.home'))
 
 
+
 @main.route('/sort_by_column')
 def sort_by_column():
     column = request.args.get('column')
@@ -189,7 +208,6 @@ def select_shift():
 @login_required
 def display_shift():
     selected_shift = session.get('selected_shift')
-    print('SELECTED SHIFT', selected_shift)
     
     if not selected_shift:
         selected_shift = 'OSL_01'
@@ -200,7 +218,7 @@ def display_shift():
             if title == selected_shift:
                 shift_title = title
                 shift_data = data
-    print(shift_data)
+
     shift_user_points = db_ctrl.get_shift_rating(df_manager.user_id, shift_title)
 
     session['current_user_point_input'] = shift_user_points
@@ -244,7 +262,6 @@ def next_shift():
         return "Invalid direction", 400
 
     next_row = df_manager.df.iloc[next_row_index] if next_row_index is not None and next_row_index < len(df_manager.df) else None
-    print(session.get('selected_shift'), next_row['turnus'])
     session['selected_shift'] = next_row['turnus']
     
     return redirect(url_for('main.display_shift'))
@@ -304,7 +321,6 @@ def update_order():
         """
         current_database_order = db_utils.execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
         current_shift_titles = {shift[1] for shift in current_database_order}
-        print('current db order', current_database_order)
 
         # Determine which shift titles are missing in the new order
         new_shift_titles = set(new_order)
@@ -364,7 +380,6 @@ def toggle_favorite():
         new_order_index = max_order_index +1 if max_order_index is not None else 1
         db_utils.add_favorite(current_user.get_id(),shift_title, new_order_index)
     else:
-        print(f"Checkbox is unchecked. Title: {shift_title}.")
         try:
             db_utils.remove_favorite(current_user.get_id(), shift_title)
         except ValueError:

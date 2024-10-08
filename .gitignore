@@ -16,3 +16,6 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+app.log
+app/logs
+app/utils/sessions
