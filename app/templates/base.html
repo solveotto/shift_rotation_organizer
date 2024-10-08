@@ -16,15 +16,29 @@
       <script src="{{ url_for('static', filename='scripts.js') }}" defer></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 
+      <!-- Add the favicon link here -->
+      <link rel="icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" type="image/x-icon">
+      <!-- Alternative formats -->
+      <!-- <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png"> -->
 
-      <title>Turnus App</title>
+
+      <title>Turnushjelper</title>
   </head>
 
   <body>
+
+
     <header>
       <nav class="navbar navbar-custom-color">
+        
         <div class="container-fluid">
+
+        
+         
           <div class="d-flex justify-content-between align-items-center w-100">
+            <a class="navbar-brand" href="#">
+              <img src="/static/artybadger.png" alt="Bootstrap" width="75" height="75" style="border-radius: 50%;">
+            </a>
             <h3 class="text-center flex-grow-1 m-0" style="position: relative; left: 1em;">
               <span>{% block prev_btn %}{% endblock %}</span>
               {{ page_name.replace('_', ' ') }}
