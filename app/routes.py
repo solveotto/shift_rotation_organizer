@@ -7,7 +7,7 @@ from flask_login import login_user as flask_login_user
 from mysql.connector import Error
 from config import conf
 from app.utils import df_utils, db_utils
-from app.forms import LoginForm
+from app.forms import LoginForm, CalculationForm
 from app.models import User
 
 main = Blueprint('main', __name__)
@@ -50,18 +50,19 @@ def logout():
 @main.route('/')
 @login_required
 def home(): 
+    form = CalculationForm()
     # Gets the values set by the user 
-    helgetimer = session.get('helgetimer', '0')
-    helgetimer_dagtid = session.get('helgetimer_dagtid', '0')
-    natt_helg = session.get('natt_helg', '0')
-    tidlig = session.get('tidlig', '0')
-    tidlig_poeng = session.get('tidlig_poeng', '0')
-    before_6 = session.get('before_6', '0')
-    ettermiddager = session.get('ettermiddager', '0')
-    ettermiddager_poeng = session.get('ettermiddager_poeng', '0')
-    slutt_for_20 = session.get('slutt_for_20')
-    nights = session.get('nights', '0')
-    nights_pts = session.get('nights_pts', '0')
+    form.helgetimer.data = session.get('helgetimer', '0')
+    form.helgetimer_dagtid.data = session.get('helgetimer_dagtid', '0')
+    form.natt_helg.data = session.get('natt_helg', '0')
+    form.tidlig.data = session.get('tidlig', '0')
+    form.tidlig_poeng.data = session.get('tidlig_poeng', '0')
+    form.before_6.data = session.get('before_6', '0')
+    form.ettermiddager.data = session.get('ettermiddager', '0')
+    form.ettermiddager_poeng.data = session.get('ettermiddager_poeng', '0')
+    form.slutt_for_20.data = session.get('slutt_for_20', '0')
+    form.nights.data = session.get('nights', '0')
+    form.nights_pts.data = session.get('nights_pts', '0')
 
 
     sort_btn_name = df_manager.sort_by_btn_txt
@@ -69,18 +70,8 @@ def home():
 
      # Pass the table data to the template
     return render_template('sort_shifts.html', 
-                           table_data = df_manager.df.to_dict(orient='records'), 
-                           helgetimer = helgetimer,
-                           helgetimer_dagtid = helgetimer_dagtid,
-                           natt_helg = natt_helg,
-                           tidlig = tidlig,
-                           tidlig_poeng = tidlig_poeng,
-                           before_6 = before_6,
-                           ettermiddager = ettermiddager,
-                           ettermiddager_poeng = ettermiddager_poeng,
-                           slutt_for_20 = slutt_for_20,
-                           nights = nights,
-                           nights_pts = nights_pts,
+                           table_data = df_manager.df.to_dict(orient='records'),
+                           form=form,
                            sort_by_btn_name = sort_btn_name,
                            page_name = 'Turnusliste',
                            favorites = favorites
@@ -111,55 +102,65 @@ def reset_search():
 
 @main.route('/submit', methods=['POST'])
 def calculate():
-    # Resets points value
-    df_manager.df['poeng'] = 0
-    df_manager.sort_by('turnus')
+    form = CalculationForm()   
+    if form.validate_on_submit():
+         # Store form data in session
+        session['helgetimer'] = form.helgetimer.data
+        session['helgetimer_dagtid'] = form.helgetimer_dagtid.data
+        session['natt_helg'] = form.natt_helg.data
+        session['tidlig'] = form.tidlig.data
+        session['tidlig_poeng'] = form.tidlig_poeng.data
+        session['before_6'] = form.before_6.data
+        session['ettermiddager'] = form.ettermiddager.data
+        session['ettermiddager_poeng'] = form.ettermiddager_poeng.data
+        session['slutt_for_20'] = form.slutt_for_20.data
+        session['nights'] = form.nights.data
+        session['nights_pts'] = form.nights_pts.data
 
-    helgetimer = request.form.get('helgetimer', '0')
-    df_manager.calc_multipliers('helgetimer', float(helgetimer))
-    session['helgetimer'] = helgetimer
-    
-    helgetimer_dagtid = request.form.get('helgetimer_dagtid', '0')
-    df_manager.calc_multipliers('helgetimer_dagtid', float(helgetimer_dagtid))
-    session['helgetimer_dagtid'] = helgetimer_dagtid
-    
-    natt_helg = request.form.get('natt_helg', '0')
-    session['natt_helg'] = natt_helg
-    df_manager.calc_multipliers('natt_helg', -float(natt_helg))
+        # Resets points value
+        df_manager.df['poeng'] = 0
+        df_manager.sort_by('turnus')
 
-    tidlig = request.form.get('tidlig', '0')
-    tidlig_poeng = request.form.get('tidlig_poeng', '0')
-    session['tidlig']= tidlig
-    session['tidlig_poeng'] = tidlig_poeng
-    df_manager.calc_thresholds('tidlig', int(tidlig), int(tidlig_poeng))
+        helgetimer = float(form.helgetimer.data)
+        df_manager.calc_multipliers('helgetimer', helgetimer)
+        helgetimer_dagtid = float(form.helgetimer_dagtid.data)
+        df_manager.calc_multipliers('helgetimer_dagtid', helgetimer_dagtid)
+        
+        natt_helg = float(form.natt_helg.data)
+        df_manager.calc_multipliers('natt_helg', -natt_helg)
 
-    before_6 = request.form.get('before_6', '0')
-    session['before_6'] = before_6
-    df_manager.calc_multipliers('before_6', int(before_6))
+        tidlig = int(form.tidlig.data)
+        tidlig_poeng = int(form.tidlig_poeng.data)
+        df_manager.calc_thresholds('tidlig', tidlig, tidlig_poeng)
 
-    # calculate points for ettermiddager
-    ettermiddager = request.form.get('ettermiddager', '0')
-    ettermiddager_pts = request.form.get('ettermiddager_poeng', '0')
-    session['ettermiddager'] = ettermiddager
-    session['ettermiddager_poeng'] = ettermiddager_pts
-    df_manager.calc_thresholds('ettermiddag', int(ettermiddager), int(ettermiddager_pts))
+        before_6 = float(form.before_6.data)
+        df_manager.calc_multipliers('before_6', before_6)
 
-    # Slutt før 20
-    slutt_for_20 = request.form.get('slutt_for_20', '0')
-    session['slutt_for_20'] = slutt_for_20
-    df_manager.calc_multipliers('afternoon_ends_before_20', -int(slutt_for_20))
+        # Calculate points for ettermiddager
+        ettermiddager = int(form.ettermiddager.data)
+        ettermiddager_pts = int(form.ettermiddager_poeng.data)
+        df_manager.calc_thresholds('ettermiddag', ettermiddager, ettermiddager_pts)
 
-    # caluclate points for nights
-    nights = request.form.get('nights', '0')
-    nights_pts = request.form.get('nights_pts', '0')
-    session['nights'] = nights
-    session['nights_pts'] = nights_pts
-    df_manager.calc_thresholds('natt', int(nights), int(nights_pts))
+        # Slutt før 20
+        slutt_for_20 = int(form.slutt_for_20.data)
+        df_manager.calc_multipliers('afternoon_ends_before_20', -slutt_for_20)
 
-    df_manager.get_all_user_points()
-    df_manager.sort_by('poeng')
-    
-    return redirect(url_for('main.home'))
+        # Calculate points for nights
+        nights = int(form.nights.data)
+        nights_pts = int(form.nights_pts.data)
+        df_manager.calc_thresholds('natt', nights, nights_pts)
+        
+
+        df_manager.get_all_user_points()
+        df_manager.sort_by('poeng')
+
+        session.modified = True
+        
+        return redirect(url_for('main.home'))
+    else:
+        flash('Form validation failed. Please check your inputs.', 'danger')
+        print("Form validation failed. Please check your inputs.")
+        return redirect(url_for('main.home'))
 
 
 @main.route('/sort_by_column')
