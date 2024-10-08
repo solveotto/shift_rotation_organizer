@@ -211,3 +211,18 @@ document.addEventListener('DOMContentLoaded', function() {
 document.querySelector('form').addEventListener('submit', function(event) {
     console.log('Form submitted');
 });
+
+
+function printTables() {
+    var printContents = '';
+    var tables = document.querySelectorAll('table');
+    tables.forEach(function(table) {
+        var name = table.closest('li').querySelector('h5').innerText;
+        printContents += '<div class="print-frame"><h5>' + name + '</h5>' + table.outerHTML + '</div><br>';
+    });
+
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+}

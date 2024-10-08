@@ -25,14 +25,16 @@
       <nav class="navbar navbar-custom-color">
         <div class="container-fluid">
           <div class="d-flex justify-content-between align-items-center w-100">
-            
             <h3 class="text-center flex-grow-1 m-0" style="position: relative; left: 1em;">
               <span>{% block prev_btn %}{% endblock %}</span>
               {{ page_name.replace('_', ' ') }}
               <span>{% block next_btn %}{% endblock %}</span>
             </h3>
+            
+            {% block print %}{% endblock %}
 
             <div class="d-flex align-items-center">
+
               
               <div class="dropdown ms-3">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">

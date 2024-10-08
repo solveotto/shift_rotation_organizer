@@ -186,3 +186,35 @@ label input[type="checkbox"] {
 .custom-remove-btn {
   margin-top: -10px; /* Adjust the value as needed */
 }
+
+
+@media print {
+  .print-frame {
+      border: 1px solid rgb(53, 52, 52);
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      page-break-inside: avoid;
+  }
+  table {
+      width: 100%;
+      border-collapse: collapse;
+  }
+  th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: center;
+      font-size: 0.8em; /* Reduced font size */
+  }
+  th {
+      background-color: #f2f2f2;
+  }
+  h5 {
+      font-size: 0.8em;
+      margin: 5px 0;
+  }
+  
+  .print-frame:nth-of-type(3n+1) {
+      page-break-before: always;
+  }
+}
