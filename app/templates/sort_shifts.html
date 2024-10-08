@@ -6,73 +6,77 @@
 
     <div class="container mt-3">
       <form class="row gy-2 gx-3 align-items-center" action="{{ url_for('main.calculate') }}" method="post" onsubmit="return disableSubmitButton(this);">
-        {{ form.hidden_tag() }}
-        <div class="shadow-sm p-3 gy-2 bg-body-tertiary rounded">
-          <div class="row py-2">
-            <h5 style="text-decoration: underline;">Tildel poeng (mindre poeng er bedre):</h6>
-            <div class="col-md-1">
-                <h6 class="fw-lighter fst-italic">Multipliser helgetimer med:</h6>
-                 {{ form.helgetimer(class="form-select-sm", aria_label="Default select example") }}
-              </div>
-
+        {% if form is defined %}
+          {{ form.hidden_tag() }}
+          <div class="shadow-sm p-3 gy-2 bg-body-tertiary rounded">
+            <div class="row py-2">
+              <h5 style="text-decoration: underline;">Tildel poeng (mindre poeng er bedre):</h6>
               <div class="col-md-1">
-                <h6 class="fw-lighter fst-italic">Multipliser helgetimer på dagtid med:</h6>
-                  {{ form.helgetimer_dagtid(class="form-select-sm", aria_label="Default select example") }}  
-              </div>
-            
-            <div class="col-md-2">
-              <div class="row-md-1">
-                <h6 class="fw-lighter fst-italic">Tidligvakter:</h6>
-                  {{ form.tidlig(class="form-select-sm", aria_label="Default select example") }}
-                  {{ form.tidlig_poeng(class="form-select-sm", aria_label="Default select example") }}
-              </div>
+                  <h6 class="fw-lighter fst-italic">Multipliser helgetimer med:</h6>
+                  {{ form.helgetimer(class="form-select-sm", aria_label="Default select example") }}
+                </div>
+
+                <div class="col-md-1">
+                  <h6 class="fw-lighter fst-italic">Multipliser helgetimer på dagtid med:</h6>
+                    {{ form.helgetimer_dagtid(class="form-select-sm", aria_label="Default select example") }}  
+                </div>
               
-              <div class="row-md-1">
-                <h6 class="fw-lighter fst-italic">Starter før 6:</h6>
-                  {{ form.before_6(class="form-select-sm", aria_label="Default select example") }}
-              </div> 
-            </div>
-            
-            
-            <div class="col-md-2">
-              <div class="row-md-1">
-                <h6 class="fw-lighter fst-italic">Ettermiddag:</h6>
-                {{ form.ettermiddager(class="form-select-sm", aria_label="Default select example") }}
-                {{ form.ettermiddager_poeng(class="form-select-sm", aria_label="Default select example") }}
+              <div class="col-md-2">
+                <div class="row-md-1">
+                  <h6 class="fw-lighter fst-italic">Tidligvakter:</h6>
+                    {{ form.tidlig(class="form-select-sm", aria_label="Default select example") }}
+                    {{ form.tidlig_poeng(class="form-select-sm", aria_label="Default select example") }}
+                </div>
                 
+                <div class="row-md-1">
+                  <h6 class="fw-lighter fst-italic">Starter før 6:</h6>
+                    {{ form.before_6(class="form-select-sm", aria_label="Default select example") }}
+                </div> 
               </div>
               
-              <div class="row-md-1">
-                <h6 class="fw-lighter fst-italic">Slutter før 20:</h6>
-                {{ form.slutt_for_20(class="form-select-sm", aria_label="Default select example") }}
-              </div> 
-            </div>
-
-
-
-            <div class="col-md-3">
-              <div class="row-md-1">
-                <h6 class="fw-lighter fst-italic">Nattevakter</h6>
-                {{ form.nights(class="form-select-sm", aria_label="Default select example") }}
-                {{ form.nights_pts(class="form-select-sm", aria_label="Default select example") }}
+              
+              <div class="col-md-2">
+                <div class="row-md-1">
+                  <h6 class="fw-lighter fst-italic">Ettermiddag:</h6>
+                  {{ form.ettermiddager(class="form-select-sm", aria_label="Default select example") }}
+                  {{ form.ettermiddager_poeng(class="form-select-sm", aria_label="Default select example") }}
+                  
+                </div>
+                
+                <div class="row-md-1">
+                  <h6 class="fw-lighter fst-italic">Slutter før 20:</h6>
+                  {{ form.slutt_for_20(class="form-select-sm", aria_label="Default select example") }}
+                </div> 
               </div>
 
 
-              <div class="row-md-1">
-                <h6 class="fw-lighter fst-italic">Natt i helg:</h6>
-                {{ form.natt_helg(class="form-select-sm", aria_label="Default select example") }}
+
+              <div class="col-md-3">
+                <div class="row-md-1">
+                  <h6 class="fw-lighter fst-italic">Nattevakter</h6>
+                  {{ form.nights(class="form-select-sm", aria_label="Default select example") }}
+                  {{ form.nights_pts(class="form-select-sm", aria_label="Default select example") }}
+                </div>
+
+
+                <div class="row-md-1">
+                  <h6 class="fw-lighter fst-italic">Natt i helg:</h6>
+                  {{ form.natt_helg(class="form-select-sm", aria_label="Default select example") }}
+                </div>
               </div>
+              
+
             </div>
             
-
-          </div>
-          
-          <div class="row py-2">
-            <div class="col-md-4">
-              <button type="submit" class="btn btn-primary">Submit</button>
-              <a href="{{ url_for('main.reset_search') }}" class="btn btn-warning">Reset</a>
-            </div>
-          </form>
+            <div class="row py-2">
+              <div class="col-md-4">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a href="{{ url_for('main.reset_search') }}" class="btn btn-warning">Reset</a>
+              </div>
+        {% else %}
+          <p>Error: Form is not defined.</p>
+        {% endif %}
+      </form>
           
             <div class="col">
               <div class="dropdown d-flex justify-content-md-end">
