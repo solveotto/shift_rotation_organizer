@@ -89,7 +89,7 @@ def home():
                            table_data = df_manager.df.to_dict(orient='records'),
                            form=form,
                            sort_by_btn_name = sort_btn_name,
-                           page_name = 'Turnusliste',
+                           page_name = 'Sorter Turnuser',
                            favorites = favorites
                            )
 
@@ -394,3 +394,15 @@ def toggle_favorite():
 
 df_manager = df_utils.DataframeManager()
 db_ctrl = db_utils
+
+
+@main.route('/turnusliste')
+def turnusliste():
+    favorites_lst = db_utils.get_favorite_lst(current_user.get_id())
+    return render_template('turnusliste.html',
+                           page_name = 'Turnusliste',
+                           table_data = turnus_data,
+                           df = df_manager.df.to_dict(orient='records'),
+                           favoritt = favorites_lst
+                           )
+    

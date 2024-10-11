@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // FOR Å DETEKTERE FAVORITT
 document.addEventListener('DOMContentLoaded', function() {
-    const inputElement = document.getElementById('id-of-input');
+    const inputElement = document.getElementById('toggle-favoritt');
     if (inputElement) {
         inputElement.addEventListener('change', function() {
             const isChecked = this.checked;
@@ -221,9 +221,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-document.querySelector('form').addEventListener('submit', function(event) {
-    console.log('Form submitted');
-});
+// document.querySelector('form').addEventListener('submit', function(event) {
+//     console.log('Form submitted');
+// });
 
 
 function printTables() {
@@ -233,6 +233,24 @@ function printTables() {
         var number =  table.closest('li').querySelector('.t-num').innerText;
         var name = table.closest('li').querySelector('.t-name').innerText;
         printContents += '<div class="print-frame"><h5>' + number +' - '+ name + '</h5>' + table.outerHTML + '</div><br>';
+    });
+
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+}
+
+
+function printAllTables() {
+    var printContents = '';
+    var tables = document.querySelectorAll('table');
+    
+    tables.forEach(function(table) {
+        var name = table.closest('li').querySelector('.t-name').innerText;
+        var dataFelt = table.closest('li').querySelector('.data-felt').outerHTML;
+        
+        printContents += '<div class="print-frame"><h4>' + name + '</h4>' + table.outerHTML + dataFelt + '</div><br>';
     });
 
     var originalContents = document.body.innerHTML;

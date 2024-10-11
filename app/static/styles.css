@@ -191,7 +191,7 @@ label input[type="checkbox"] {
 @media print {
   .print-frame {
       border: 1px solid rgb(53, 52, 52);
-      width: 80%;
+      width: 100%;
       padding: 10px;
       margin: 10px 0;
       page-break-inside: avoid;
@@ -214,7 +214,7 @@ label input[type="checkbox"] {
       margin: 5px 0;
   }
   
-  .print-frame:nth-of-type(3n+1) {
+  .print-frame:nth-of-type(2n+1) {
       page-break-before: always;
   }
 }

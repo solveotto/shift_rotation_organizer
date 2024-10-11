@@ -110,12 +110,11 @@
                                 {% for row in table_data %}
                                     {% if row.turnus == shift_title %}
                                             <td>
-                                                <label for="id-of-input" class="custom-checkbox">
-                                                    <input type="checkbox" id="id-of-input" shift_title="{{ shift_title }}" {% if favoritt %}checked{% endif %}>
+                                                <label for="toggle-favoritt" class="custom-checkbox">
+                                                    <input type="checkbox" id="toggle-favoritt" shift_title="{{ shift_title }}" {% if favoritt %}checked{% endif %}>
                                                         <i class="bi bi-star"></i>
                                                         <i class="bi bi-star-fill"></i>
                                                 </label>
-                                            </div>
                                             </td>
                                             <td>{{ row.poeng }}</td>
                                             <td>{{ row.tidlig }}</td>
