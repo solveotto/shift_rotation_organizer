@@ -24,13 +24,13 @@
                         {% set outer_index = loop.index0 %} <!-- Setter indexen for toggle funksjonen-->
                         {% for name, data in turnus.items() %}
                     
-                            <li class="list-group-item mb-2 rounded p-2 small" data-name="{{ name }}" style="border: 1px solid black;" data-bs-toggle="tooltip" data-bs-placement="top" title="Klikk og dra for å endre rekkefølge."> 
+                            <li class="list-group-item mb-2 rounded p-2 small" data-name="{{ name }}" style="border: 1px solid black;"> 
                                 <table>
                                     <div class="d-flex align-items-center justify-content-between py-1">
                                         <div class="clickable-row" data-turnus="{{name}}">
                                             <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
                                         </div>
-                                        <label for="toggle-favoritt-{{ outer_index }}" class="custom-checkbox">
+                                        <label for="toggle-favoritt-{{ outer_index }}" class="custom-checkbox" data-bs-toggle="tooltip" data-bs-placement="top" title="Klikk for å velge som favoritt.">
                                             <input type="checkbox" id="toggle-favoritt-{{ outer_index }}"  class="toggle-favoritt" shift_title="{{ name }}" {% if name in favoritt %}checked{% endif %}>
                                                 <i class="bi bi-star"></i>
                                                 <i class="bi bi-star-fill"></i>
