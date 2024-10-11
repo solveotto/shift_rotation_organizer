@@ -4,20 +4,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelectorAll('.clickable-row').forEach(row => {
         row.addEventListener('click', () => {
             const turnus = row.getAttribute('data-turnus');
-            const checkbox = row.querySelector('.prevent-click');
-            const isChecked = checkbox ? checkbox.checked : false;
-
-            if (isChecked) {
-                console.log('Checkbox is checked:', isChecked);
+            
                 console.log('Turnus:', turnus);
-            }
+            
 
             fetch('/api/js_select_shift', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ turnus: turnus, checked: isChecked })
+                body: JSON.stringify({ turnus: turnus })
             })
             .then(response => {
                 if (response.redirected) {
@@ -194,14 +190,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-// FOR Å DETEKTERE FAVORITT
+// TOGGLE FAVORITT
 document.addEventListener('DOMContentLoaded', function() {
-    const inputElement = document.getElementById('toggle-favoritt');
-    if (inputElement) {
-        inputElement.addEventListener('change', function() {
-            const isChecked = this.checked;
-            const shiftTitle = this.getAttribute('shift_title');
+    // Use event delegation to handle change events on elements with the class 'toggle-favoritt'
+    document.body.addEventListener('change', function(event) {
+        if (event.target.classList.contains('toggle-favoritt')) {
+            const isChecked = event.target.checked;
+            const shiftTitle = event.target.getAttribute('shift_title');
             
+            console.log('isChecked: ', isChecked, ',', 'ShiftTitle: ', shiftTitle)
+
+
             fetch('/toggle_favorite', {
                 method: 'POST',
                 headers: {
@@ -216,10 +215,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch((error) => {
                 console.error('Error:', error);
             });
-        });
-    } 
+        }
+    });
 });
-
 
 // document.querySelector('form').addEventListener('submit', function(event) {
 //     console.log('Form submitted');

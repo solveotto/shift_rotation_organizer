@@ -110,8 +110,8 @@
                                 {% for row in table_data %}
                                     {% if row.turnus == shift_title %}
                                             <td>
-                                                <label for="toggle-favoritt" class="custom-checkbox">
-                                                    <input type="checkbox" id="toggle-favoritt" shift_title="{{ shift_title }}" {% if favoritt %}checked{% endif %}>
+                                                <label for="toggle-favoritt-{{ loop.index }}" class="custom-checkbox">
+                                                    <input type="checkbox" id="toggle-favoritt-{{ loop.index }}" class="toggle-favoritt" shift_title="{{ shift_title }}" {% if favoritt %}checked{% endif %}>
                                                         <i class="bi bi-star"></i>
                                                         <i class="bi bi-star-fill"></i>
                                                 </label>

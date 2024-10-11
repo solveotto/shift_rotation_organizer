@@ -129,14 +129,15 @@
           <tbody>
 
             {% for row in table_data %}
-              <tr class="clickable-row" data-turnus="{{ row.turnus }}">
+              <tr>
                 <td>
-                  {% if row.turnus in favorites %}
-                    <i class="bi bi-check"></i>
-              
-                  {% endif %}
+                  <label for="toggle-favoritt-{{ loop.index }}" class="custom-checkbox">
+                    <input type="checkbox" id="toggle-favoritt-{{ loop.index }}" class="toggle-favoritt" shift_title="{{ row.turnus }}" {% if row.turnus in favorites %}checked{% endif %}>
+                        <i class="bi bi-star"></i>
+                        <i class="bi bi-star-fill"></i>
+                  </label>
                 </td>
-                <td>{{ row.turnus }}</td>
+                <td class="clickable-row" data-turnus="{{ row.turnus }}">{{ row.turnus }}</td>
                 <td>{{ row.poeng | int }}</td>
                 <td>{{ row.tidlig }}</td>
                 <td>{{ row.before_6 }}</td>

@@ -199,6 +199,7 @@ def sort_by_column():
 def select_shift():
     html_data = request.get_json()
     selected_shift = html_data.get('turnus')
+    print('SELECTED SHIFT:',  selected_shift)
     session['selected_shift'] = selected_shift
     return redirect(url_for('main.display_shift'))
 
