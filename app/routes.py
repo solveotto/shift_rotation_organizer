@@ -308,6 +308,7 @@ def favorites():
     return render_template('favorites.html',
                            page_name = 'Favoritter',
                            favorites = fav_dict_sorted,
+                           df = df_manager.df.to_dict(orient='records'),
                            dataframe = data)
 
 

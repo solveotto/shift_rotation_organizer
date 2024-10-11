@@ -99,7 +99,46 @@
                                                     </tr>
                                             {% endfor %}
                                         </tbody>
-                                    </table>   
+                                    </table>
+                                    {% for row in df %}
+                                    {% if row.turnus == name %}
+                                        <div class="container-fluid data-felt text-center">
+                                            <div class="row">
+                                                <div class="col">
+                                                    Dagsverk: <b>{{row.shift_cnt}}</b>
+                                                </div>
+                                                <div class="col">
+                                                    Tidlig: <b>{{row.tidlig}}</b>
+                                                </div>
+                                                <div class="col">
+                                                    Kveld: <b>{{row.ettermiddag}}</b>
+                                                </div>
+                                                <div class="col">
+                                                    Natt: <b>{{row.natt}}</b>
+                                                </div>
+                                                
+                                                
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col">
+                                                    Helgetimer: <b>{{row.helgetimer}}</b>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="col">
+                                                        Helgtimer dag: <b>{{row.helgetimer_dagtid}}</b>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    Starter før 6: <b>{{ row.before_6 }}</b>
+                                                </div>
+                                                <div class="col">
+                                                    Slutt før 20: <b>{{ row.afternoon_ends_before_20 }}</b>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {%endif%}
+                                {% endfor %}
                                 </li>
                             {% endfor %}
                         {% endfor %}
