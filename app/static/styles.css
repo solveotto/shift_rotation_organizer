@@ -66,7 +66,8 @@ body, html {
 }
 
 .early-and-late {
-  background-color: rgb(204, 92, 92);
+  background-color: rgb(38, 142, 184);
+  color: white;
 }
 
 
@@ -187,13 +188,12 @@ label input[type="checkbox"] {
   margin-top: -10px; /* Adjust the value as needed */
 }
 
-
 @media print {
   .print-frame {
       border: 1px solid rgb(53, 52, 52);
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
+      padding: 1px; /* Reduced padding */
+      margin: 1px 0; /* Reduced margin */
       page-break-inside: avoid;
   }
   table {
@@ -202,21 +202,22 @@ label input[type="checkbox"] {
   }
   th, td {
       border: 1px solid black;
-      padding: 8px;
+      padding: 1px; /* Reduced padding */
       text-align: center;
-      font-size: 0.8em; /* Reduced font size */
+      font-size: 0.6em; /* Further reduced font size */
   }
   th {
       background-color: #f2f2f2;
   }
   h5 {
-      font-size: 0.8em;
-      margin: 5px 0;
+      font-size: 0.2em; /* Further reduced font size */
+      margin: 2px 0; /* Reduced margin */
   }
-  
-  .print-frame:nth-of-type(2n+1) {
+
+  .small-text {
+      font-size: 0.6em; /* Reduced font size for small-text class */
+  }
+  .print-frame:nth-of-type(3n+1) {
       page-break-before: always;
   }
 }
-
-

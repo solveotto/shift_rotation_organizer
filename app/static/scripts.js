@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelectorAll('.clickable-row').forEach(row => {
         row.addEventListener('click', () => {
             const turnus = row.getAttribute('data-turnus');
-            
+
                 console.log('Turnus:', turnus);
             
 
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     td.classList.add('late')
                 }
 
-                if (start_hours > 6 && start_hours < 9 && end_hours > 16 && end_hours < 18){
+                if (start_hours > 5 && start_hours < 9 && end_hours >= 16 && end_hours < 18){
                     td.classList.add('early-and-late')
                 }
 

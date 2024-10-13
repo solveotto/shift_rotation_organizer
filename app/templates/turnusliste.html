@@ -30,7 +30,7 @@
                                         <div class="clickable-row" data-turnus="{{name}}">
                                             <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
                                         </div>
-                                        <label for="toggle-favoritt-{{ outer_index }}" class="custom-checkbox" data-bs-toggle="tooltip" data-bs-placement="top" title="Klikk for å velge som favoritt.">
+                                        <label for="toggle-favoritt-{{ outer_index }}" class="custom-checkbox" data-toggle="tooltip" data-placement="top" title="Klikk for å velge som favoritt.">
                                             <input type="checkbox" id="toggle-favoritt-{{ outer_index }}"  class="toggle-favoritt" shift_title="{{ name }}" {% if name in favoritt %}checked{% endif %}>
                                                 <i class="bi bi-star"></i>
                                                 <i class="bi bi-star-fill"></i>
@@ -84,7 +84,7 @@
                                 {% for row in df %}
                                     {% if row.turnus == name %}
                                         <div class="container-fluid data-felt text-center">
-                                            <div class="row">
+                                            <div class="row small-text" >
                                                 <div class="col">
                                                     Dagsverk: <b>{{row.shift_cnt}}</b>
                                                 </div>
@@ -101,7 +101,7 @@
                                                 
                                             </div>
                                             
-                                            <div class="row">
+                                            <div class="row small-text">
                                                 <div class="col">
                                                     Helgetimer: <b>{{row.helgetimer}}</b>
                                                 </div>

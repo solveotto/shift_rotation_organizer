@@ -160,8 +160,8 @@ class Turnus():
                             helgedager += 1
 
 
-                        ### ENDS BERFORE 16 ###
-                        if end.time() <= time(16,00) and start.time() < time(12,00):
+                        ### TIDLIGVAKTER ###
+                        if end.time() <= time(18,00) and start.time() < time(12,00):
                             tidlig += 1
                             ### STARTS BEFORE 6 ####
                             if start.time() < time(6,0):
@@ -169,7 +169,7 @@ class Turnus():
                             
 
                         ### AFTERNOONS ENDS AFTER 16 ###(
-                        if end.time() > time(16,00) or end.date() > start.date():
+                        if end.time() > time(18,00) or end.date() > start.date():
                             if str(end.date()) == '1900-01-02' and end.time() < time(3,0):
                                 afternoon_count += 1
                             elif str(end.date()) == '1900-01-01':
@@ -177,24 +177,6 @@ class Turnus():
                                 if end.time() <= time(20):
                                     afternoon_ends_before_20 += 1
                                     
-
-
-                            
-                                      
-                                      
-                            # ### Afternoons in row ###
-                            # next_row_cnt = 0
-                            # next_row_is_afternoon = True
-                            # while next_row_is_afternoon == True:
-                            #     next_row_value = turuns_df_reset.iloc[_index + 1]['start']
-                            #     # Check if the next row's 'column_name' contains a specific value
-                            #     if next_row_value > pd.to_datetime('16:00', format='%H:%M'):
-                            #         next_row_cnt += 1
-                            #     else:
-                            #         next_row_is_afternoon = False
-                                    
-                            # afternons_in_row += next_row_cnt
-                                
 
                 #### TEST ####
                 #print(f"{_dagsverk['turnus']}, {_dagsverk['uke_nr']}, {_dagsverk['ukedag']}, {sunday_hours}")
