@@ -235,12 +235,13 @@ def display_shift():
 
     if shift_title and shift_data:
         return render_template('selected_shift.html',
-                               table_data = selected_shift_df.to_dict(orient='records'), 
+                               table_data = selected_shift_df.to_dict(orient='records'),
+                               df = df_manager.df.to_dict(orient='records'),
                                shift_title=shift_title, 
                                shift_data=shift_data,
                                shift_user_points = shift_user_points[1],
                                favoritt = favoritt,
-                               page_name = 'Turnusdata for ' + shift_title)
+                               page_name = shift_title)
     else:
         return "No shift data found", 400
     

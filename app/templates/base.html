@@ -39,13 +39,16 @@
             <a class="navbar-brand" href="{{ url_for('main.home') }}">
               <img src="/static/artybadger.png" alt="Bootstrap" width="75" height="75" style="border-radius: 50%;">
             </a>
+            
             <h2 class="text-center flex-grow-1 m-0" style="position: relative; left: 1em;">
               <span>{% block prev_btn %}{% endblock %}</span>
               {{ page_name.replace('_', ' ') }}
               <span>{% block next_btn %}{% endblock %}</span>
             </h2>
-            
-            {% block print %}{% endblock %}
+
+            <div class="hide-on-small-screens">
+              {% block print %}{% endblock %}
+            </div>
 
             <div class="d-flex align-items-center">
 
@@ -88,7 +91,7 @@
             <div class="d-flex justify-content-center align-items-center w-100">
                 
               <div class="mx-1 mx-md-3 mx-lg-5">
-                <a href="{{ url_for('main.home') }}" class="{% if request.endpoint == 'main.home' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Soter Turnuser</a>
+                <a href="{{ url_for('main.home') }}" class="{% if request.endpoint == 'main.home' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Sorter Turnuser</a>
               </div>
               
               <div class="mx-1 mx-md-3 mx-lg-5">

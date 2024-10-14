@@ -221,3 +221,31 @@ label input[type="checkbox"] {
       page-break-before: always;
   }
 }
+
+/*Navbar on small screens*/
+@media (max-width: 576px) {
+  .navbar .btn {
+      font-size: 0.8em; /* Reduced font size */
+      padding: 0.25rem 0.5rem; /* Adjust padding for better fit */
+  }
+}
+
+@media (max-width: 576px) {
+  .hide-on-small-screens {
+      display: none !important; /* Hide the element on small screens */
+  }
+}
+
+/* Gjør det sånn at det som er i tabellene ikke går utover ramma på små skjermer */
+.list-group-item {
+  overflow: auto; /* Ensure the content does not overflow the li item */
+}
+
+.table-responsive {
+  overflow-x: auto; /* Adds horizontal scrollbar if needed */
+}
+
+.table {
+  width: 100%; /* Ensure the table takes the full width of the container */
+  table-layout: fixed; /* Ensure the table layout is fixed */
+}
