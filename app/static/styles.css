@@ -247,5 +247,10 @@ label input[type="checkbox"] {
 
 .table {
   width: 100%; /* Ensure the table takes the full width of the container */
-  table-layout: fixed; /* Ensure the table layout is fixed */
+  table-layout: auto; /* Ensure the table layout is fixed */
+}
+
+
+.table-responsive-lg {
+  overflow-x: auto; /* Adds horizontal scrollbar if needed */
 }
