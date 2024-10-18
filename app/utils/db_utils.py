@@ -212,8 +212,16 @@ def remove_favorite(user_id, title):
         WHERE user_id = %s AND shift_title = %s
     """
     execute_query(query_remove_title, (user_id, title))
-
-    update_favorite_order(user_id)
+    
+    # Update order indices of remaining favorites
+    query_update_order = """
+        UPDATE favorites
+        SET order_index = order_index - 1
+        WHERE user_id = %s AND order_index > (
+            SELECT order_index FROM favorites WHERE user_id = %s AND shift_title = %s
+        )
+    """
+    execute_query(query_update_order, (user_id, user_id, title))
 
 
 if __name__ == '__main__':

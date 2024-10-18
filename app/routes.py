@@ -11,8 +11,12 @@ from config import conf
 from app.utils import df_utils, db_utils
 from app.forms import LoginForm, CalculationForm
 from app.models import User
+from threading import Lock
 
 main = Blueprint('main', __name__)
+
+# Create a lock object
+favorite_lock = Lock()
 
 # Configure logging
 log_file_path = os.path.join(conf.log_dir, 'app.log')
@@ -387,22 +391,21 @@ def toggle_favorite():
     favorite = data.get('favorite')
     shift_title = data.get('shift_title')
 
-
-    if favorite:
-        max_order_index = db_utils.get_max_ordered_index(current_user.get_id())
-        new_order_index = max_order_index +1 if max_order_index is not None else 1
-        db_utils.add_favorite(current_user.get_id(),shift_title, new_order_index)
-    else:
-        try:
-            db_utils.remove_favorite(current_user.get_id(), shift_title)
-        except ValueError:
-            print('Not a favorite')
+    with favorite_lock:
+        if favorite:
+            max_order_index = db_utils.get_max_ordered_index(current_user.get_id())
+            new_order_index = max_order_index + 1 if max_order_index is not None else 0
+            db_utils.add_favorite(current_user.get_id(), shift_title, new_order_index)
+        else:
+            try:
+                db_utils.remove_favorite(current_user.get_id(), shift_title)
+            except ValueError:
+                print('Not a favorite')
+    
     return jsonify({'status': 'success'})
-
 
 df_manager = df_utils.DataframeManager()
 db_ctrl = db_utils
-
 
 @main.route('/turnusliste')
 def turnusliste():

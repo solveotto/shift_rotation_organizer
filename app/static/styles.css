@@ -210,12 +210,12 @@ label input[type="checkbox"] {
       background-color: #f2f2f2;
   }
   h5 {
-      font-size: 0.2em; /* Further reduced font size */
-      margin: 2px 0; /* Reduced margin */
+      font-size: 0.1em; /* Further reduced font size */
+      margin: 1px 0; /* Reduced margin */
   }
 
   .small-text {
-      font-size: 0.6em; /* Reduced font size for small-text class */
+      font-size: 0.9em; /* Reduced font size for small-text class */
   }
   .print-frame:nth-of-type(3n+1) {
       page-break-before: always;
