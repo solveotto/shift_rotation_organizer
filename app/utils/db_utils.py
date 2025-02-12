@@ -227,7 +227,7 @@ def remove_favorite(user_id, title):
 
 
 if __name__ == '__main__':
-    create_new_user('bård', 'førsterad')
+    create_new_user('recruiter', '.dLnvyHb7P')
     #add_points_to_user('test1', 10)
     #username, user_id = login('solve')
 
