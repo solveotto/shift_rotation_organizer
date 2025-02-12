@@ -19,6 +19,7 @@ main = Blueprint('main', __name__)
 favorite_lock = Lock()
 
 # Configure logging
+os.makedirs(conf.log_dir, exist_ok=True)
 log_file_path = os.path.join(conf.log_dir, 'app.log')
 rotating_handler = RotatingFileHandler(log_file_path, maxBytes=10*1024*1024, backupCount=5)  # 10 MB per file, keep 5 backups
 rotating_handler.setLevel(logging.WARNING)

@@ -6,13 +6,15 @@ import bcrypt
 from flask import flash
 
 
-
-config = configparser.ConfigParser()
-config.read('config.ini')
-mysql_host = config['mysql']['host']
-mysql_user = config['mysql']['user']
-mysql_password = config['mysql']['password']
-mysql_database = config['mysql']['database']
+try:
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    mysql_host = config['mysql']['host']
+    mysql_user = config['mysql']['user']
+    mysql_password = config['mysql']['password']
+    mysql_database = config['mysql']['database']
+except KeyError:
+    print("no config file")
 
    
 def execute_query(query, params=None, fetch=False):
