@@ -6,57 +6,77 @@ import bcrypt
 from flask import flash
 
 
-try:
-    config = configparser.ConfigParser()
-    config.read('config.ini')
+config = configparser.ConfigParser()
+config.read('config.ini')
+db_type = config['general'].get('db_type', 'mysql')
+
+if db_type == 'mysql':
+    import mysql.connector
+    from mysql.connector import Error
     mysql_host = config['mysql']['host']
     mysql_user = config['mysql']['user']
     mysql_password = config['mysql']['password']
     mysql_database = config['mysql']['database']
-except KeyError:
-    print("no config file")
+elif db_type == 'sqlite':
+    import sqlite3
+    sqlite_path = config['sqlite']['path']
+else:
+    raise Exception("Unsupported db_type in config.ini")
 
    
 def execute_query(query, params=None, fetch=False):
     conn = None
     try:
-        conn = mysql.connector.connect(
+        if db_type == 'mysql':
+            conn = mysql.connector.connect(
                 host = mysql_host,
                 user = mysql_user,
                 password = mysql_password,
                 database = mysql_database)
-        
-        if conn and conn.is_connected():
-            with conn.cursor() as cursor:
-                cursor.execute(query, params)
-                if fetch:
-                    result = cursor.fetchall()
-                    return result
-                elif fetch == "fetchone":
-                    result = cursor.fetchone()
-                    return result
-                else:
-                    conn.commit()
-                    return True
+            cursor = conn.cursor()
+        elif db_type == 'sqlite':
+            conn = sqlite3.connect(sqlite_path)
+            cursor = conn.cursor()
+            # Convert MySQL-style %s placeholders to SQLite ?
+            query = query.replace('%s', '?')
+
+        cursor.execute(query, params or ())
+        if fetch == True or fetch == 'fetchall':
+            result = cursor.fetchall()
+            return result
+        elif fetch == "fetchone":
+            result = cursor.fetchone()
+            return result
         else:
-            print("Failed to connect to the database")
-            return False
-    except Error as e:
+            conn.commit()
+            return True
+    except Exception as e:
         print(f"Error executing query: {e}")
-        
         return False
     finally:
-        if conn and conn.is_connected():
+        if conn:
             conn.close()
 
 
 def set_user_points(user_id, shift_title, amount):
-    insert_rating_query = """
-    INSERT INTO points (user_id, shift_title, user_points)
-    VALUES (%s, %s, %s)
-    ON DUPLICATE KEY UPDATE user_points = %s, rated_at = CURRENT_TIMESTAMP
-    """
-    result = execute_query(insert_rating_query, (user_id, shift_title, amount, amount))
+    if db_type == 'mysql':
+        insert_rating_query = """
+        INSERT INTO points (user_id, shift_title, user_points)
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE user_points = %s, rated_at = CURRENT_TIMESTAMP
+        """
+        params = (user_id, shift_title, amount, amount)
+    elif db_type == 'sqlite':
+        # SQLite upsert using ON CONFLICT (requires unique constraint on user_id+shift_title)
+        insert_rating_query = """
+        INSERT INTO points (user_id, shift_title, user_points, rated_at)
+        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id, shift_title) DO UPDATE SET
+            user_points=excluded.user_points,
+            rated_at=CURRENT_TIMESTAMP
+        """
+        params = (user_id, shift_title, amount)
+    result = execute_query(insert_rating_query, params)
     if result:
         print("Shift points adjusted.")
 
@@ -136,17 +156,15 @@ def create_new_user(username, hashed_password):
 
             
 def get_user_data(username):
-    login_user_query = """
-            SELECT *
-            FROM users
-            WHERE username = %s
-            """
+    login_user_query = "SELECT id, username, password, is_auth FROM users WHERE username = %s" if db_type == 'mysql' else "SELECT id, username, password, is_auth FROM users WHERE username = ?"
     result = execute_query(login_user_query, (username, ), fetch=True)
     if result:
-        data = {'username': result[0][1], 'id': result[0][0], 'password': result[0][2], 'is_auth': result[0][5]}
+        # result[0] is a tuple: (id, username, password, is_auth)
+        data = {'id': result[0][0], 'username': result[0][1], 'password': result[0][2], 'is_auth': result[0][3]}
         return data
     else:
         print("Failed to execute login query!")
+        return None
 
 def get_user_password(username):
     query = """
@@ -227,7 +245,7 @@ def remove_favorite(user_id, title):
 
 
 if __name__ == '__main__':
-    create_new_user('recruiter', '.dLnvyHb7P')
+    create_new_user('testuser', 'testuser')
     #add_points_to_user('test1', 10)
     #username, user_id = login('solve')
 
