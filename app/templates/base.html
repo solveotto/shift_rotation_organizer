@@ -65,6 +65,14 @@
                   <li>
                     <a class="dropdown-item" href="{{ url_for('main.download_turnusnokler_zip') }}">Lagre Turnusnøkler</a>
                   </li>
+                  {% if current_user.is_admin %}
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <a class="dropdown-item" href="{{ url_for('main.admin') }}">
+                      <i class="bi bi-gear"></i> Admin Panel
+                    </a>
+                  </li>
+                  {% endif %}
                   <li>
                     <a class="dropdown-item" href="{{ url_for('main.logout') }}">
                       <span>

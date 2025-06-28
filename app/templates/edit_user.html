@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Edit User: {{ user.username }}</h3>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Leave blank to keep the current password</div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.confirm_password.label(class="form-label") }}
+                            {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else "")) }}
+                            {% if form.confirm_password.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.confirm_password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_auth(class="form-check-input") }}
+                                {{ form.is_auth.label(class="form-check-label") }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('main.admin') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -261,29 +261,13 @@ def add_favorite(user_id, title, order_index):
 def remove_favorite(user_id, title):
     session = get_db_session()
     try:
-        # First, get the order_index of the favorite to be removed
-        favorite_to_remove = session.query(Favorites).filter_by(user_id=user_id, shift_title=title).first()
-        if not favorite_to_remove:
-            print("Favorite not found")
-            return False
-        
-        removed_order_index = favorite_to_remove.order_index
-        
-        # Delete the favorite
-        session.delete(favorite_to_remove)
-        
-        # Update order indices of remaining favorites
-        remaining_favorites = session.query(Favorites).filter(
-            Favorites.user_id == user_id,
-            Favorites.order_index > removed_order_index
-        ).all()
-        
-        for favorite in remaining_favorites:
-            favorite.order_index -= 1
-        
-        session.commit()
-        print("Favorite removed successfully")
-        return True
+        favorite = session.query(Favorites).filter_by(user_id=user_id, shift_title=title).first()
+        if favorite:
+            session.delete(favorite)
+            session.commit()
+            print(f"Favorite removed: {title}")
+            return True
+        return False
     except Exception as e:
         session.rollback()
         print(f"Error removing favorite: {e}")
@@ -291,6 +275,130 @@ def remove_favorite(user_id, title):
     finally:
         session.close()
 
+### ADMIN FUNCTIONS ###
+
+def get_all_users():
+    """Get all users from the database"""
+    session = get_db_session()
+    try:
+        users = session.query(DBUser).all()
+        return [
+            {
+                'id': user.id,
+                'username': user.username,
+                'is_auth': user.is_auth
+            }
+            for user in users
+        ]
+    finally:
+        session.close()
+
+def get_user_by_id(user_id):
+    """Get a specific user by ID"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(id=user_id).first()
+        if user:
+            return {
+                'id': user.id,
+                'username': user.username,
+                'is_auth': user.is_auth
+            }
+        return None
+    finally:
+        session.close()
+
+def create_user(username, password, is_auth=0):
+    """Create a new user"""
+    session = get_db_session()
+    try:
+        # Check if username already exists
+        existing_user = session.query(DBUser).filter_by(username=username).first()
+        if existing_user:
+            return False, "Username already exists"
+        
+        new_user = DBUser(
+            username=username,
+            password=hash_password(password),
+            is_auth=is_auth
+        )
+        session.add(new_user)
+        session.commit()
+        return True, "User created successfully"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error creating user: {e}"
+    finally:
+        session.close()
+
+def update_user(user_id, username, password=None, is_auth=None):
+    """Update an existing user"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(id=user_id).first()
+        if not user:
+            return False, "User not found"
+        
+        # Check if new username conflicts with existing user
+        if username != user.username:
+            existing_user = session.query(DBUser).filter_by(username=username).first()
+            if existing_user:
+                return False, "Username already exists"
+        
+        user.username = username
+        if password:
+            user.password = hash_password(password)
+        if is_auth is not None:
+            user.is_auth = is_auth
+        
+        session.commit()
+        return True, "User updated successfully"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error updating user: {e}"
+    finally:
+        session.close()
+
+def delete_user(user_id):
+    """Delete a user and all associated data"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(id=user_id).first()
+        if not user:
+            return False, "User not found"
+        
+        # Delete associated favorites
+        session.query(Favorites).filter_by(user_id=user_id).delete()
+        
+        # Delete associated points
+        session.query(Points).filter_by(user_id=user_id).delete()
+        
+        # Delete the user
+        session.delete(user)
+        session.commit()
+        return True, "User deleted successfully"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error deleting user: {e}"
+    finally:
+        session.close()
+
+def toggle_user_auth(user_id):
+    """Toggle user authentication status"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(id=user_id).first()
+        if not user:
+            return False, "User not found"
+        
+        user.is_auth = 1 if user.is_auth == 0 else 0
+        session.commit()
+        return True, f"User authentication {'enabled' if user.is_auth == 1 else 'disabled'}"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error toggling user auth: {e}"
+    finally:
+        session.close()
 
 if __name__ == '__main__':
     create_new_user('testuser', 'testuser')

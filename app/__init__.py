@@ -4,6 +4,7 @@ from flask_caching import Cache
 from config import conf
 from app.models import User
 from flask_session import Session
+from app.utils import db_utils
 
 
 
@@ -20,8 +21,16 @@ def create_app():
 
 
     @login_manager.user_loader
-    def load_user(username):
-        return User.get(username)
+    def load_user(user_id):
+        # Convert user_id to int and get user data
+        try:
+            user_id = int(user_id)
+            db_user_data = db_utils.get_user_by_id(user_id)
+            if db_user_data:
+                return User(db_user_data['username'], db_user_data['id'], db_user_data['is_auth'])
+        except (ValueError, TypeError):
+            pass
+        return None
 
     
     # Configure server-side session storage

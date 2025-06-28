@@ -9,7 +9,7 @@ from flask_login import login_user as flask_login_user
 from mysql.connector import Error
 from config import conf
 from app.utils import df_utils, db_utils
-from app.forms import LoginForm, CalculationForm
+from app.forms import LoginForm, CalculationForm, CreateUserForm, EditUserForm
 from app.models import User
 from threading import Lock
 
@@ -43,7 +43,7 @@ def login():
         try:
             db_user_data = db_utils.get_user_data(form.username.data)
             if db_user_data and User.verify_password(db_user_data['password'], form.password.data):
-                user = User(db_user_data['id'], form.username.data, db_user_data['is_auth'])
+                user = User(form.username.data, db_user_data['id'], db_user_data['is_auth'])
                 flask_login_user(user)
                 return redirect(url_for('main.home'))
             else:
@@ -417,4 +417,121 @@ def turnusliste():
                            df = df_manager.df.to_dict(orient='records'),
                            favoritt = favorites_lst
                            )
+
+# Admin Routes
+@main.route('/admin')
+@login_required
+def admin():
+    # Check if user is authorized (is_auth = 1)
+    if not current_user.is_admin:
+        flash('Access denied. You need admin privileges to view this page.', 'danger')
+        return redirect(url_for('main.home'))
+    
+    users = db_utils.get_all_users()
+    return render_template('admin.html', 
+                         users=users,
+                         page_name='Admin Panel')
+
+@main.route('/admin/create_user', methods=['GET', 'POST'])
+@login_required
+def create_user():
+    # Check if user is authorized (is_auth = 1)
+    if not current_user.is_admin:
+        flash('Access denied. You need admin privileges to perform this action.', 'danger')
+        return redirect(url_for('main.home'))
+    
+    form = CreateUserForm()
+    if form.validate_on_submit():
+        success, message = db_utils.create_user(
+            username=form.username.data,
+            password=form.password.data,
+            is_auth=1 if form.is_auth.data else 0
+        )
+        if success:
+            flash(message, 'success')
+            return redirect(url_for('main.admin'))
+        else:
+            flash(message, 'danger')
+    
+    return render_template('create_user.html', 
+                         form=form,
+                         page_name='Create User')
+
+@main.route('/admin/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def edit_user(user_id):
+    # Check if user is authorized (is_auth = 1)
+    if not current_user.is_admin:
+        flash('Access denied. You need admin privileges to perform this action.', 'danger')
+        return redirect(url_for('main.home'))
+    
+    user = db_utils.get_user_by_id(user_id)
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('main.admin'))
+    
+    form = EditUserForm()
+    
+    if form.validate_on_submit():
+        success, message = db_utils.update_user(
+            user_id=user_id,
+            username=form.username.data,
+            password=form.password.data if form.password.data else None,
+            is_auth=1 if form.is_auth.data else 0
+        )
+        if success:
+            flash(message, 'success')
+            return redirect(url_for('main.admin'))
+        else:
+            flash(message, 'danger')
+    elif request.method == 'GET':
+        form.username.data = user['username']
+        form.is_auth.data = user['is_auth'] == 1
+    
+    return render_template('edit_user.html', 
+                         form=form,
+                         user=user,
+                         page_name='Edit User')
+
+@main.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    # Check if user is authorized (is_auth = 1)
+    if not current_user.is_admin:
+        flash('Access denied. You need admin privileges to perform this action.', 'danger')
+        return redirect(url_for('main.home'))
+    
+    # Prevent admin from deleting themselves
+    if user_id == current_user.id:
+        flash('You cannot delete your own account.', 'danger')
+        return redirect(url_for('main.admin'))
+    
+    success, message = db_utils.delete_user(user_id)
+    if success:
+        flash(message, 'success')
+    else:
+        flash(message, 'danger')
+    
+    return redirect(url_for('main.admin'))
+
+@main.route('/admin/toggle_auth/<int:user_id>', methods=['POST'])
+@login_required
+def toggle_auth(user_id):
+    # Check if user is authorized (is_auth = 1)
+    if not current_user.is_admin:
+        flash('Access denied. You need admin privileges to perform this action.', 'danger')
+        return redirect(url_for('main.home'))
+    
+    # Prevent admin from disabling their own auth
+    if user_id == current_user.id:
+        flash('You cannot disable your own authentication.', 'danger')
+        return redirect(url_for('main.admin'))
+    
+    success, message = db_utils.toggle_user_auth(user_id)
+    if success:
+        flash(message, 'success')
+    else:
+        flash(message, 'danger')
+    
+    return redirect(url_for('main.admin'))
     
