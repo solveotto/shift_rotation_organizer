@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, UniqueConstraint, func
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 import configparser
 import json
 import bcrypt
@@ -89,17 +88,15 @@ def set_user_points(user_id, shift_title, amount):
 
 
 def get_user_points(user_id, shift_title):
-    query = """
-    SELECT user_points FROM points WHERE user_id = %s AND shift_title = %s
-    """
-    result = execute_query(query, (user_id, shift_title), fetch=True)
-    
-    if result:
-        points = result[0][0]
-        return points
-    else:
-        points = 0
-        return points
+    session = get_db_session()
+    try:
+        result = session.query(Points.user_points).filter_by(user_id=user_id, shift_title=shift_title).first()
+        if result:
+            return result.user_points
+        else:
+            return 0
+    finally:
+        session.close()
 
 
 def get_shift_rating(user_id, shift_title):
@@ -122,13 +119,6 @@ def get_all_ratings(user_id):
     finally:
         session.close()
 
-    # Gammelt format
-    # query = """
-    # SELECT shift_title, user_points FROM points WHERE user_id = %s
-    # """
-    # result = execute_query(query, (user_id, ), fetch=True)
-
-    # return result
     
 def add_shifts_to_database(file_path):
     session = get_db_session()
@@ -154,20 +144,6 @@ def add_shifts_to_database(file_path):
     finally:
         session.close()
 
-# FØR ALCHEMY
-# def add_shifts_to_database(file_path):
-#     with open (file_path, 'r') as f:
-#         turnus_data = json.load(f)
-    
-#     for x in turnus_data:
-#         for name in x.keys():
-#             insert_shift = """
-#             INSERT INTO shifts (title)
-#             VALUES (%s)
-#             """
-#             execute_query(insert_shift, (name, ))
-            
-
 
 #### USER LOGIN AND REG ####
 
@@ -178,70 +154,84 @@ def hash_password(password):
 
 
 def create_new_user(username, hashed_password):
-    query = """
-    INSERT INTO users (username, password)
-    VALUES (%s, %s)
-    """
-    result = execute_query(query, (username, hash_password(hashed_password)))
-
-    if result:
+    session = get_db_session()
+    try:
+        new_user = DBUser(username=username, password=hash_password(hashed_password))
+        session.add(new_user)
+        session.commit()
         print(f"User created")
-    else:
-        print('Error creating user')
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f'Error creating user: {e}')
+        return False
+    finally:
+        session.close()
 
             
 def get_user_data(username):
-    login_user_query = "SELECT id, username, password, is_auth FROM users WHERE username = %s" if db_type == 'mysql' else "SELECT id, username, password, is_auth FROM users WHERE username = ?"
-    result = execute_query(login_user_query, (username, ), fetch=True)
-    if result:
-        # result[0] is a tuple: (id, username, password, is_auth)
-        data = {'id': result[0][0], 'username': result[0][1], 'password': result[0][2], 'is_auth': result[0][3]}
-        return data
-    else:
-        print("Failed to execute login query!")
-        return None
+    session = get_db_session()
+    try:
+        result = session.query(DBUser).filter_by(username=username).first()
+        if result:
+            data = {
+                'id': result.id, 
+                'username': result.username, 
+                'password': result.password, 
+                'is_auth': result.is_auth
+            }
+            return data
+        else:
+            print("Failed to execute login query!")
+            return None
+    finally:
+        session.close()
 
 def get_user_password(username):
-    query = """
-    SELECT password FROM users WHERE username = %s
-    """
-    result = execute_query(query, (username, ), fetch='fetchone')
-    return result
+    session = get_db_session()
+    try:
+        result = session.query(DBUser.password).filter_by(username=username).first()
+        return result.password if result else None
+    finally:
+        session.close()
 
 
 
 ### FAVORITES ###
 
 def get_favorite_lst(user_id):
-    query_fetch_order = """
-        SELECT id, shift_title FROM favorites WHERE user_id = %s ORDER BY order_index
-        """
-    result = execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
-    shift_titles = [item[1] for item in result]
-    return shift_titles
+    session = get_db_session()
+    try:
+        results = session.query(Favorites.shift_title).filter_by(user_id=user_id).order_by(Favorites.order_index).all()
+        shift_titles = [result.shift_title for result in results]
+        return shift_titles
+    finally:
+        session.close()
 
 
 def update_favorite_order(user_id):
+    session = get_db_session()
     try:
         # Fetch the current order of the favorites
-        query_fetch_order = """
-        SELECT id, shift_title FROM favorites WHERE user_id = %s
-        """
-        current_database_order = execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
-        current_shift_titles = {shift[1] for shift in current_database_order}
+        current_favorites = session.query(Favorites).filter_by(user_id=user_id).all()
+        current_shift_titles = [favorite.shift_title for favorite in current_favorites]
 
-        # update curent favorties order in database
+        # Update current favorites order in database
         for index, shift_title in enumerate(current_shift_titles):
-            query_update_order = """
-            INSERT INTO favorites (shift_title, user_id, order_index)
-            VALUES (%s, %s, %s)
-            ON DUPLICATE KEY UPDATE order_index = VALUES(order_index)
-            """
-
-            execute_query(query_update_order, (shift_title, user_id, index))
-    except Error as e:
-        print(f"Failed to modify database. Changes only stored localy. Error = {e}")
-        flash(f'Failed to modify database. Changes only stored localy. Error = {e}', 'danger')
+            favorite = session.query(Favorites).filter_by(user_id=user_id, shift_title=shift_title).first()
+            if favorite:
+                favorite.order_index = index
+        
+        session.commit()
+        print("Favorite order updated successfully")
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Failed to modify database. Changes only stored locally. Error = {e}")
+        flash(f'Failed to modify database. Changes only stored locally. Error = {e}', 'danger')
+        return False
+    finally:
+        session.close()
 
 
 def get_max_ordered_index(user_id):
@@ -254,28 +244,52 @@ def get_max_ordered_index(user_id):
 
 def add_favorite(user_id, title, order_index):
     print('ADD FAVORITE EXECUTED')
-    query_add_title = """
-        INSERT INTO favorites (user_id, shift_title, order_index)
-        VALUES (%s, %s, %s)
-    """
-    execute_query(query_add_title, (user_id, title, order_index))
+    session = get_db_session()
+    try:
+        new_favorite = Favorites(user_id=user_id, shift_title=title, order_index=order_index)
+        session.add(new_favorite)
+        session.commit()
+        print("Favorite added successfully")
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Error adding favorite: {e}")
+        return False
+    finally:
+        session.close()
 
 def remove_favorite(user_id, title):
-    query_remove_title = """
-        DELETE FROM favorites
-        WHERE user_id = %s AND shift_title = %s
-    """
-    execute_query(query_remove_title, (user_id, title))
-    
-    # Update order indices of remaining favorites
-    query_update_order = """
-        UPDATE favorites
-        SET order_index = order_index - 1
-        WHERE user_id = %s AND order_index > (
-            SELECT order_index FROM favorites WHERE user_id = %s AND shift_title = %s
-        )
-    """
-    execute_query(query_update_order, (user_id, user_id, title))
+    session = get_db_session()
+    try:
+        # First, get the order_index of the favorite to be removed
+        favorite_to_remove = session.query(Favorites).filter_by(user_id=user_id, shift_title=title).first()
+        if not favorite_to_remove:
+            print("Favorite not found")
+            return False
+        
+        removed_order_index = favorite_to_remove.order_index
+        
+        # Delete the favorite
+        session.delete(favorite_to_remove)
+        
+        # Update order indices of remaining favorites
+        remaining_favorites = session.query(Favorites).filter(
+            Favorites.user_id == user_id,
+            Favorites.order_index > removed_order_index
+        ).all()
+        
+        for favorite in remaining_favorites:
+            favorite.order_index -= 1
+        
+        session.commit()
+        print("Favorite removed successfully")
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Error removing favorite: {e}")
+        return False
+    finally:
+        session.close()
 
 
 if __name__ == '__main__':
