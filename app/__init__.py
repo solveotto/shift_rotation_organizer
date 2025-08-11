@@ -43,9 +43,9 @@ def create_app():
     Session(app)
 
 
-    from app.routes import main
-    app.register_blueprint(main, url_prefix='/')
-
+    from app.routes.main import blueprints
+    for blueprint in blueprints:
+        app.register_blueprint(blueprint)
 
 
 

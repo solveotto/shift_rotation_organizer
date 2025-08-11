@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ turnus: turnus })
+                body: JSON.stringify({ shift_title: turnus })
             })
             .then(response => {
                 if (response.redirected) {

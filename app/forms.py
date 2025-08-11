@@ -26,14 +26,14 @@ class CreateUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    is_auth = BooleanField('Authorized User')
+    is_auth = BooleanField('Admin rights')
     submit = SubmitField('Create User')
 
 class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
     password = PasswordField('New Password (leave blank to keep current)')
     confirm_password = PasswordField('Confirm New Password')
-    is_auth = BooleanField('Authorized User')
+    is_auth = BooleanField('Admin rights')
     submit = SubmitField('Update User')
 
     def validate_confirm_password(self, field):
