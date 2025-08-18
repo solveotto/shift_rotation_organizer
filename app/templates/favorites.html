@@ -10,10 +10,7 @@
     </div>
 {% endblock %}
 
-
-
 {% block content %}
-
 <div class="col-md-5 offset-md-3">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -28,123 +25,173 @@
     {% endwith %}
 </div>
 
-
 <div class="container-fluid printable">
-        <div class="row justify-content-center">
-            <div class="col-auto">
-                <div class="table-responsive">
-                    <ul id="sortable-list" class="list-group py-2">
-                        <div class="container">
-                            {% if favorites|length == 0 %}
-                            <br><br><br><br><br><br><br><br><br>
-                                <h5>Ingen favoritter er valg.</h5>
-                            {%endif%}
-                        </div>
-                        
-                        {% for turnus in favorites %}
-                            {% set outer_index = loop.index0 %}
-                            {% for name, data in turnus.items() %}
-                                
-                                <li class="list-group-item mb-2 rounded p-2 small" data-name="{{ name }}" style="border: 1px solid black;" data-bs-toggle="tooltip" data-bs-placement="top" title="Klikk og dra for å endre rekkefølge."> 
-                                    <table>
-                                        <div class="d-flex align-items-center justify-content-between py-1">
-                                            <h5 class="t-num">#{{ outer_index+1 }}</h5>
-                                            <div class="clickable-row" data-turnus="{{name}}">
-                                                <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
-
-                                            </div>
-                                            
-                                            <a href="{{ url_for('api.toggle_favorite', shift_title=name) }}" class="btn btn-outline-danger btn-sm custom-remove-btn">X</a>
-                                        </div>
-                                        
-                                        <thead class="text-center">
-                                            <tr>
-                                                <th style="border: 1px solid black;">Uke</th>
-                                                <th style="border: 1px solid black;">Mandag</th>
-                                                <th style="border: 1px solid black;">Tirsdag</th>
-                                                <th style="border: 1px solid black;">Onsdag</th>
-                                                <th style="border: 1px solid black;">Tordag</th>
-                                                <th style="border: 1px solid black;">Fredag</th>
-                                                <th style="border: 1px solid black;">Lørdag</th>
-                                                <th style="border: 1px solid black;">Søndag</th>
-                                            </tr>
-                                        </thead>
-                                        
-                                                    
-                                        <tbody class="text-center">
-                                            {% for week_nr, week_data in data.items() %}
-                                                <tr class="align-middle text-nowrap">
-                                                    <td style="border: 1px solid black; font-size: small;">{{ week_nr }}</td>
-
-                                                    {% for day_nr, day_data in week_data.items() %}
-                                                        <td id="cell" class="min-width-td" style="border: 1px solid black;">
-                                                            <div class="custom-text" style="font-size: xx-small;">{{day_data.dagsverk}}</div>
-                                                            <div class="time-text" style="font-size: small;">
-                                                                {% for time in day_data.tid %}
-                                                                    {% if day_data.tid|length == 2 %}
-                                                                        {% if loop.first %}
-                                                                            {{ time }} -
-                                                                        {% else %}
-                                                                            {{ time }}
-                                                                        {% endif %}
-                                                                    {% else %}
-                                                                        {{ time }}
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            <div class="table-responsive">
+                <div class="container">
+                    {% if favorites|length == 0 %}
+                    <br><br><br><br><br><br><br><br><br>
+                        <h5>Ingen favoritter er valg.</h5>
+                    {% endif %}
+                </div>
+                
+                {% for turnus in favorites %}
+                    {% set outer_index = loop.index0 %}
+                    {% for name, data in turnus.items() %}
+                        <div class="list-group-item mb-2 rounded p-2 small" style="border: 1px solid black;">
+                            <div class="d-flex align-items-center justify-content-between py-1">
+                                <div class="d-flex align-items-center">
+                                    <h5 class="t-num me-3">#{{ outer_index+1 }}</h5>
                                     
-                                                                    {% endif %}
-                                                                {% endfor %}
-                                                        </td>
-                                                        
-                                                        
-                                                    {% endfor %}
-                                                    </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                    {% for row in df %}
-                                    {% if row.turnus == name %}
-                                        <div class="container-fluid data-felt text-center">
-                                            <div class="row small-text">
-                                                <div class="col">
-                                                    Dagsverk: <b>{{row.shift_cnt}}</b>
-                                                </div>
-                                                <div class="col">
-                                                    Tidlig: <b>{{row.tidlig}}</b>
-                                                </div>
-                                                <div class="col">
-                                                    Kveld: <b>{{row.ettermiddag}}</b>
-                                                </div>
-                                                <div class="col">
-                                                    Natt: <b>{{row.natt}}</b>
-                                                </div>
-                                                
-                                                
-                                            </div>
-                                            
-                                            <div class="row small-text">
-                                                <div class="col">
-                                                    Helgetimer: <b>{{row.helgetimer}}</b>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="col">
-                                                        Helgtimer dag: <b>{{row.helgetimer_dagtid}}</b>
+                                    <!-- Move up/down buttons -->
+                                    <div class="btn-group-vertical me-3" role="group">
+                                        {% if outer_index > 0 %}
+                                            <button class="btn btn-outline-secondary btn-sm py-1" 
+                                                    onclick="moveFavorite('{{ name }}', 'up')" 
+                                                    title="Flytt opp">
+                                                <i class="bi bi-arrow-up"></i>
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-outline-secondary btn-sm py-1" disabled>
+                                                <i class="bi bi-arrow-up"></i>
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {% if outer_index < favorites|length - 1 %}
+                                            <button class="btn btn-outline-secondary btn-sm py-1" 
+                                                    onclick="moveFavorite('{{ name }}', 'down')" 
+                                                    title="Flytt ned">
+                                                <i class="bi bi-arrow-down"></i>
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-outline-secondary btn-sm py-1" disabled>
+                                                <i class="bi bi-arrow-down"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="clickable-row" data-turnus="{{name}}">
+                                    <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
+                                </div>
+                                
+                                <a href="{{ url_for('api.toggle_favorite', shift_title=name) }}" class="btn btn-outline-danger btn-sm custom-remove-btn">X</a>
+                            </div>
+                            
+                            <!-- ... existing table content ... -->
+                            <table>
+                                <thead class="text-center">
+                                    <tr>
+                                        <th style="border: 1px solid black;">Uke</th>
+                                        <th style="border: 1px solid black;">Mandag</th>
+                                        <th style="border: 1px solid black;">Tirsdag</th>
+                                        <th style="border: 1px solid black;">Onsdag</th>
+                                        <th style="border: 1px solid black;">Tordag</th>
+                                        <th style="border: 1px solid black;">Fredag</th>
+                                        <th style="border: 1px solid black;">Lørdag</th>
+                                        <th style="border: 1px solid black;">Søndag</th>
+                                    </tr>
+                                </thead>
+                                
+                                <tbody class="text-center">
+                                    {% for week_nr, week_data in data.items() %}
+                                        <tr class="align-middle text-nowrap">
+                                            <td style="border: 1px solid black; font-size: small;">{{ week_nr }}</td>
+
+                                            {% for day_nr, day_data in week_data.items() %}
+                                                <td id="cell" class="min-width-td" style="border: 1px solid black;">
+                                                    <div class="custom-text" style="font-size: xx-small;">{{day_data.dagsverk}}</div>
+                                                    <div class="time-text" style="font-size: small;">
+                                                        {% for time in day_data.tid %}
+                                                            {% if day_data.tid|length == 2 %}
+                                                                {% if loop.first %}
+                                                                    {{ time }} -
+                                                                {% else %}
+                                                                    {{ time }}
+                                                                {% endif %}
+                                                            {% else %}
+                                                                {{ time }}
+                                                            {% endif %}
+                                                        {% endfor %}
                                                     </div>
-                                                </div>
-                                                <div class="col">
-                                                    Starter før 6: <b>{{ row.before_6 }}</b>
-                                                </div>
-                                                <div class="col">
-                                                    Slutt før 20: <b>{{ row.afternoon_ends_before_20 }}</b>
-                                                </div>
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            
+                            <!-- ... existing stats content ... -->
+                            {% for row in df %}
+                                {% if row.turnus == name %}
+                                    <div class="container-fluid data-felt text-center">
+                                        <div class="row small-text">
+                                            <div class="col">
+                                                Dagsverk: <b>{{row.shift_cnt}}</b>
+                                            </div>
+                                            <div class="col">
+                                                Tidlig: <b>{{row.tidlig}}</b>
+                                            </div>
+                                            <div class="col">
+                                                Kveld: <b>{{row.ettermiddag}}</b>
+                                            </div>
+                                            <div class="col">
+                                                Natt: <b>{{row.natt}}</b>
                                             </div>
                                         </div>
-                                    {%endif%}
-                                {% endfor %}
-                                </li>
+                                        
+                                        <div class="row small-text">
+                                            <div class="col">
+                                                Helgetimer: <b>{{row.helgetimer}}</b>
+                                            </div>
+                                            <div class="col">
+                                                <div class="col">
+                                                    Helgtimer dag: <b>{{row.helgetimer_dagtid}}</b>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                Starter før 6: <b>{{ row.before_6 }}</b>
+                                            </div>
+                                            <div class="col">
+                                                Slutt før 20: <b>{{ row.afternoon_ends_before_20 }}</b>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             {% endfor %}
-                        {% endfor %}
-                    </ul>
-                </div>  
-            </div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>  
         </div>
     </div>
+</div>
+
+<script>
+function moveFavorite(shiftTitle, direction) {
+    fetch('/api/move-favorite', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+            shift_title: shiftTitle, 
+            direction: direction 
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.reload();
+        } else {
+            alert('Feil ved flytting av favoritt: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Feil ved flytting av favoritt');
+    });
+}
+</script>
 {% endblock %}

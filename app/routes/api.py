@@ -33,55 +33,6 @@ def rate_displayed_shift():
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to save rating: {str(e)}'})
 
-@api.route('/update-order', methods=['POST'])
-def update_order():
-    data = request.get_json()
-    new_order = data.get('order', [])
-    user_id = current_user.get_id()
-    shifts_to_add = None
-    shifts_to_remove = None
-    
-    try:
-        # Fetch the current order of the favorites
-        query_fetch_order = """
-        SELECT id, shift_title FROM favorites WHERE user_id = %s
-        """
-        current_database_order = db_utils.execute_query(query_fetch_order, (user_id, ), fetch='fetchall')
-        current_shift_titles = {shift[1] for shift in current_database_order}
-
-        # Determine which shift titles are missing in the new order
-        new_shift_titles = set(new_order)
-        shifts_to_remove = current_shift_titles - new_shift_titles
-        shifts_to_add = new_shift_titles - current_shift_titles
-        
-        # Remove missing shift titles from the database
-        if shifts_to_remove:
-            query_delete_shifts = """
-            DELETE FROM favorites WHERE user_id = %s AND shift_title IN (%s)
-            """ % (user_id, ','.join(['%s'] * len(shifts_to_remove)))
-            db_utils.execute_query(query_delete_shifts, tuple(shifts_to_remove))
-        
-        for shift_title in shifts_to_add:
-            query_add_shift = """
-            INSERT INTO favorites (shift_title, user_id, order_index)
-            VALUES (%s, %s, %s)
-            """
-            db_utils.execute_query(query_add_shift, (shift_title, user_id, new_order.index(shift_title)))
-
-        # update current favorites order in database
-        for index, shift_title in enumerate(new_order):
-            query_update_order = """
-            INSERT INTO favorites (shift_title, user_id, order_index)
-            VALUES (%s, %s, %s)
-            ON DUPLICATE KEY UPDATE order_index = VALUES(order_index)
-            """
-            db_utils.execute_query(query_update_order, (shift_title, user_id, index))
-    except Error as e:
-        print(f"Failed to modify database. Changes only stored locally.")
-        return jsonify({'status': 'error', 'message': f'Failed to modify database. Changes only stored locally. Error: {e}'})
-
-    return jsonify({'status': 'success', 'new_order': new_order})
-
 @api.route('/toggle_favorite', methods=['POST'])
 def toggle_favorite():
     data = request.get_json()
@@ -98,3 +49,65 @@ def toggle_favorite():
                 return jsonify({'status': 'success', 'message': 'Removed from favorites'})
         except Exception as e:
             return jsonify({'status': 'error', 'message': str(e)}) 
+
+@api.route('/move-favorite', methods=['POST'])
+def move_favorite():
+    data = request.get_json()
+    shift_title = data.get('shift_title')
+    direction = data.get('direction')
+    user_id = current_user.get_id()
+    
+    if not shift_title or direction not in ['up', 'down']:
+        return jsonify({'status': 'error', 'message': 'Invalid parameters'})
+    
+    try:
+        session = db_utils.get_db_session()
+        
+        # Get current favorites with order
+        current_favorites = session.query(db_utils.Favorites).filter_by(user_id=user_id).order_by(db_utils.Favorites.order_index).all()
+        
+        if not current_favorites:
+            session.close()
+            return jsonify({'status': 'error', 'message': 'No favorites found'})
+        
+        # Find current position
+        current_index = None
+        for i, favorite in enumerate(current_favorites):
+            if favorite.shift_title == shift_title:
+                current_index = i
+                break
+        
+        if current_index is None:
+            session.close()
+            return jsonify({'status': 'error', 'message': 'Favorite not found'})
+        
+        # Calculate new position
+        if direction == 'up' and current_index > 0:
+            new_index = current_index - 1
+        elif direction == 'down' and current_index < len(current_favorites) - 1:
+            new_index = current_index + 1
+        else:
+            session.close()
+            return jsonify({'status': 'error', 'message': 'Cannot move in that direction'})
+        
+        # Swap the order_index values
+        current_favorite = current_favorites[current_index]
+        target_favorite = current_favorites[new_index]
+        
+        # Store the current order_index values
+        temp_order = current_favorite.order_index
+        current_favorite.order_index = target_favorite.order_index
+        target_favorite.order_index = temp_order
+        
+        # Commit the changes
+        session.commit()
+        session.close()
+        
+        return jsonify({'status': 'success', 'message': 'Favorite moved successfully'})
+        
+    except Exception as e:
+        if 'session' in locals():
+            session.rollback()
+            session.close()
+        print(f"Error moving favorite: {e}")
+        return jsonify({'status': 'error', 'message': f'Database error: {str(e)}'}) 

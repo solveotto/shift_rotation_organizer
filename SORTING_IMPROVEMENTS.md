@@ -41,7 +41,6 @@ The sorting functionality in `sort_shifts.html` has been completely modernized f
 - `clearSearch()`: Clears search input
 
 ### CSS Improvements:
-- Hover effects on sortable headers
 - Smooth transitions for better UX
 - Clear visual hierarchy with icons
 

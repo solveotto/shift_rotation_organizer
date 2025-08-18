@@ -237,10 +237,6 @@ label input[type="checkbox"] {
 }
 
 /* Gjør det sånn at det som er i tabellene ikke går utover ramma på små skjermer */
-.list-group-item {
-  overflow: auto; /* Ensure the content does not overflow the li item */
-}
-
 .table-responsive {
   overflow-x: auto; /* Adds horizontal scrollbar if needed */
 }
