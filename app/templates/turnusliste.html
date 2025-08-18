@@ -14,6 +14,125 @@
 
 {% block content %}
 
+<!-- Sorting Controls -->
+<div class="container-fluid mb-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Sorter Turnuser</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="helgetimer-slider" class="form-label">Helgetimer</label>
+                            <input type="range" class="form-range" id="helgetimer-slider" min="-10" max="10" value="0" step="0.5">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Høy → Lav</small>
+                                <small class="text-muted">Lav → Høy</small>
+                            </div>
+                            <div class="text-center mt-1">
+                                <span id="helgetimer-value" class="badge bg-secondary">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="shift-cnt-slider" class="form-label">Dagsverk</label>
+                            <input type="range" class="form-range" id="shift-cnt-slider" min="-10" max="10" value="0" step="0.5">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Høy → Lav</small>
+                                <small class="text-muted">Lav → Høy</small>
+                            </div>
+                            <div class="text-center mt-1">
+                                <span id="shift-cnt-value" class="badge bg-secondary">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="tidlig-slider" class="form-label">Tidlig</label>
+                            <input type="range" class="form-range" id="tidlig-slider" min="-10" max="10" value="0" step="0.5">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Høy → Lav</small>
+                                <small class="text-muted">Lav → Høy</small>
+                            </div>
+                            <div class="text-center mt-1">
+                                <span id="tidlig-value" class="badge bg-secondary">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="natt-slider" class="form-label">Natt</label>
+                            <input type="range" class="form-range" id="natt-slider" min="-10" max="10" value="0" step="0.5">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Høy → Lav</small>
+                                <small class="text-muted">Lav → Høy</small>
+                            </div>
+                            <div class="text-center mt-1">
+                                <span id="natt-value" class="badge bg-secondary">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="ettermiddag-slider" class="form-label">Ettermiddag</label>
+                            <input type="range" class="form-range" id="ettermiddag-slider" min="-10" max="10" value="0" step="0.5">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Høy → Lav</small>
+                                <small class="text-muted">Lav → Høy</small>
+                            </div>
+                            <div class="text-center mt-1">
+                                <span id="ettermiddag-value" class="badge bg-secondary">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="before-6-slider" class="form-label">Før 6:00</label>
+                            <input type="range" class="form-range" id="before-6-slider" min="-10" max="10" value="0" step="0.5">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Høy → Lav</small>
+                                <small class="text-muted">Lav → Høy</small>
+                            </div>
+                            <div class="text-center mt-1">
+                                <span id="before-6-value" class="badge bg-secondary">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="afternoon-ends-slider" class="form-label">Slutt før 20:00</label>
+                            <input type="range" class="form-range" id="afternoon-ends-slider" min="-10" max="10" value="0" step="0.5">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Høy → Lav</small>
+                                <small class="text-muted">Lav → Høy</small>
+                            </div>
+                            <div class="text-center mt-1">
+                                <span id="afternoon-ends-value" class="badge bg-secondary">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <button id="reset-sorting" class="btn btn-outline-secondary btn-sm w-100 mt-4">
+                                <i class="bi bi-arrow-clockwise"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Current Sorting Display -->
+<div class="container-fluid mb-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info" id="sorting-info" style="display: none;">
+                <strong>Sortering aktiv:</strong> <span id="sorting-criteria">Ingen</span>
+                <button type="button" class="btn-close float-end" onclick="hideSortingInfo()"></button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container-fluid printable">
     <div class="row justify-content-center">
