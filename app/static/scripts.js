@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('isChecked: ', isChecked, ',', 'ShiftTitle: ', shiftTitle)
 
 
-            fetch('/toggle_favorite', {
+            fetch('/api/toggle_favorite', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -162,6 +162,37 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    });
+
+    // Handle remove favorite button clicks (X buttons)
+    document.body.addEventListener('click', function(event) {
+        if (event.target.classList.contains('remove-favorite-btn')) {
+            const shiftTitle = event.target.getAttribute('data-shift-title');
+            
+            console.log('Removing favorite:', shiftTitle);
+
+            fetch('/api/toggle_favorite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ favorite: false, shift_title: shiftTitle })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // Remove the favorite item from the page after successful removal
+                if (data.status === 'success') {
+                    const favoriteItem = event.target.closest('.list-group-item');
+                    if (favoriteItem) {
+                        favoriteItem.remove();
+                    }
+                }
             })
             .catch((error) => {
                 console.error('Error:', error);

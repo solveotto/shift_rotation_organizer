@@ -72,11 +72,13 @@
                                     </div>
                                 </div>
                                 
-                                <div class="clickable-row" data-turnus="{{name}}">
-                                    <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
+                                <div class="d-flex align-items-center">
+                                    <div class="clickable-row me-3" data-turnus="{{name}}">
+                                        <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
+                                    </div>
+                                    
+                                    <button class="btn btn-outline-danger btn-sm custom-remove-btn remove-favorite-btn" data-shift-title="{{name}}">X</button>
                                 </div>
-                                
-                                <a href="{{ url_for('api.toggle_favorite', shift_title=name) }}" class="btn btn-outline-danger btn-sm custom-remove-btn">X</a>
                             </div>
                             
                             <!-- ... existing table content ... -->

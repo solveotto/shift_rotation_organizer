@@ -34,6 +34,7 @@ def rate_displayed_shift():
         return jsonify({'status': 'error', 'message': f'Failed to save rating: {str(e)}'})
 
 @api.route('/toggle_favorite', methods=['POST'])
+@login_required
 def toggle_favorite():
     data = request.get_json()
     favorite = data.get('favorite')
@@ -42,13 +43,15 @@ def toggle_favorite():
     with favorite_lock:
         try:
             if favorite:
-                db_utils.add_favorite(current_user.get_id(), shift_title)
+                # Calculate the next order index for the new favorite
+                order_index = db_utils.get_max_ordered_index(current_user.get_id()) + 1
+                db_utils.add_favorite(current_user.get_id(), shift_title, order_index)
                 return jsonify({'status': 'success', 'message': 'Added to favorites'})
             else:
                 db_utils.remove_favorite(current_user.get_id(), shift_title)
                 return jsonify({'status': 'success', 'message': 'Removed from favorites'})
         except Exception as e:
-            return jsonify({'status': 'error', 'message': str(e)}) 
+            return jsonify({'status': 'error', 'message': str(e)})
 
 @api.route('/move-favorite', methods=['POST'])
 def move_favorite():
