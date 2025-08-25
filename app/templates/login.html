@@ -32,7 +32,7 @@
         <h2 class="text-center text-dark mt-3">Login</h2>
         <div class="card custom-card mx-auto">
 
-          <form action="{{ url_for('main.login') }}" method="POST" class="card-body cardbody-color p-lg-5">
+          <form action="{{ url_for('auth.login') }}" method="POST" class="card-body cardbody-color p-lg-5">
             {{ form.hidden_tag() }}
             
             <div class="text-center">

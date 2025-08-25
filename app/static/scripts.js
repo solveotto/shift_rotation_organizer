@@ -39,8 +39,285 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
 });
 
+// Color adjustment system
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're on the turnusliste page
+    const colorPanel = document.querySelector('#apply-colors');
+    if (!colorPanel) return;
+
+    // Default color and time settings
+    const defaultSettings = {
+        early: {
+            color: '#00ffff',
+            time: '16:00'
+        },
+        late: {
+            color: '#ff9696',
+            time: '16:00'
+        },
+        night: {
+            color: '#eb41eb',
+            time: '19:00'
+        },
+        dayoff: {
+            color: '#42bb42'
+        },
+        hdag: {
+            color: '#ffd700'
+        },
+        earlylate: {
+            color: '#268eb8'
+        }
+    };
+
+    // Load saved settings from localStorage or use defaults
+    function loadColorSettings() {
+        try {
+            const saved = localStorage.getItem('shiftColorSettings');
+            if (saved) {
+                return { ...defaultSettings, ...JSON.parse(saved) };
+            }
+        } catch (error) {
+            console.warn('Error loading color settings:', error);
+        }
+        return defaultSettings;
+    }
+
+    // Save settings to localStorage
+    function saveColorSettings(settings) {
+        try {
+            localStorage.setItem('shiftColorSettings', JSON.stringify(settings));
+            console.log('Color settings saved:', settings);
+        } catch (error) {
+            console.error('Error saving color settings:', error);
+        }
+    }
+
+    // Apply colors to the shift table
+    function applyColorsToTable() {
+        const settings = loadColorSettings();
+        console.log('Applying colors with settings:', settings);
+        
+        // Remove existing color classes
+        const tds = document.querySelectorAll('td[id="cell"]');
+        console.log(`Found ${tds.length} table cells to color`);
+        
+        tds.forEach(td => {
+            td.classList.remove('early', 'late', 'night', 'day_off', 'h-dag', 'early-and-late');
+            td.style.backgroundColor = '';
+            td.style.color = '';
+        });
+
+        // Apply new colors based on settings
+        tds.forEach(td => {
+            const timeTextElement = td.querySelector('.time-text');
+            if (timeTextElement) {
+                let timeText = timeTextElement.textContent.trim();
+                timeText = timeText.replace(/\s+/g, ' ');
+                const times = timeText.split(' - ').map(time => time.trim());
+                const customTextElement = td.querySelector('.custom-text');
+
+                // Check for H-dag
+                if (customTextElement && customTextElement.textContent.trim().endsWith('H')) {
+                    td.style.backgroundColor = settings.hdag.color;
+                    console.log('Applied H-dag color:', settings.hdag.color);
+                    return;
+                }
+
+                if (times.length > 1) {
+                    const startTime = times[0];
+                    const [start_hours, start_minutes] = startTime.split(':').map(Number);
+                    const startTotalMinutes = start_hours * 60 + start_minutes;
+
+                    const endTime = times[1];
+                    const [end_hours, end_minutes] = endTime.split(':').map(Number);
+                    const endTotalMinutes = end_hours * 60 + end_minutes;
+
+                    // Parse threshold times
+                    const [late_hours, late_minutes] = settings.late.time.split(':').map(Number);
+                    const late_shift = late_hours * 60 + late_minutes;
+                    
+                    const [night_hours, night_minutes] = settings.night.time.split(':').map(Number);
+                    const night_shift = night_hours * 60 + night_minutes;
+
+                    // Apply colors based on new thresholds
+                    // Check night shift first (highest priority)
+                    if (startTotalMinutes >= night_shift) {
+                        td.style.backgroundColor = settings.night.color;
+                        console.log('Applied night color:', settings.night.color, 'for time:', timeText, 'start:', startTime, 'startTotalMinutes:', startTotalMinutes, 'night_shift:', night_shift);
+                    }
+                    // Check early + late shift combination
+                    else if (start_hours > 5 && start_hours < 9 && end_hours >= 16 && end_hours < 18) {
+                        td.style.backgroundColor = settings.earlylate.color;
+                        td.style.color = 'white';
+                        console.log('Applied early+late color:', settings.earlylate.color, 'for time:', timeText);
+                    }
+                    // Check early vs late shifts
+                    else if (endTotalMinutes <= late_shift) {
+                        td.style.backgroundColor = settings.early.color;
+                        console.log('Applied early color:', settings.early.color, 'for time:', timeText);
+                    } else {
+                        td.style.backgroundColor = settings.late.color;
+                        console.log('Applied late color:', settings.late.color, 'for time:', timeText);
+                    }
+                    
+                    // Handle overnight shifts (start time > end time) - only if not already colored
+                    if (startTotalMinutes > endTotalMinutes && !td.style.backgroundColor) {
+                        // If it's not already a night shift, apply late color
+                        if (startTotalMinutes < night_shift) {
+                            td.style.backgroundColor = settings.late.color;
+                            console.log('Applied late color (overnight):', settings.late.color, 'for time:', timeText);
+                        }
+                    }
+
+                } else {
+                    const listOfDaysoff = ['XX', 'OO', 'TT', ''];
+                    if (listOfDaysoff.includes(times[0])) {
+                        td.style.backgroundColor = settings.dayoff.color;
+                        console.log('Applied day off color:', settings.dayoff.color, 'for text:', times[0]);
+                    }
+                }
+            }
+        });
+        
+        console.log('Color application completed');
+    }
+
+    // Initialize color inputs with current settings
+    function initializeColorInputs() {
+        const settings = loadColorSettings();
+        
+        try {
+            // Set color values
+            const earlyColor = document.getElementById('early-color');
+            const lateColor = document.getElementById('late-color');
+            const nightColor = document.getElementById('night-color');
+            const dayoffColor = document.getElementById('dayoff-color');
+            const hdagColor = document.getElementById('hdag-color');
+            const earlylateColor = document.getElementById('earlylate-color');
+            
+            if (earlyColor) earlyColor.value = settings.early.color;
+            if (lateColor) lateColor.value = settings.late.color;
+            if (nightColor) nightColor.value = settings.night.color;
+            if (dayoffColor) dayoffColor.value = settings.dayoff.color;
+            if (hdagColor) hdagColor.value = settings.hdag.color;
+            if (earlylateColor) earlylateColor.value = settings.earlylate.color;
+            
+            // Set time values
+            const earlyTime = document.getElementById('early-time');
+            const lateTime = document.getElementById('late-time');
+            const nightTime = document.getElementById('night-time');
+            
+            if (earlyTime) earlyTime.value = settings.early.time;
+            if (lateTime) lateTime.value = settings.late.time;
+            if (nightTime) nightTime.value = settings.night.time;
+            
+            console.log('Color inputs initialized with settings:', settings);
+        } catch (error) {
+            console.error('Error initializing color inputs:', error);
+        }
+    }
+
+    // Apply button click handler
+    const applyButton = document.getElementById('apply-colors');
+    if (applyButton) {
+        applyButton.addEventListener('click', function() {
+            try {
+                const newSettings = {
+                    early: {
+                        color: document.getElementById('early-color')?.value || defaultSettings.early.color,
+                        time: document.getElementById('early-time')?.value || defaultSettings.early.time
+                    },
+                    late: {
+                        color: document.getElementById('late-color')?.value || defaultSettings.late.color,
+                        time: document.getElementById('late-time')?.value || defaultSettings.late.time
+                    },
+                    night: {
+                        color: document.getElementById('night-color')?.value || defaultSettings.night.color,
+                        time: document.getElementById('night-time')?.value || defaultSettings.night.time
+                    },
+                    dayoff: {
+                        color: document.getElementById('dayoff-color')?.value || defaultSettings.dayoff.color
+                    },
+                    hdag: {
+                        color: document.getElementById('hdag-color')?.value || defaultSettings.hdag.color
+                    },
+                    earlylate: {
+                        color: document.getElementById('earlylate-color')?.value || defaultSettings.earlylate.color
+                    }
+                };
+
+                saveColorSettings(newSettings);
+                applyColorsToTable();
+                
+                // Show success feedback
+                const button = this;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Farger brukt!';
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-primary');
+                }, 2000);
+                
+                console.log('Colors applied successfully');
+            } catch (error) {
+                console.error('Error applying colors:', error);
+                alert('Feil ved bruk av farger. Sjekk konsollen for detaljer.');
+            }
+        });
+    }
+
+    // Reset button click handler
+    const resetButton = document.getElementById('reset-colors');
+    if (resetButton) {
+        resetButton.addEventListener('click', function() {
+            if (confirm('Er du sikker på at du vil tilbakestille alle fargeinnstillinger?')) {
+                try {
+                    localStorage.removeItem('shiftColorSettings');
+                    initializeColorInputs();
+                    applyColorsToTable();
+                    
+                    // Show reset feedback
+                    const button = this;
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Reset!';
+                    button.classList.remove('btn-outline-secondary');
+                    button.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-outline-secondary');
+                    }, 2000);
+                    
+                    console.log('Colors reset to defaults');
+                } catch (error) {
+                    console.error('Error resetting colors:', error);
+                    alert('Feil ved tilbakestilling av farger. Sjekk konsollen for detaljer.');
+                }
+            }
+        });
+    }
+
+    // Initialize the color system
+    console.log('Initializing color adjustment system...');
+    initializeColorInputs();
+    applyColorsToTable();
+    console.log('Color adjustment system initialized');
+});
+
 // Adds color to the shift table
 document.addEventListener('DOMContentLoaded', function() {
+    // This function is now handled by the color adjustment system above
+    // Keeping it for backward compatibility but it won't run if colors are already applied
+    if (localStorage.getItem('shiftColorSettings')) {
+        return; // Colors already applied by the new system
+    }
+
     const tds = document.querySelectorAll('td[id="cell"]');
     tds.forEach(td => {
         const timeTextElement = td.querySelector('.time-text');
@@ -76,21 +353,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (endTotalMinutes > late_shift) {
                     td.classList.add('late');
                 }
-                if (startTotalMinutes > late_shift && endTotalMinutes < startTotalMinutes) {
-                    td.classList.add('late');
-                }
-                if (startTotalMinutes < late_shift && endTotalMinutes < startTotalMinutes) {
-                    td.classList.add('late');
-                }
                 if (startTotalMinutes >= night_shift) {
                     td.classList.add('night');
                 }
-
-                
-                if (startTotalMinutes > endTotalMinutes){
-                    td.classList.add('late')
+                if (startTotalMinutes > endTotalMinutes) {
+                    td.classList.add('late');
                 }
 
+                
                 if (start_hours > 5 && start_hours < 9 && end_hours >= 16 && end_hours < 18){
                     td.classList.add('early-and-late')
                 }

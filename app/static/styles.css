@@ -26,6 +26,10 @@ body, html {
   background-color: #7cb1d6;;
 }
 
+/* Remove the body padding and navbar positioning */
+
+/* Remove the conflicting footer navbar CSS since Bootstrap handles it */
+
 
 .custom-width {
     width: 150px; /* Adjust the width as needed */
@@ -38,6 +42,368 @@ body, html {
 
 .min-width-td {
   min-width: 90px; /* Set your desired minimum width */
+}
+
+/* Shift table cell styling */
+#cell {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+#cell:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 1;
+}
+
+/* Ensure text is readable on colored backgrounds */
+#cell[style*="background-color"] {
+  color: #000;
+  font-weight: 500;
+}
+
+#cell[style*="background-color"] .time-text {
+  color: inherit;
+}
+
+#cell[style*="background-color"] .custom-text {
+  color: inherit;
+}
+
+/* Specific color overrides for better readability */
+#cell[style*="background-color: #268eb8"] {
+  color: white !important;
+}
+
+#cell[style*="background-color: #268eb8"] .time-text,
+#cell[style*="background-color: #268eb8"] .custom-text {
+  color: white !important;
+}
+
+/* Table styling improvements */
+.table-responsive table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table-responsive th,
+.table-responsive td {
+  border: 1px solid #dee2e6;
+  padding: 0.5rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table-responsive th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+
+/* Enhanced sidebar styling */
+.sorting-sidebar {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-right: 1px solid #dee2e6;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  min-width: 280px;
+  max-width: 320px;
+}
+
+
+
+
+.sidebar-header {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  color: white;
+  padding: 0.75rem 1rem;
+  margin: 0;
+  border-bottom: 1px solid #495057;
+}
+
+.sidebar-header:first-child {
+  border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.sidebar-header .sidebar-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.sidebar-content {
+  padding: 1rem;
+  background: white;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.sidebar-content:last-child {
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.control-item {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 0.375rem;
+  border: 1px solid #e9ecef;
+}
+
+.control-item:last-child {
+  margin-bottom: 0;
+}
+
+.control-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Color adjustment specific styles */
+.control-item:has(.color-input-group) {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+}
+
+.color-input-group .form-control-color {
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.color-input-group .form-control-color:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  transform: scale(1.05);
+}
+
+.color-input-group .form-control-sm {
+  border: 1px solid #ced4da;
+  transition: all 0.2s ease;
+}
+
+.color-input-group .form-control-sm:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Button styles for color adjustment */
+#apply-colors, #reset-colors {
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+#apply-colors:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+#reset-colors:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Success state for buttons */
+.btn-success {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: white !important;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+.slider-labels small {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.value-display {
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* Sidebar Slider Styling */
+.sidebar-slider {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.3);
+    outline: none;
+    -webkit-appearance: none;
+    margin-bottom: 8px;
+}
+
+.sidebar-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    border: 2px solid #7cb1d6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
+
+.sidebar-slider::-webkit-slider-thumb:hover {
+    background: #f8f9fa;
+    transform: scale(1.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.sidebar-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    border: 2px solid #7cb1d6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
+
+.sidebar-slider::-moz-range-thumb:hover {
+    background: #f8f9fa;
+    transform: scale(1.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.sidebar-slider::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.3);
+    border: none;
+}
+
+.sidebar-slider::-ms-track {
+    height: 4px;
+    border-radius: 2px;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+
+.sidebar-slider::-ms-fill-lower {
+    background: rgba(255,255,255,0.6);
+    border-radius: 2px;
+}
+
+.sidebar-slider::-ms-fill-upper {
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+}
+
+.sidebar-slider::-ms-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    border: 2px solid #7cb1d6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Sidebar Badge Styling */
+.sorting-sidebar .badge {
+    background-color: rgba(255,255,255,0.9) !important;
+    color: #495057 !important;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    min-width: 2rem;
+    font-weight: 600;
+}
+
+.sorting-sidebar .badge:hover {
+    background-color: white !important;
+    transform: scale(1.05);
+}
+
+/* Reset Button in Sidebar */
+.sorting-sidebar #reset-sorting {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.3);
+    color: white;
+    font-size: 0.8rem;
+    padding: 8px;
+    transition: all 0.2s ease;
+}
+
+.sorting-sidebar #reset-sorting:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Page Layout */
+.page-layout {
+    display: flex;
+    gap: 0;
+    min-height: calc(100vh - 120px);
+    background: #f8f9fa;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .page-layout {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .sorting-sidebar,
+    .color-sidebar {
+        width: 100%;
+        position: relative;
+        top: 0;
+        max-height: none;
+        min-width: auto;
+        max-width: none;
+        order: unset;
+    }
+    
+    .sidebar-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+    }
+    
+    .control-item {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar-content {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .control-item {
+        padding: 10px;
+    }
+    
+    .sorting-sidebar,
+    .color-sidebar {
+        font-size: 0.9rem;
+    }
+    
+    .page-layout {
+        padding: 10px;
+    }
 }
 
 
@@ -370,7 +736,7 @@ label input[type="checkbox"] {
 /* Small text under sliders */
 .text-muted {
     font-size: 0.75rem;
-    color: #6c757d !important;
+    color: #7d6c6c !important;
 }
 
 /* Reset button styling */
@@ -420,13 +786,6 @@ label input[type="checkbox"] {
 #sorting-criteria {
     font-weight: 500;
     color: #7cb1d6;
-}
-
-/* Page Layout with Sidebar */
-.page-layout {
-    display: flex;
-    gap: 20px;
-    min-height: calc(100vh - 120px);
 }
 
 /* Left Sidebar */

@@ -7,35 +7,49 @@ from app.routes.main import df_manager, turnus_data
 
 shifts = Blueprint('shifts', __name__)
 
-@shifts.route('/')
-@login_required
-def home(): 
-    form = CalculationForm()
+# @shifts.route('/')
+# @login_required
+# def home(): 
+#     form = CalculationForm()
 
-    # Gets the values set by the user 
-    form.helgetimer.data = session.get('helgetimer', '0')
-    form.helgetimer_dagtid.data = session.get('helgetimer_dagtid', '0')
-    form.natt_helg.data = session.get('natt_helg', '0')
-    form.tidlig.data = session.get('tidlig', '0')
-    form.tidlig_poeng.data = session.get('tidlig_poeng', '0')
-    form.before_6.data = session.get('before_6', '0')
-    form.ettermiddager.data = session.get('ettermiddager', '0')
-    form.ettermiddager_poeng.data = session.get('ettermiddager_poeng', '0')
-    form.slutt_for_20.data = session.get('slutt_for_20', '0')
-    form.nights.data = session.get('nights', '0')
-    form.nights_pts.data = session.get('nights_pts', '0')
+#     # Gets the values set by the user 
+#     form.helgetimer.data = session.get('helgetimer', '0')
+#     form.helgetimer_dagtid.data = session.get('helgetimer_dagtid', '0')
+#     form.natt_helg.data = session.get('natt_helg', '0')
+#     form.tidlig.data = session.get('tidlig', '0')
+#     form.tidlig_poeng.data = session.get('tidlig_poeng', '0')
+#     form.before_6.data = session.get('before_6', '0')
+#     form.ettermiddager.data = session.get('ettermiddager', '0')
+#     form.ettermiddager_poeng.data = session.get('ettermiddager_poeng', '0')
+#     form.slutt_for_20.data = session.get('slutt_for_20', '0')
+#     form.nights.data = session.get('nights', '0')
+#     form.nights_pts.data = session.get('nights_pts', '0')
 
-    sort_btn_name = df_manager.sort_by_btn_txt
-    favorites = db_utils.get_favorite_lst(current_user.get_id())
+#     sort_btn_name = df_manager.sort_by_btn_txt
+#     favorites = db_utils.get_favorite_lst(current_user.get_id())
     
-    time.sleep(1)
+#     time.sleep(1)
     
-    return render_template('sort_shifts.html', 
-                         table_data=df_manager.df.to_dict(orient='records'),
-                         form=form,
-                         sort_by_btn_name=sort_btn_name,
-                         page_name='Sorter Turnuser',
-                         favorites=favorites)
+#     return render_template('sort_shifts.html', 
+#                          table_data=df_manager.df.to_dict(orient='records'),
+#                          form=form,
+#                          sort_by_btn_name=sort_btn_name,
+#                          page_name='Sorter Turnuser',
+#                          favorites=favorites)
+
+@shifts.route('/turnusliste')
+def turnusliste():
+    # Get favorites for current user
+    from flask_login import current_user
+    favoritt = db_utils.get_favorite_lst(current_user.get_id()) if current_user.is_authenticated else []
+    
+    return render_template('turnusliste.html', 
+                         page_name='Turnusliste',
+                         table_data=turnus_data,  # Add this
+                         df=df_manager.df.to_dict(orient='records'),  # Add this
+                         favoritt=favoritt)  # Add this
+
+
 
 @shifts.route('/reset_search')
 def reset_search():
@@ -174,7 +188,7 @@ def next_shift():
         next_shift = all_shifts[next_index]
         return redirect(url_for('shifts.display_shift', shift_title=next_shift))
     except ValueError:
-        return redirect(url_for('shifts.home'))
+        return redirect(url_for('shifts.turnusliste'))
 
 @shifts.route('/favorites')
 @login_required
@@ -193,14 +207,3 @@ def favorites():
                          favorites=fav_dict_sorted,
                          df=df_manager.df.to_dict(orient='records'))
 
-@shifts.route('/turnusliste')
-def turnusliste():
-    # Get favorites for current user
-    from flask_login import current_user
-    favoritt = db_utils.get_favorite_lst(current_user.get_id()) if current_user.is_authenticated else []
-    
-    return render_template('turnusliste.html', 
-                         page_name='Turnusliste',
-                         table_data=turnus_data,  # Add this
-                         df=df_manager.df.to_dict(orient='records'),  # Add this
-                         favoritt=favoritt)  # Add this

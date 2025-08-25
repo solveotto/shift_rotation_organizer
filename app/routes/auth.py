@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import logout_user, login_required, login_user as flask_login_user
+from flask_login import logout_user, login_required, login_user as flask_login_user, current_user
 from mysql.connector import Error
 from app.forms import LoginForm
 from app.models import User
@@ -9,10 +9,10 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    from app.routes.main import current_user  # Import here to avoid circular imports
+    # from app.routes.main import current_user  # Import here to avoid circular imports
     
     if current_user.is_authenticated:
-        return redirect(url_for('shifts.home'))
+        return redirect(url_for('shifts.turnusliste'))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -21,7 +21,7 @@ def login():
             if db_user_data and User.verify_password(db_user_data['password'], form.password.data):
                 user = User(form.username.data, db_user_data['id'], db_user_data['is_auth'])
                 flask_login_user(user)
-                return redirect(url_for('shifts.home'))
+                return redirect(url_for('shifts.turnusliste'))
             else:
                 flash('Login unsuccessful. Please check username and password', 'danger')
         except Error as e:

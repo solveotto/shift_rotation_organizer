@@ -22,6 +22,7 @@
 
 
         <title>Turnushjelper</title>
+        {% block extra_css %}{% endblock %}
     </head>
 
     <body>
@@ -35,9 +36,11 @@
           
           
             <div class="d-flex justify-content-between align-items-center w-100">
-              <a class="navbar-brand" href="{{ url_for('shifts.home') }}">
+              
+              <a class="navbar-brand" href="{{ url_for('shifts.turnusliste') }}">
                 <img src="/static/img/artybadger.png" alt="Bootstrap" width="75" height="75" style="border-radius: 50%;">
               </a>
+              
               
               <h2 class="text-center flex-grow-1 m-0" style="position: relative; left: 1em;">
                 <span>{% block prev_btn %}{% endblock %}</span>
@@ -99,10 +102,7 @@
         <div class="container py-5">
           <nav class="navbar navbar-custom-color fixed-bottom">
               <div class="d-flex justify-content-center align-items-center w-100">
-                  
-                <div class="mx-1 mx-md-3 mx-lg-5">
-                  <a href="{{ url_for('shifts.home') }}" class="{% if request.endpoint == 'shifts.home' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Sorter Turnuser</a>
-                </div>
+
                 
                 <div class="mx-1 mx-md-3 mx-lg-5">
                   <a href="{{ url_for('shifts.turnusliste') }}" class="{% if request.endpoint == 'shifts.turnusliste' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Turnusliste</a>
