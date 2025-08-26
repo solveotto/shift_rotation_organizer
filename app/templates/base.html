@@ -112,6 +112,9 @@
                 <div class="mx-1 mx-md-3 mx-lg-5">
                   <a href="{{ url_for('shifts.favorites') }}" class="{% if request.endpoint == 'shifts.favorites' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Favoritter</a>
                 </div>
+                <div class="mx-1 mx-md-3 mx-lg-5">
+                  <a href="{{ url_for('shifts.compare') }}" class="{% if request.endpoint == 'shifts.compare' %}btn btn-success{% else %}btn btn-outline-success{% endif %}">Sammenlign</a>
+                </div>
         
               </div>
           </nav>

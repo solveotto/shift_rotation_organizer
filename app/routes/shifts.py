@@ -207,3 +207,18 @@ def favorites():
                          favorites=fav_dict_sorted,
                          df=df_manager.df.to_dict(orient='records'))
 
+
+@shifts.route('/compare')
+def compare():
+    # Prepare metrics for charts
+    df = df_manager.df
+    metrics = ['natt', 'tidlig', 'shift_cnt', 'before_6', 'helgetimer']
+    labels = df['turnus'].tolist()
+    data = {m: df[m].tolist() if m in df else [] for m in metrics}
+
+    return render_template(
+        'compare.html',
+        page_name='Sammenlign Turnuser',
+        labels=labels,
+        data=data
+    )
