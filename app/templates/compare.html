@@ -8,24 +8,30 @@
 <div class="container py-3">
   <div class="row g-3 mb-3">
     <div class="col-12 d-flex align-items-center gap-2">
-      <label for="order-select" class="form-label m-0">Sorter:</label>
-      <select id="order-select" class="form-select form-select-sm" style="width: auto;">
-        <option value="asc">Minst → Størst</option>
-        <option value="desc" selected>Størst → Minst</option>
-      </select>
-      <div class="vr mx-2"></div>
-      <label for="chart-mode" class="form-label m-0">Visning:</label>
-      <select id="chart-mode" class="form-select form-select-sm" style="width: auto;">
-        <option value="vertical" selected>Søyle (kolonner)</option>
-        <option value="pie">Kakediagram</option>
-      </select>
+      <div class="d-flex align-items-center gap-2">
+        <span class="form-label m-0">Visning:</span>
+        <div class="btn-group" role="group" aria-label="Visning">
+          <button type="button" id="view-vertical" class="btn btn-outline-primary active" data-mode="vertical">
+            <i class="bi bi-bar-chart"></i> Søyler
+          </button>
+          <button type="button" id="view-pie" class="btn btn-outline-primary" data-mode="pie">
+            <i class="bi bi-pie-chart"></i> Kake
+          </button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="row g-4">
     <div class="col-12">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Dagsverk</h5>
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Dagsverk</span>
+            <div class="btn-group" role="group" aria-label="Sorter Dagsverk" data-order-container="shift_cnt">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="shift_cnt" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="shift_cnt" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
           <div id="wrap-chart-shift_cnt" style="position: relative; height: 360px; overflow: auto;">
             <canvas id="chart-shift_cnt"></canvas>
           </div>
@@ -35,7 +41,13 @@
     <div class="col-12 col-lg-6">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Natt</h5>
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Natt</span>
+            <div class="btn-group" role="group" aria-label="Sorter Natt" data-order-container="natt">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="natt" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="natt" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
           <div id="wrap-chart-natt" style="position: relative; height: 360px; overflow: auto;">
             <canvas id="chart-natt"></canvas>
           </div>
@@ -45,7 +57,13 @@
     <div class="col-12 col-lg-6">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Tidlig</h5>
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Tidlig</span>
+            <div class="btn-group" role="group" aria-label="Sorter Tidlig" data-order-container="tidlig">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="tidlig" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="tidlig" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
           <div id="wrap-chart-tidlig" style="position: relative; height: 360px; overflow: auto;">
             <canvas id="chart-tidlig"></canvas>
           </div>
@@ -55,7 +73,13 @@
     <div class="col-12 col-lg-6">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Før 6:00</h5>
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Før 6:00</span>
+            <div class="btn-group" role="group" aria-label="Sorter Før 6:00" data-order-container="before_6">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="before_6" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="before_6" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
           <div id="wrap-chart-before_6" style="position: relative; height: 360px; overflow: auto;">
             <canvas id="chart-before_6"></canvas>
           </div>
@@ -65,7 +89,13 @@
     <div class="col-12 col-lg-6">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Helgetimer</h5>
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Helgetimer</span>
+            <div class="btn-group" role="group" aria-label="Sorter Helgetimer" data-order-container="helgetimer">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="helgetimer" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="helgetimer" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
           <div id="wrap-chart-helgetimer" style="position: relative; height: 360px; overflow: auto;">
             <canvas id="chart-helgetimer"></canvas>
           </div>
@@ -75,10 +105,15 @@
   </div>
 </div>
 
+<script id="compare-labels" type="application/json">{{ labels|tojson }}</script>
+<script id="compare-data" type="application/json">{{ data|tojson }}</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
-  const labels = {{ labels|tojson }};
-  const data = {{ data|tojson }};
+  (function() {
+  if (window.ChartDataLabels) { Chart.register(ChartDataLabels); }
+  const turnusLabels = JSON.parse(document.getElementById('compare-labels').textContent);
+  const metricsData = JSON.parse(document.getElementById('compare-data').textContent);
 
   const charts = {};
 
@@ -127,7 +162,7 @@
       wrap.style.height = '420px';
       canvasEl.style.height = '400px';
       // Ensure horizontal scrolling space for many columns
-      const widthPerBar = 80; // px per column including spacing (increased for readability)
+      const widthPerBar = 40; // px per column including spacing (increased for readability)
       const minWidth = Math.max(valuesArr.length * widthPerBar, wrap.clientWidth);
       // Important: set both CSS size and canvas pixel attributes
       canvasEl.style.width = minWidth + 'px';
@@ -182,7 +217,8 @@
           callbacks: {
             title: (items) => items[0]?.label || ''
           }
-        }
+        },
+        datalabels: { display: false }
       }
     };
     const datasetCommon = {
@@ -195,7 +231,7 @@
     if (!isPie) {
       datasetCommon.barThickness = 28; // thicker columns
       datasetCommon.maxBarThickness = 34;
-      datasetCommon.categoryPercentage = 0.5; // spacing between groups
+      datasetCommon.categoryPercentage = 0.1; // spacing between groups
       datasetCommon.barPercentage = 0.8; // spacing within group
     }
 
@@ -211,30 +247,53 @@
     // no extra list rendering
   }
 
-  function renderAll(orderValue) {
+  function renderAll(_unused) {
     const m = {
-      'chart-shift_cnt': { arr: data['shift_cnt'], label: 'Dagsverk' },
-      'chart-natt': { arr: data['natt'], label: 'Natt' },
-      'chart-tidlig': { arr: data['tidlig'], label: 'Tidlig' },
-      'chart-before_6': { arr: data['before_6'], label: 'Før 6:00' },
-      'chart-helgetimer': { arr: data['helgetimer'], label: 'Helgetimer' }
+      'chart-shift_cnt': { arr: metricsData['shift_cnt'], label: 'Dagsverk' },
+      'chart-natt': { arr: metricsData['natt'], label: 'Natt' },
+      'chart-tidlig': { arr: metricsData['tidlig'], label: 'Tidlig' },
+      'chart-before_6': { arr: metricsData['before_6'], label: 'Før 6:00' },
+      'chart-helgetimer': { arr: metricsData['helgetimer'], label: 'Helgetimer' }
     };
 
     for (const [canvasId, cfg] of Object.entries(m)) {
-      const { lbls, vals } = sortOnly(labels, cfg.arr, orderValue);
-      makeChart(canvasId, lbls, vals, cfg.label, document.getElementById('chart-mode').value);
+      // Determine per-chart override; fallback to global orderValue
+      const containerKey = canvasId.replace('chart-','');
+      const activeBtn = document.querySelector(`[data-order-container="${containerKey}"] .order-btn.active`);
+      const perOrder = activeBtn ? activeBtn.getAttribute('data-order') : 'desc';
+      const { lbls, vals } = sortOnly(turnusLabels, cfg.arr, perOrder);
+      const currentMode = document.querySelector('[data-mode].active')?.getAttribute('data-mode') || 'vertical';
+      makeChart(canvasId, lbls, vals, cfg.label, currentMode);
     }
   }
 
-  const orderSelect = document.getElementById('order-select');
-  const modeSelect = document.getElementById('chart-mode');
-  renderAll(orderSelect.value);
-  orderSelect.addEventListener('change', () => {
-    renderAll(orderSelect.value);
-  });
-  modeSelect.addEventListener('change', () => {
-    renderAll(orderSelect.value);
-  });
+  renderAll('desc');
+  // Per-chart order listeners
+  // Per-chart order listeners
+  // Per-chart order toggle buttons
+  function attachOrderGroup(containerKey) {
+    const group = document.querySelector(`[data-order-container="${containerKey}"]`);
+    if (!group) return;
+    group.querySelectorAll('.order-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.order-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderAll('desc');
+      });
+    });
+  }
+  ['shift_cnt','natt','tidlig','before_6','helgetimer'].forEach(attachOrderGroup);
+  // View mode toggle listeners
+  function setActiveMode(btn) {
+    document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderAll('desc');
+  }
+  const viewVertical = document.getElementById('view-vertical');
+  const viewPie = document.getElementById('view-pie');
+  viewVertical.addEventListener('click', () => setActiveMode(viewVertical));
+  viewPie.addEventListener('click', () => setActiveMode(viewPie));
+  })();
 </script>
 {% endblock %}
 
