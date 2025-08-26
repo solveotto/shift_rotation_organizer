@@ -26,10 +26,6 @@ body, html {
   background-color: #7cb1d6;;
 }
 
-/* Remove the body padding and navbar positioning */
-
-/* Remove the conflicting footer navbar CSS since Bootstrap handles it */
-
 
 .custom-width {
     width: 150px; /* Adjust the width as needed */
@@ -43,6 +39,7 @@ body, html {
 .min-width-td {
   min-width: 90px; /* Set your desired minimum width */
 }
+
 
 /* Shift table cell styling */
 #cell {
@@ -80,6 +77,7 @@ body, html {
   color: white !important;
 }
 
+
 /* Table styling improvements */
 .table-responsive table {
   border-collapse: collapse;
@@ -109,9 +107,6 @@ body, html {
   min-width: 280px;
   max-width: 320px;
 }
-
-
-
 
 .sidebar-header {
   background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
@@ -228,120 +223,18 @@ body, html {
     margin-top: 8px;
 }
 
-/* Sidebar Slider Styling */
-.sidebar-slider {
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255,255,255,0.3);
-    outline: none;
-    -webkit-appearance: none;
-    margin-bottom: 8px;
-}
 
-.sidebar-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: white;
-    cursor: pointer;
-    border: 2px solid #7cb1d6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
-}
 
-.sidebar-slider::-webkit-slider-thumb:hover {
-    background: #f8f9fa;
-    transform: scale(1.1);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-}
 
-.sidebar-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: white;
-    cursor: pointer;
-    border: 2px solid #7cb1d6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
-}
 
-.sidebar-slider::-moz-range-thumb:hover {
-    background: #f8f9fa;
-    transform: scale(1.1);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-}
 
-.sidebar-slider::-moz-range-track {
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255,255,255,0.3);
-    border: none;
-}
 
-.sidebar-slider::-ms-track {
-    height: 4px;
-    border-radius: 2px;
-    background: transparent;
-    border-color: transparent;
-    color: transparent;
-}
 
-.sidebar-slider::-ms-fill-lower {
-    background: rgba(255,255,255,0.6);
-    border-radius: 2px;
-}
 
-.sidebar-slider::-ms-fill-upper {
-    background: rgba(255,255,255,0.3);
-    border-radius: 2px;
-}
 
-.sidebar-slider::-ms-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: white;
-    cursor: pointer;
-    border: 2px solid #7cb1d6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
 
-/* Sidebar Badge Styling */
-.sorting-sidebar .badge {
-    background-color: rgba(255,255,255,0.9) !important;
-    color: #495057 !important;
-    font-size: 0.7rem;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    min-width: 2rem;
-    font-weight: 600;
-}
 
-.sorting-sidebar .badge:hover {
-    background-color: white !important;
-    transform: scale(1.05);
-}
 
-/* Reset Button in Sidebar */
-.sorting-sidebar #reset-sorting {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.3);
-    color: white;
-    font-size: 0.8rem;
-    padding: 8px;
-    transition: all 0.2s ease;
-}
-
-.sorting-sidebar #reset-sorting:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-    color: white;
-    transform: translateY(-1px);
-}
 
 /* Main Content Area */
 .main-content {
@@ -788,234 +681,4 @@ label input[type="checkbox"] {
     color: #7cb1d6;
 }
 
-/* Left Sidebar */
-.sorting-sidebar {
-    width: 280px;
-    background: linear-gradient(135deg, #7cb1d6 0%, #5a8bb3 100%);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    flex-shrink: 0;
-    position: sticky;
-    top: 20px;
-    height: fit-content;
-    max-height: calc(100vh - 140px);
-    overflow-y: auto;
-}
-
-.sidebar-header {
-    background: rgba(0,0,0,0.1);
-    padding: 16px;
-    border-radius: 8px 8px 0 0;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-.sidebar-title {
-    color: white;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin: 0;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-
-.sidebar-content {
-    padding: 11px;
-}
-
-.control-item {
-    margin-bottom: 14px;
-    padding: 8px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-.control-item:last-child {
-    margin-bottom: 0;
-}
-
-.control-label {
-    display: block;
-    color: white;
-    font-weight: 500;
-    font-size: 0.8rem;
-    margin-bottom: 8px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-
-.slider-labels {
-    display: flex;
-    justify-content: space-between;
-    margin: 8px 0;
-}
-
-.slider-labels small {
-    color: rgba(255,255,255,0.8);
-    font-size: 0.65rem;
-    font-weight: 500;
-}
-
-.value-display {
-    text-align: center;
-    margin-top: 8px;
-}
-
-/* Sidebar Slider Styling */
-.sidebar-slider {
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255,255,255,0.3);
-    outline: none;
-    -webkit-appearance: none;
-    margin-bottom: 8px;
-}
-
-.sidebar-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: white;
-    cursor: pointer;
-    border: 2px solid #7cb1d6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
-}
-
-.sidebar-slider::-webkit-slider-thumb:hover {
-    background: #f8f9fa;
-    transform: scale(1.1);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-}
-
-.sidebar-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: white;
-    cursor: pointer;
-    border: 2px solid #7cb1d6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
-}
-
-.sidebar-slider::-moz-range-thumb:hover {
-    background: #f8f9fa;
-    transform: scale(1.1);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-}
-
-.sidebar-slider::-moz-range-track {
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255,255,255,0.3);
-    border: none;
-}
-
-.sidebar-slider::-ms-track {
-    height: 4px;
-    border-radius: 2px;
-    background: transparent;
-    border-color: transparent;
-    color: transparent;
-}
-
-.sidebar-slider::-ms-fill-lower {
-    background: rgba(255,255,255,0.6);
-    border-radius: 2px;
-}
-
-.sidebar-slider::-ms-fill-upper {
-    background: rgba(255,255,255,0.3);
-    border-radius: 2px;
-}
-
-.sidebar-slider::-ms-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: white;
-    cursor: pointer;
-    border: 2px solid #7cb1d6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-/* Sidebar Badge Styling */
-.sorting-sidebar .badge {
-    background-color: rgba(255,255,255,0.9) !important;
-    color: #495057 !important;
-    font-size: 0.7rem;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    min-width: 2rem;
-    font-weight: 600;
-}
-
-.sorting-sidebar .badge:hover {
-    background-color: white !important;
-    transform: scale(1.05);
-}
-
-/* Reset Button in Sidebar */
-.sorting-sidebar #reset-sorting {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.3);
-    color: white;
-    font-size: 0.8rem;
-    padding: 8px;
-    transition: all 0.2s ease;
-}
-
-.sorting-sidebar #reset-sorting:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-    color: white;
-    transform: translateY(-1px);
-}
-
-/* Main Content Area */
-.main-content {
-    flex: 1;
-    min-width: 0;
-}
-
-/* Responsive Design */
-@media (max-width: 992px) {
-    .page-layout {
-        flex-direction: column;
-        gap: 16px;
-    }
-    
-    .sorting-sidebar {
-        width: 100%;
-        position: relative;
-        top: 0;
-        max-height: none;
-    }
-    
-    .sidebar-content {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-    }
-    
-    .control-item {
-        margin-bottom: 0;
-    }
-}
-
-@media (max-width: 576px) {
-    .sidebar-content {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    .control-item {
-        padding: 10px;
-    }
-    
-    .sorting-sidebar {
-        font-size: 0.9rem;
-    }
-}
+/* Left sidebar styles moved to sorting.css */

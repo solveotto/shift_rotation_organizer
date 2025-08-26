@@ -3,6 +3,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/turnusliste/coloradjustment.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/turnusliste/sorting.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='extras/overrides.css') }}">
 {% endblock %}
 
@@ -35,8 +36,8 @@
                 <label for="helgetimer-slider" class="control-label">Helgetimer</label>
                 <input type="range" class="form-range sidebar-slider" id="helgetimer-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
+                    <small>Få</small>
+                    <small>Mange</small>
                 </div>
                 <div class="value-display">
                     <span id="helgetimer-value" class="badge bg-secondary">0</span>
@@ -116,12 +117,15 @@
             </div>
             
             <div class="control-item">
-                <button id="reset-sorting" class="btn btn-outline-light btn-sm w-100">
+                <button id="reset-sorting" class="btn btn btn-sm w-100">
                     <i class="bi bi-arrow-clockwise"></i> Reset
                 </button>
             </div>
         </div>
     </aside>
+
+
+
 
     <!-- Main Content Area -->
     <main class="main-content">
