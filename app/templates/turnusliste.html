@@ -23,12 +23,25 @@
 {% block content %}
 
 <div class="page-layout">
+    <!-- Mobile Hamburger Buttons -->
+    <div class="mobile-controls">
+        <button class="hamburger-btn sorting-hamburger" id="sorting-hamburger">
+            <i class="bi bi-funnel"></i>
+        </button>
+        <button class="hamburger-btn color-hamburger" id="color-hamburger">
+            <i class="bi bi-palette"></i>
+        </button>
+    </div>
+    
     <!-- Left Sidebar - Sorting Controls -->
-    <aside class="sorting-sidebar">
+    <aside class="sorting-sidebar" id="sorting-sidebar">
         <div class="sidebar-header">
             <h6 class="sidebar-title">
                 <i class="bi bi-funnel"></i> Sorter Turnuser
             </h6>
+            <button class="close-sidebar-btn" onclick="closeSortingSidebar()">
+                <i class="bi bi-x-lg"></i>
+            </button>
         </div>
         
         <div class="sidebar-content">
@@ -262,11 +275,14 @@
     </main>
 
     <!-- Right Sidebar - Color Adjustment Panel -->
-    <aside class="color-sidebar">
+    <aside class="color-sidebar" id="color-sidebar">
         <div class="sidebar-header">
             <h6 class="sidebar-title">
                 <i class="bi bi-palette"></i> Fargeinnstillinger
             </h6>
+            <button class="close-sidebar-btn" onclick="closeColorSidebar()">
+                <i class="bi bi-x-lg"></i>
+            </button>
         </div>
         
         <div class="sidebar-content">
@@ -331,6 +347,75 @@
         </div>
     </aside>
 </div>
+
+<script>
+// Mobile sidebar toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const sortingHamburger = document.getElementById('sorting-hamburger');
+    const colorHamburger = document.getElementById('color-hamburger');
+    const sortingSidebar = document.getElementById('sorting-sidebar');
+    const colorSidebar = document.getElementById('color-sidebar');
+    const mainContent = document.querySelector('.main-content');
+    
+    // Toggle sorting sidebar
+    sortingHamburger.addEventListener('click', function() {
+        sortingSidebar.classList.toggle('sidebar-open');
+        colorSidebar.classList.remove('sidebar-open');
+        updateMainContentMargin();
+    });
+    
+    // Toggle color sidebar
+    colorHamburger.addEventListener('click', function() {
+        colorSidebar.classList.toggle('sidebar-open');
+        sortingSidebar.classList.remove('sidebar-open');
+        updateMainContentMargin();
+    });
+    
+    // Update main content margin based on open sidebars
+    function updateMainContentMargin() {
+        const isSortingOpen = sortingSidebar.classList.contains('sidebar-open');
+        const isColorOpen = colorSidebar.classList.contains('sidebar-open');
+        
+        // Only push content on mobile (screen width <= 768px)
+        if (window.innerWidth <= 768 && (isSortingOpen || isColorOpen)) {
+            mainContent.classList.add('content-pushed');
+        } else {
+            mainContent.classList.remove('content-pushed');
+        }
+    }
+    
+    // Close sidebars when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.sorting-sidebar') && 
+            !event.target.closest('.color-sidebar') &&
+            !event.target.closest('.hamburger-btn')) {
+            sortingSidebar.classList.remove('sidebar-open');
+            colorSidebar.classList.remove('sidebar-open');
+            updateMainContentMargin();
+        }
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sortingSidebar.classList.remove('sidebar-open');
+            colorSidebar.classList.remove('sidebar-open');
+            mainContent.classList.remove('content-pushed');
+        }
+    });
+    
+    // Close sidebar functions (global scope for onclick)
+    window.closeSortingSidebar = function() {
+        sortingSidebar.classList.remove('sidebar-open');
+        updateMainContentMargin();
+    };
+    
+    window.closeColorSidebar = function() {
+        colorSidebar.classList.remove('sidebar-open');
+        updateMainContentMargin();
+    };
+});
+</script>
 
 {% endblock %}
 

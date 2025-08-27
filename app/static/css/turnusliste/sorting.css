@@ -7,12 +7,57 @@
     min-width: 280px;
     max-width: 320px;
     order: 1; /* Ensure it appears on the left */
+    position: sticky;
+    top: 90px;
+    align-self: flex-start;
+    max-height: calc(100vh - 110px);
+    overflow: auto;
+    z-index: 2;
+}
+
+/* Custom scrollbar for WebKit browsers */
+.sorting-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sorting-sidebar::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+}
+
+.sorting-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+.sorting-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
 }
 
 .sidebar-header {
     background: rgba(0,0,0,0.1);
     padding: 16px;
     border-bottom: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-sidebar-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: none;
+}
+
+.close-sidebar-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
 }
 
 .sidebar-title {
@@ -36,9 +81,22 @@
     outline: none;
     -webkit-appearance: none;
     margin-bottom: 8px;
+    cursor: pointer;
 }
 
 
+
+.sidebar-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    border: 2px solid #7cb1d6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
 
 .sidebar-slider::-moz-range-thumb {
     width: 16px;
@@ -49,6 +107,12 @@
     border: 2px solid #7cb1d6;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     transition: all 0.2s ease;
+}
+
+.sidebar-slider::-webkit-slider-thumb:hover {
+    background: #f8f9fa;
+    transform: scale(1.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
 }
 
 .sidebar-slider::-moz-range-thumb:hover {
@@ -136,17 +200,58 @@
 
 
 
-/* Responsive Design for left sidebar */
-@media (max-width: 992px) {
-    .page-layout {
-        flex-direction: column;
-        gap: 16px;
+/* Responsive Design for left sidebar - Hamburger menu system */
+@media (max-width: 768px) {
+    .sorting-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 300px;
+        height: 100vh;
+        z-index: 999;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: none;
+        order: 1;
     }
     
+    .sidebar-open {
+        transform: translateX(0);
+    }
+    
+    .close-sidebar-btn {
+        display: block;
+    }
+    
+    /* Add backdrop when sidebar is open */
+    .sidebar-open::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.3);
+        z-index: -1;
+    }
+}
+
+/* Handle medium screens where sidebars should stay sticky */
+@media (min-width: 993px) and (max-width: 1400px) {
     .sorting-sidebar {
-        width: 100%;
-        position: relative;
-        order: 1;
+        position: sticky;
+        top: 90px;
+        align-self: flex-start;
+        max-height: calc(100vh - 110px);
+        overflow: auto;
+        z-index: 2;
+    }
+    
+    .close-sidebar-btn {
+        display: none;
     }
 }
 
@@ -158,5 +263,50 @@
     
     .sorting-sidebar {
         font-size: 0.9rem;
+        width: 280px;
+    }
+    
+    .sidebar-slider {
+        height: 6px;
+        margin-bottom: 12px;
+    }
+    
+    .sidebar-slider::-moz-range-thumb,
+    .sidebar-slider::-webkit-slider-thumb {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .control-item {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sorting-sidebar {
+        width: 260px;
+    }
+    
+    .sidebar-header {
+        padding: 12px;
+    }
+    
+    .sidebar-content {
+        padding: 8px;
+    }
+    
+    .control-item {
+        padding: 8px;
+    }
+    
+    .sidebar-slider {
+        height: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .sidebar-slider::-moz-range-thumb,
+    .sidebar-slider::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
     }
 }

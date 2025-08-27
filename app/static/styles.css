@@ -3,6 +3,16 @@ body, html {
   margin: 0;
 }
 
+
+/* Ensure proper spacing between main content and right sidebar */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  order: 2; /* Center between sidebars */
+  margin: 0 1rem; /* Add some spacing from sidebars */
+}  
+
+
 .content-wrapper {
   display: flex;
   flex-direction: column;
@@ -156,74 +166,6 @@ body, html {
   display: block;
 }
 
-/* Color adjustment specific styles */
-.control-item:has(.color-input-group) {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border: 1px solid #dee2e6;
-}
-
-.color-input-group .form-control-color {
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.color-input-group .form-control-color:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-  transform: scale(1.05);
-}
-
-.color-input-group .form-control-sm {
-  border: 1px solid #ced4da;
-  transition: all 0.2s ease;
-}
-
-.color-input-group .form-control-sm:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-/* Button styles for color adjustment */
-#apply-colors, #reset-colors {
-  transition: all 0.2s ease;
-  font-weight: 500;
-}
-
-#apply-colors:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-#reset-colors:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-/* Success state for buttons */
-.btn-success {
-  background-color: #198754 !important;
-  border-color: #198754 !important;
-  color: white !important;
-}
-
-.slider-labels {
-    display: flex;
-    justify-content: space-between;
-    margin: 8px 0;
-}
-
-.slider-labels small {
-    color: rgba(255,255,255,0.8);
-    font-size: 0.65rem;
-    font-weight: 500;
-}
-
-.value-display {
-    text-align: center;
-    margin-top: 8px;
-}
-
-
 
 
 
@@ -240,18 +182,143 @@ body, html {
 .main-content {
     flex: 1;
     min-width: 0;
+    margin-inline: 12px;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
 }
 
 /* Page Layout */
 .page-layout {
     display: flex;
-    gap: 0;
+    gap: 12px;
     min-height: calc(100vh - 120px);
     background: #f8f9fa;
+    align-items: flex-start;
+    position: relative;
+}
+
+/* Mobile Controls */
+.mobile-controls {
+    display: none;
+    position: fixed;
+    top: 100px;
+    left: 10px;
+    z-index: 1000;
+    gap: 8px;
+    flex-direction: column;
+}
+
+.hamburger-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.sorting-hamburger {
+    background: linear-gradient(135deg, #7cb1d6 0%, #5a8bb3 100%);
+    color: white;
+}
+
+.color-hamburger {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+.hamburger-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+.hamburger-btn.active {
+    background: #0d6efd;
+    color: white;
 }
 
 /* Responsive Design */
 @media (max-width: 1400px) {
+    .page-layout {
+        flex-direction: row;
+        gap: 12px;
+    }
+    
+    .sorting-sidebar,
+    .color-sidebar {
+        position: sticky;
+        top: 90px;
+        align-self: flex-start;
+        max-height: calc(100vh - 110px);
+        overflow: auto;
+        z-index: 2;
+    }
+    
+    .main-content {
+        margin-inline: 12px;
+        flex: 1;
+        order: 2;
+    }
+}
+
+/* Ensure proper layout between 993px and 1400px */
+@media (min-width: 993px) and (max-width: 1400px) {
+    .page-layout {
+        flex-direction: row;
+        gap: 12px;
+    }
+    
+    .sorting-sidebar,
+    .color-sidebar {
+        position: sticky;
+        top: 90px;
+        align-self: flex-start;
+        max-height: calc(100vh - 110px);
+        overflow: auto;
+        z-index: 2;
+    }
+    
+    .main-content {
+        margin-inline: 12px;
+        flex: 1;
+        order: 2;
+    }
+}
+
+@media (max-width: 992px) {
+    .page-layout {
+        gap: 0;
+    }
+    
+    /* Ensure main content is properly scrollable */
+    .main-content {
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: calc(100vh - 120px);
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Make tables responsive on mobile */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+}
+
+/* Add a new breakpoint for when sidebars should collapse into hamburger menus */
+@media (max-width: 768px) {
+    .mobile-controls {
+        display: flex;
+    }
+    
     .page-layout {
         flex-direction: column;
         gap: 16px;
@@ -259,13 +326,22 @@ body, html {
     
     .sorting-sidebar,
     .color-sidebar {
+        position: static;
         width: 100%;
-        position: relative;
-        top: 0;
         max-height: none;
-        min-width: auto;
-        max-width: none;
         order: unset;
+        top: auto;
+        align-self: stretch;
+    }
+    
+    .main-content {
+        margin-inline: 0;
+        order: 3;
+    }
+    
+    .main-content.content-pushed {
+        margin-left: 320px;
+        transition: margin-left 0.3s ease;
     }
     
     .sidebar-content {
@@ -292,10 +368,99 @@ body, html {
     .sorting-sidebar,
     .color-sidebar {
         font-size: 0.9rem;
+        width: 280px;
     }
     
     .page-layout {
         padding: 10px;
+        gap: 8px;
+    }
+    
+    .main-content {
+        margin-inline: 0;
+    }
+    
+    .main-content.content-pushed {
+        margin-left: 300px;
+    }
+    
+    .mobile-controls {
+        top: 90px;
+        left: 8px;
+    }
+    
+    .hamburger-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+    
+    /* Ensure tables are scrollable on mobile */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    /* Improve touch scrolling */
+    .main-content {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-layout {
+        padding: 8px;
+        gap: 6px;
+    }
+    
+    .sidebar-content {
+        gap: 8px;
+    }
+    
+    .control-item {
+        padding: 8px;
+    }
+    
+    .main-content {
+        margin-inline: 0;
+    }
+    
+    .table-responsive {
+        font-size: 0.85rem;
+        overflow-x: auto;
+        max-width: 100%;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    .printable {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+    
+    .sorting-sidebar,
+    .color-sidebar {
+        width: 260px;
+    }
+    
+    .main-content.content-pushed {
+        margin-left: 280px;
+    }
+    
+    .mobile-controls {
+        top: 85px;
+        left: 5px;
+    }
+    
+    .hamburger-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    /* Improve touch scrolling on very small screens */
+    .main-content {
+        -webkit-overflow-scrolling: touch;
     }
 }
 
