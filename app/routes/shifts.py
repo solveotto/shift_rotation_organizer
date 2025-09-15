@@ -37,7 +37,7 @@ shifts = Blueprint('shifts', __name__)
 #                          page_name='Sorter Turnuser',
 #                          favorites=favorites)
 
-@shifts.route('/turnusliste')
+@shifts.route('/')
 def turnusliste():
     # Get favorites for current user
     from flask_login import current_user

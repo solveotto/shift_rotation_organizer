@@ -1,0 +1,5 @@
+- Teste å endre turnus til R24
+- Lage funksjon for å legge til turnuser
+- Endre fargeinnstillingene slik at når du klikker på turnus så kan du endre fargen
+- Forandre tiden ved å trykke på et tannhjul på tunrusene
+- Endre størrelsen på Sortere turnus navbar

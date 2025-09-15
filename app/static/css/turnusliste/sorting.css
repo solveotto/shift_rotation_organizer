@@ -84,6 +84,17 @@
     cursor: pointer;
 }
 
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+.slider-labels small {
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 0.65rem;
+    font-weight: 500;
+}
 
 
 .sidebar-slider::-webkit-slider-thumb {
@@ -201,7 +212,7 @@
 
 
 /* Responsive Design for left sidebar - Hamburger menu system */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
     .sorting-sidebar {
         position: fixed;
         top: 0;
@@ -235,7 +246,7 @@
         right: 0;
         bottom: 0;
         background: rgba(0,0,0,0.3);
-        z-index: -1;
+        z-index: 998;
     }
 }
 

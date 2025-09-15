@@ -5,7 +5,7 @@ from app.utils import db_utils
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 
-@admin.route('/')
+@admin.route('/dashboard')
 @login_required
 def admin_dashboard():
     # Check if user is authorized (is_auth = 1)

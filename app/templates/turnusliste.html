@@ -14,7 +14,7 @@
     <div class="print-button-container" style="margin-top: 20px;">
         <button class="btn btn-outline-dark btn-sm mb-3 py-1" 
                 style="--bs-btn-padding-y: 1.25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"
-                onclick="printAllTables()">Utskrift <i class="bi bi-printer"></i>
+                onclick="printTables()">Utskrift <i class="bi bi-printer"></i>
         </button>
     </div>
 {% endblock %}
@@ -61,8 +61,8 @@
                 <label for="shift-cnt-slider" class="control-label">Dagsverk</label>
                 <input type="range" class="form-range sidebar-slider" id="shift-cnt-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
+                    <small>Få</small>
+                    <small>Mange</small>
                 </div>
                 <div class="value-display">
                     <span id="shift-cnt-value" class="badge bg-secondary">0</span>
@@ -73,8 +73,8 @@
                 <label for="tidlig-slider" class="control-label">Tidlig</label>
                 <input type="range" class="form-range sidebar-slider" id="tidlig-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
+                    <small>Få</small>
+                    <small>Mange</small>
                 </div>
                 <div class="value-display">
                     <span id="tidlig-value" class="badge bg-secondary">0</span>
@@ -85,8 +85,8 @@
                 <label for="natt-slider" class="control-label">Natt</label>
                 <input type="range" class="form-range sidebar-slider" id="natt-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
+                    <small>Få</small>
+                    <small>Mange</small>
                 </div>
                 <div class="value-display">
                     <span id="natt-value" class="badge bg-secondary">0</span>
@@ -97,8 +97,8 @@
                 <label for="ettermiddag-slider" class="control-label">Ettermiddag</label>
                 <input type="range" class="form-range sidebar-slider" id="ettermiddag-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
+                    <small>Få</small>
+                    <small>Mange</small>
                 </div>
                 <div class="value-display">
                     <span id="ettermiddag-value" class="badge bg-secondary">0</span>
@@ -109,8 +109,8 @@
                 <label for="before-6-slider" class="control-label">Før 6:00</label>
                 <input type="range" class="form-range sidebar-slider" id="before-6-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
+                    <small>Få</small>
+                    <small>Mange</small>
                 </div>
                 <div class="value-display">
                     <span id="before-6-value" class="badge bg-secondary">0</span>
@@ -121,8 +121,8 @@
                 <label for="afternoon-ends-slider" class="control-label">Slutt før 20:00</label>
                 <input type="range" class="form-range sidebar-slider" id="afternoon-ends-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
+                    <small>Få</small>
+                    <small>Mange</small>
                 </div>
                 <div class="value-display">
                     <span id="afternoon-ends-value" class="badge bg-secondary">0</span>
@@ -274,7 +274,7 @@
         </div>
     </main>
 
-    <!-- Right Sidebar - Color Adjustment Panel -->
+    <!-- Right Sidebar - Color Adjustment Panel 
     <aside class="color-sidebar" id="color-sidebar">
         <div class="sidebar-header">
             <h6 class="sidebar-title">
@@ -286,7 +286,7 @@
         </div>
         
         <div class="sidebar-content">
-            <!-- Color Settings -->
+            <!-- Color Settings 
             <div class="control-item">
                 <label class="control-label">Tidlig skift</label>
                 <div class="color-input-group">
@@ -346,7 +346,7 @@
             </div>
         </div>
     </aside>
-</div>
+</div> -->
 
 <script>
 // Mobile sidebar toggle functionality
@@ -376,8 +376,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const isSortingOpen = sortingSidebar.classList.contains('sidebar-open');
         const isColorOpen = colorSidebar.classList.contains('sidebar-open');
         
-        // Only push content on mobile (screen width <= 768px)
-        if (window.innerWidth <= 768 && (isSortingOpen || isColorOpen)) {
+        // Only push content on mobile (screen width <= 1200px)
+        if (window.innerWidth <= 1200 && (isSortingOpen || isColorOpen)) {
             mainContent.classList.add('content-pushed');
         } else {
             mainContent.classList.remove('content-pushed');
@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle window resize
     window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
+        if (window.innerWidth > 1200) {
             sortingSidebar.classList.remove('sidebar-open');
             colorSidebar.classList.remove('sidebar-open');
             mainContent.classList.remove('content-pushed');

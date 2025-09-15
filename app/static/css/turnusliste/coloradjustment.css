@@ -121,17 +121,6 @@
   color: white !important;
 }
 
-.slider-labels {
-    display: flex;
-    justify-content: space-between;
-    margin: 8px 0;
-}
-
-.slider-labels small {
-    color: rgba(255,255,255,0.8);
-    font-size: 0.65rem;
-    font-weight: 500;
-}
 
 .value-display {
     text-align: center;
@@ -169,14 +158,14 @@
   }
 
 /* Responsive Design for color sidebar - Hamburger menu system */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
     .color-sidebar {
         position: fixed;
         top: 0;
         right: 0;
         width: 300px;
         height: 100vh;
-        z-index: 999;
+        z-index: 1000;
         transform: translateX(100%);
         transition: transform 0.3s ease;
         box-shadow: -2px 0 10px rgba(0,0,0,0.2);
@@ -202,8 +191,8 @@
         left: 0;
         right: 0;
         bottom: 0;
+        z-index: 998;
         background: rgba(0,0,0,0.3);
-        z-index: -1;
     }
 }
 

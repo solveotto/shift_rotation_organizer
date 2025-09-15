@@ -479,28 +479,20 @@ document.addEventListener('DOMContentLoaded', function() {
 function printTables() {
     var printContents = '';
     var tables = document.querySelectorAll('table');
-    tables.forEach(function(table) {
-        var number =  table.closest('li').querySelector('.t-num').innerText;
-        var name = table.closest('li').querySelector('.t-name').innerText;
-        printContents += '<div class="print-frame"><h5>' + number +' - '+ name + '</h5>' + table.outerHTML + '</div><br>';
-    });
-
-    var originalContents = document.body.innerHTML;
-    document.body.innerHTML = printContents;
-    window.print();
-    document.body.innerHTML = originalContents;
-}
-
-
-function printAllTables() {
-    var printContents = '';
-    var tables = document.querySelectorAll('table');
     
     tables.forEach(function(table) {
-        var name = table.closest('li').querySelector('.t-name').innerText;
-        var dataFelt = table.closest('li').querySelector('.data-felt').outerHTML;
+        var container = table.closest('li') || table.closest('div.list-group-item');
+        var name = container.querySelector('.t-name').innerText;
         
-        printContents += '<div class="print-frame"><h4>' + name + '</h4>' + table.outerHTML + dataFelt + '</div><br>';
+        // Try to get the number, but don't fail if it doesn't exist
+        var numberElement = container.querySelector('.t-num');
+        var number = numberElement ? numberElement.innerText + ' - ' : '';
+        
+        // Try to get the data stats, but don't fail if it doesn't exist
+        var dataFeltElement = container.querySelector('.data-felt');
+        var dataFelt = dataFeltElement ? dataFeltElement.outerHTML : '';
+        
+        printContents += '<div class="print-frame"><h4>' + number + name + '</h4>' + table.outerHTML + dataFelt + '</div><br>';
     });
 
     var originalContents = document.body.innerHTML;
