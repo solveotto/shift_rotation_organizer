@@ -1,11 +1,7 @@
 {% extends "base.html" %}
 
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/turnusliste/coloradjustment.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/turnusliste/sorting.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='extras/overrides.css') }}">
-{% endblock %}
+{% block extra_css %}{% endblock %}
 
 
 {% block title %}Favoritter{% endblock %}
@@ -23,25 +19,12 @@
 {% block content %}
 
 <div class="page-layout">
-    <!-- Mobile Hamburger Buttons -->
-    <div class="mobile-controls">
-        <button class="hamburger-btn sorting-hamburger" id="sorting-hamburger">
-            <i class="bi bi-funnel"></i>
-        </button>
-        <button class="hamburger-btn color-hamburger" id="color-hamburger">
-            <i class="bi bi-palette"></i>
-        </button>
-    </div>
-    
     <!-- Left Sidebar - Sorting Controls -->
-    <aside class="sorting-sidebar" id="sorting-sidebar">
+    <aside class="sorting-sidebar">
         <div class="sidebar-header">
             <h6 class="sidebar-title">
                 <i class="bi bi-funnel"></i> Sorter Turnuser
             </h6>
-            <button class="close-sidebar-btn" onclick="closeSortingSidebar()">
-                <i class="bi bi-x-lg"></i>
-            </button>
         </div>
         
         <div class="sidebar-content">
@@ -49,8 +32,8 @@
                 <label for="helgetimer-slider" class="control-label">Helgetimer</label>
                 <input type="range" class="form-range sidebar-slider" id="helgetimer-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Få</small>
-                    <small>Mange</small>
+                    <small>Høy</small>
+                    <small>Lav</small>
                 </div>
                 <div class="value-display">
                     <span id="helgetimer-value" class="badge bg-secondary">0</span>
@@ -61,8 +44,8 @@
                 <label for="shift-cnt-slider" class="control-label">Dagsverk</label>
                 <input type="range" class="form-range sidebar-slider" id="shift-cnt-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Få</small>
-                    <small>Mange</small>
+                    <small>Høy</small>
+                    <small>Lav</small>
                 </div>
                 <div class="value-display">
                     <span id="shift-cnt-value" class="badge bg-secondary">0</span>
@@ -73,8 +56,8 @@
                 <label for="tidlig-slider" class="control-label">Tidlig</label>
                 <input type="range" class="form-range sidebar-slider" id="tidlig-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Få</small>
-                    <small>Mange</small>
+                    <small>Høy</small>
+                    <small>Lav</small>
                 </div>
                 <div class="value-display">
                     <span id="tidlig-value" class="badge bg-secondary">0</span>
@@ -85,8 +68,8 @@
                 <label for="natt-slider" class="control-label">Natt</label>
                 <input type="range" class="form-range sidebar-slider" id="natt-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Få</small>
-                    <small>Mange</small>
+                    <small>Høy</small>
+                    <small>Lav</small>
                 </div>
                 <div class="value-display">
                     <span id="natt-value" class="badge bg-secondary">0</span>
@@ -97,8 +80,8 @@
                 <label for="ettermiddag-slider" class="control-label">Ettermiddag</label>
                 <input type="range" class="form-range sidebar-slider" id="ettermiddag-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Få</small>
-                    <small>Mange</small>
+                    <small>Høy</small>
+                    <small>Lav</small>
                 </div>
                 <div class="value-display">
                     <span id="ettermiddag-value" class="badge bg-secondary">0</span>
@@ -109,8 +92,8 @@
                 <label for="before-6-slider" class="control-label">Før 6:00</label>
                 <input type="range" class="form-range sidebar-slider" id="before-6-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Få</small>
-                    <small>Mange</small>
+                    <small>Høy</small>
+                    <small>Lav</small>
                 </div>
                 <div class="value-display">
                     <span id="before-6-value" class="badge bg-secondary">0</span>
@@ -121,8 +104,8 @@
                 <label for="afternoon-ends-slider" class="control-label">Slutt før 20:00</label>
                 <input type="range" class="form-range sidebar-slider" id="afternoon-ends-slider" min="-10" max="10" value="0" step="0.5">
                 <div class="slider-labels">
-                    <small>Få</small>
-                    <small>Mange</small>
+                    <small>Høy</small>
+                    <small>Lav</small>
                 </div>
                 <div class="value-display">
                     <span id="afternoon-ends-value" class="badge bg-secondary">0</span>
@@ -130,7 +113,7 @@
             </div>
             
             <div class="control-item">
-                <button id="reset-sorting" class="btn btn btn-sm w-100">
+                <button id="reset-sorting" class="btn btn-outline-light btn-sm w-100">
                     <i class="bi bi-arrow-clockwise"></i> Reset
                 </button>
             </div>
@@ -274,148 +257,8 @@
         </div>
     </main>
 
-    <!-- Right Sidebar - Color Adjustment Panel 
-    <aside class="color-sidebar" id="color-sidebar">
-        <div class="sidebar-header">
-            <h6 class="sidebar-title">
-                <i class="bi bi-palette"></i> Fargeinnstillinger
-            </h6>
-            <button class="close-sidebar-btn" onclick="closeColorSidebar()">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-        
-        <div class="sidebar-content">
-            <!-- Color Settings 
-            <div class="control-item">
-                <label class="control-label">Tidlig skift</label>
-                <div class="color-input-group">
-                    <input type="color" id="early-color" class="form-control form-control-color" value="#00ffff" title="Velg farge for tidlig skift">
-                    <span class="color-label">Slutter før</span>
-                    <input type="time" id="early-time" class="form-control form-control-sm" value="16:00">
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label class="control-label">Kveldsskift</label>
-                <div class="color-input-group">
-                    <input type="color" id="late-color" class="form-control form-control-color" value="#ff9696" title="Velg farge for kveldsskift">
-                    <span class="color-label">Slutter etter</span>
-                    <input type="time" id="late-time" class="form-control form-control-sm" value="16:00">
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label class="control-label">Nattskift</label>
-                <div class="color-input-group">
-                    <input type="color" id="night-color" class="form-control form-control-color" value="#eb41eb" title="Velg farge for nattskift">
-                    <span class="color-label">Starter etter</span>
-                    <input type="time" id="night-time" class="form-control form-control-sm" value="19:00">
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label class="control-label">Fridager</label>
-                <div class="color-input-group">
-                    <input type="color" id="dayoff-color" class="form-control form-control-color" value="#42bb42" title="Velg farge for fridager">
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label class="control-label">H-dager</label>
-                <div class="color-input-group">
-                    <input type="color" id="hdag-color" class="form-control form-control-color" value="#ffd700" title="Velg farge for H-dager">
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label class="control-label">Tidlig + Kveld</label>
-                <div class="color-input-group">
-                    <input type="color" id="earlylate-color" class="form-control form-control-color" value="#268eb8" title="Velg farge for tidlig + kveld">
-                    <span class="color-label">Tidlig: 6-9, Kveld: 16-18</span>
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <button id="apply-colors" class="btn btn-outline-primary btn-sm w-100 mb-2">
-                    <i class="bi bi-check-circle"></i> Bruk farger
-                </button>
-                <button id="reset-colors" class="btn btn-outline-secondary btn-sm w-100">
-                    <i class="bi bi-arrow-clockwise"></i> Reset farger
-                </button>
-            </div>
-        </div>
-    </aside>
-</div> -->
+</div>
 
-<script>
-// Mobile sidebar toggle functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const sortingHamburger = document.getElementById('sorting-hamburger');
-    const colorHamburger = document.getElementById('color-hamburger');
-    const sortingSidebar = document.getElementById('sorting-sidebar');
-    const colorSidebar = document.getElementById('color-sidebar');
-    const mainContent = document.querySelector('.main-content');
-    
-    // Toggle sorting sidebar
-    sortingHamburger.addEventListener('click', function() {
-        sortingSidebar.classList.toggle('sidebar-open');
-        colorSidebar.classList.remove('sidebar-open');
-        updateMainContentMargin();
-    });
-    
-    // Toggle color sidebar
-    colorHamburger.addEventListener('click', function() {
-        colorSidebar.classList.toggle('sidebar-open');
-        sortingSidebar.classList.remove('sidebar-open');
-        updateMainContentMargin();
-    });
-    
-    // Update main content margin based on open sidebars
-    function updateMainContentMargin() {
-        const isSortingOpen = sortingSidebar.classList.contains('sidebar-open');
-        const isColorOpen = colorSidebar.classList.contains('sidebar-open');
-        
-        // Only push content on mobile (screen width <= 1200px)
-        if (window.innerWidth <= 1200 && (isSortingOpen || isColorOpen)) {
-            mainContent.classList.add('content-pushed');
-        } else {
-            mainContent.classList.remove('content-pushed');
-        }
-    }
-    
-    // Close sidebars when clicking outside
-    document.addEventListener('click', function(event) {
-        if (!event.target.closest('.sorting-sidebar') && 
-            !event.target.closest('.color-sidebar') &&
-            !event.target.closest('.hamburger-btn')) {
-            sortingSidebar.classList.remove('sidebar-open');
-            colorSidebar.classList.remove('sidebar-open');
-            updateMainContentMargin();
-        }
-    });
-    
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 1200) {
-            sortingSidebar.classList.remove('sidebar-open');
-            colorSidebar.classList.remove('sidebar-open');
-            mainContent.classList.remove('content-pushed');
-        }
-    });
-    
-    // Close sidebar functions (global scope for onclick)
-    window.closeSortingSidebar = function() {
-        sortingSidebar.classList.remove('sidebar-open');
-        updateMainContentMargin();
-    };
-    
-    window.closeColorSidebar = function() {
-        colorSidebar.classList.remove('sidebar-open');
-        updateMainContentMargin();
-    };
-});
-</script>
 
 {% endblock %}
 

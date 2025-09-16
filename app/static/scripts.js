@@ -663,6 +663,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 valueDisplay.className = 'badge bg-secondary';
             }
         }
+        
+        // Set data-value attribute for inline display
+        slider.setAttribute('data-value', slider.value);
     }
 
     // Update sorting info display
