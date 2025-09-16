@@ -41,6 +41,21 @@ body, html {
   padding: 0.75rem 0;
   position: relative;
   z-index: 1030; /* Bootstrap navbar z-index */
+  min-height: 70px; /* Adjust to your desired height */
+  align-items: center;
+}
+
+.modern-navbar .container-fluid {
+  min-height: 70px;
+  align-items: center;
+}
+
+/* Ensure consistent height on all screen sizes */
+@media (max-width: 991.98px) {
+  .modern-navbar {
+    min-height: 70px;
+    padding: 0.75rem 0; /* Same as desktop */
+  }
 }
 
 .modern-navbar .navbar-brand {
@@ -563,6 +578,162 @@ body, html {
     min-height: calc(100vh - 120px);
 }
 
+/* Navbar Filtering Interface */
+.navbar-filtering {
+    position: relative;
+}
+
+.filter-menu {
+    min-width: 300px;
+    max-width: 400px;
+    padding: 1rem;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border-radius: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.filter-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.filter-slider {
+    height: 4px;
+    border-radius: 2px;
+    background: #e9ecef;
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    margin: 0;
+    position: relative;
+}
+
+.filter-slider::before {
+    content: attr(data-value);
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #495057;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.filter-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #0d6efd;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.filter-slider::-webkit-slider-thumb:hover {
+    background: #0b5ed7;
+    transform: scale(1.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.filter-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #0d6efd;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.filter-slider::-moz-range-thumb:hover {
+    background: #0b5ed7;
+    transform: scale(1.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.filter-slider::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: #e9ecef;
+    border: none;
+}
+
+.filter-actions {
+    grid-column: 1 / -1;
+    margin-top: 0.5rem;
+}
+
+/* Mobile menu items */
+.mobile-menu-item {
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.75) !important;
+    transition: color 0.15s ease-in-out;
+}
+
+.mobile-menu-item:hover {
+    color: rgba(255, 255, 255, 1) !important;
+}
+
+.mobile-menu-item i {
+    margin-right: 0.5rem;
+}
+
+/* Mobile dropdown menu */
+.mobile-dropdown-menu {
+    min-width: 280px;
+    max-width: 320px;
+    padding: 1rem;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border-radius: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.mobile-sorting-menu .filter-controls {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+}
+
+.mobile-sorting-menu .filter-item {
+    margin-bottom: 0.5rem;
+}
+
+.mobile-sorting-menu .filter-label {
+    font-size: 0.7rem;
+    margin-bottom: 0.25rem;
+}
+
+/* (Reverted) No custom navbar breakpoint overrides; use Bootstrap defaults */
+
 /* Responsive Design */
 @media (max-width: 992px) {
     .page-layout {
@@ -989,3 +1160,48 @@ label input[type="checkbox"] {
 }
 
 /* Left sidebar styles moved to sorting.css */
+
+/* Centered navbar with responsive side margins */
+.modern-navbar .container-fluid {
+  max-width: 1400px; /* Maximum content width */
+  margin: 0 auto; /* Center the content */
+  padding-left: 2rem; /* Base side padding */
+  padding-right: 2rem;
+}
+
+/* Responsive side margins */
+@media (min-width: 1200px) {
+  .modern-navbar .container-fluid {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .modern-navbar .container-fluid {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  .modern-navbar .container-fluid {
+    padding-left: 6rem;
+    padding-right: 6rem;
+  }
+}
+
+/* Smaller screens - reduce side margins */
+@media (max-width: 768px) {
+  .modern-navbar .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .modern-navbar .container-fluid {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}

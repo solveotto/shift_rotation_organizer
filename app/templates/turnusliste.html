@@ -7,118 +7,115 @@
 {% block title %}Favoritter{% endblock %}
 
 {% block print %}
-    <div class="print-button-container" style="margin-top: 20px;">
-        <button class="btn btn-outline-dark btn-sm mb-3 py-1" 
-                style="--bs-btn-padding-y: 1.25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"
-                onclick="printTables()">Utskrift <i class="bi bi-printer"></i>
-        </button>
-    </div>
+    <button class="btn btn-outline-light btn-sm" onclick="printTables()">
+        <i class="bi bi-printer"></i> Utskrift
+    </button>
 {% endblock %}
 
+{% block filtering %}
+<div class="navbar-filtering d-none d-lg-flex align-items-center me-3">
+    <div class="filter-dropdown">
+        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-funnel"></i> Sorter
+        </button>
+        <div class="dropdown-menu dropdown-menu-end filter-menu">
+            <div class="filter-controls">
+                <div class="filter-item">
+                    <label class="filter-label">Helgetimer</label>
+                    <input type="range" class="form-range filter-slider" id="helgetimer-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Dagsverk</label>
+                    <input type="range" class="form-range filter-slider" id="shift-cnt-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Tidlig</label>
+                    <input type="range" class="form-range filter-slider" id="tidlig-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Natt</label>
+                    <input type="range" class="form-range filter-slider" id="natt-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Ettermiddag</label>
+                    <input type="range" class="form-range filter-slider" id="ettermiddag-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Før 6:00</label>
+                    <input type="range" class="form-range filter-slider" id="before-6-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Slutt før 20:00</label>
+                    <input type="range" class="form-range filter-slider" id="afternoon-ends-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-actions">
+                    <button id="reset-sorting" class="btn btn-warning btn-sm w-100">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block mobile_sorting %}
+<div class="mobile-sorting-menu">
+    <div class="filter-controls">
+        <div class="filter-item">
+            <label class="filter-label">Helgetimer</label>
+            <input type="range" class="form-range filter-slider" id="helgetimer-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Dagsverk</label>
+            <input type="range" class="form-range filter-slider" id="shift-cnt-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Tidlig</label>
+            <input type="range" class="form-range filter-slider" id="tidlig-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Natt</label>
+            <input type="range" class="form-range filter-slider" id="natt-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Ettermiddag</label>
+            <input type="range" class="form-range filter-slider" id="ettermiddag-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Før 6:00</label>
+            <input type="range" class="form-range filter-slider" id="before-6-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Slutt før 20:00</label>
+            <input type="range" class="form-range filter-slider" id="afternoon-ends-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-actions">
+            <button id="reset-sorting-mobile" class="btn btn-warning btn-sm w-100">
+                <i class="bi bi-arrow-clockwise"></i> Reset
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
 {% block content %}
 
 <div class="page-layout">
-    <!-- Left Sidebar - Sorting Controls -->
-    <aside class="sorting-sidebar">
-        <div class="sidebar-header">
-            <h6 class="sidebar-title">
-                <i class="bi bi-funnel"></i> Sorter Turnuser
-            </h6>
-        </div>
-        
-        <div class="sidebar-content">
-            <div class="control-item">
-                <label for="helgetimer-slider" class="control-label">Helgetimer</label>
-                <input type="range" class="form-range sidebar-slider" id="helgetimer-slider" min="-10" max="10" value="0" step="0.5">
-                <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
-                </div>
-                <div class="value-display">
-                    <span id="helgetimer-value" class="badge bg-secondary">0</span>
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label for="shift-cnt-slider" class="control-label">Dagsverk</label>
-                <input type="range" class="form-range sidebar-slider" id="shift-cnt-slider" min="-10" max="10" value="0" step="0.5">
-                <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
-                </div>
-                <div class="value-display">
-                    <span id="shift-cnt-value" class="badge bg-secondary">0</span>
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label for="tidlig-slider" class="control-label">Tidlig</label>
-                <input type="range" class="form-range sidebar-slider" id="tidlig-slider" min="-10" max="10" value="0" step="0.5">
-                <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
-                </div>
-                <div class="value-display">
-                    <span id="tidlig-value" class="badge bg-secondary">0</span>
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label for="natt-slider" class="control-label">Natt</label>
-                <input type="range" class="form-range sidebar-slider" id="natt-slider" min="-10" max="10" value="0" step="0.5">
-                <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
-                </div>
-                <div class="value-display">
-                    <span id="natt-value" class="badge bg-secondary">0</span>
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label for="ettermiddag-slider" class="control-label">Ettermiddag</label>
-                <input type="range" class="form-range sidebar-slider" id="ettermiddag-slider" min="-10" max="10" value="0" step="0.5">
-                <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
-                </div>
-                <div class="value-display">
-                    <span id="ettermiddag-value" class="badge bg-secondary">0</span>
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label for="before-6-slider" class="control-label">Før 6:00</label>
-                <input type="range" class="form-range sidebar-slider" id="before-6-slider" min="-10" max="10" value="0" step="0.5">
-                <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
-                </div>
-                <div class="value-display">
-                    <span id="before-6-value" class="badge bg-secondary">0</span>
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <label for="afternoon-ends-slider" class="control-label">Slutt før 20:00</label>
-                <input type="range" class="form-range sidebar-slider" id="afternoon-ends-slider" min="-10" max="10" value="0" step="0.5">
-                <div class="slider-labels">
-                    <small>Høy</small>
-                    <small>Lav</small>
-                </div>
-                <div class="value-display">
-                    <span id="afternoon-ends-value" class="badge bg-secondary">0</span>
-                </div>
-            </div>
-            
-            <div class="control-item">
-                <button id="reset-sorting" class="btn btn-outline-light btn-sm w-100">
-                    <i class="bi bi-arrow-clockwise"></i> Reset
-                </button>
-            </div>
-        </div>
-    </aside>
 
 
 

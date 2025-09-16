@@ -717,20 +717,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize
     initializeOriginalOrder();
     
-    // Add event listeners to sliders
+    // Add event listeners to sliders (both desktop and mobile filters)
     const sliders = document.querySelectorAll('input[type="range"]');
     sliders.forEach(slider => {
+        // Set initial value display
+        updateSliderValue(slider);
+        
         slider.addEventListener('input', function() {
             updateSliderValue(this);
+            
+            // Sync mobile and desktop sliders
+            const sliderId = this.id;
+            if (sliderId.includes('-mobile')) {
+                const desktopId = sliderId.replace('-mobile', '');
+                const desktopSlider = document.getElementById(desktopId);
+                if (desktopSlider) {
+                    desktopSlider.value = this.value;
+                    updateSliderValue(desktopSlider);
+                }
+            } else {
+                const mobileId = sliderId + '-mobile';
+                const mobileSlider = document.getElementById(mobileId);
+                if (mobileSlider) {
+                    mobileSlider.value = this.value;
+                    updateSliderValue(mobileSlider);
+                }
+            }
+            
             sortTurnuser();
         });
     });
     
-    // Add event listener to reset button
-    const resetButton = document.getElementById('reset-sorting');
-    if (resetButton) {
-        resetButton.addEventListener('click', resetOrder);
-    }
+    // Add event listener to reset buttons (both desktop and mobile)
+    const resetButtons = document.querySelectorAll('#reset-sorting, #reset-sorting-mobile');
+    resetButtons.forEach(button => {
+        button.addEventListener('click', resetOrder);
+    });
     
     // Initialize slider values
     sliders.forEach(updateSliderValue);

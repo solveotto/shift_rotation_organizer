@@ -63,21 +63,29 @@
                     <span>Sammenlign</span>
                   </a>
                 </li>
+                <li class="nav-item d-lg-none">
+                  <a class="nav-link" href="#">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>TEST</span>
+                  </a>
+                </li>
+                
+                
               </ul>
+
 
               <!-- Right Side Actions -->
               <div class="navbar-actions d-flex align-items-center">
                 <!-- Page Title and Navigation -->
-                <div class="page-navigation d-none d-lg-flex align-items-center me-4">
-                  {% block prev_btn %}{% endblock %}
-                  <h4 class="page-title mb-0 mx-3">{{ page_name.replace('_', ' ') }}</h4>
-                  {% block next_btn %}{% endblock %}
-                </div>
+              
 
                 <!-- Print Button -->
                 <div class="action-buttons d-none d-md-flex align-items-center me-3">
                   {% block print %}{% endblock %}
                 </div>
+
+                <!-- Filtering Controls -->
+                {% block filtering %}{% endblock %}
 
                 <!-- User Menu -->
                 <div class="dropdown">
