@@ -1205,3 +1205,23 @@ label input[type="checkbox"] {
     padding-right: 0.5rem;
   }
 }
+
+/* Mobile centered sorter */
+.mobile-centered-sorter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Ensure proper navbar layout on mobile */
+@media (max-width: 991.98px) {
+  .modern-navbar .container-fluid {
+    position: relative;
+  }
+  
+  .mobile-centered-sorter {
+    z-index: 1000;
+  }
+}
