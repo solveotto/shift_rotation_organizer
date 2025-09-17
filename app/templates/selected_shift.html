@@ -6,13 +6,13 @@
 
 <!-- Previous and next buttons for selected shift view -->
 {% block prev_btn %}
-    <a href="{{ url_for('main.next_shift', direction='prev') }}"><i class="bi bi-caret-left-fill"></i></a>
+    <a href="{{ url_for('shifts.next_shift', direction='prev') }}"><i class="bi bi-caret-left-fill"></i></a>
 {% endblock %}
 
 
 
 {% block next_btn %}
-    <a href="{{ url_for('main.next_shift', direction='next') }}"><i class="bi bi-caret-right-fill"></i></a>
+    <a href="{{ url_for('shifts.next_shift', direction='next') }}"><i class="bi bi-caret-right-fill"></i></a>
 {% endblock %}
 
 
@@ -30,7 +30,7 @@
                 <div class="table-responsive">
                     <ul class="list-group py-2">
                 
-                        <li class="list-group-item mb-2 rounded p-2 small" data-name="{{ name }}" style="border: 1px solid black;"> 
+                        <li class="list-group-item mb-2 rounded p-2 small" style="border: 1px solid black;"> 
                             <table>
                                 <div class="text-center">
                                     {% for row in df %}
@@ -140,7 +140,7 @@
 
         
         <div class="d-flex justify-content-center py-2 ">
-                    <form action="{{ url_for('main.rate_displayed_shift') }}" method="POST">
+                    <form action="{{ url_for('api.rate_displayed_shift') }}" method="POST">
                         <div class="input-group input-group-sm mb-3">
                             <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm" id="user_points" name="user_points" value="{{ shift_user_points }}" style="max-width: 50px;">
                             <button class="btn btn-primary" type="submit" id="button-addon1">Legg til poeng</button>

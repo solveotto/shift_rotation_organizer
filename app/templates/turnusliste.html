@@ -1,138 +1,261 @@
 {% extends "base.html" %}
 
+
+{% block extra_css %}{% endblock %}
+
+
 {% block title %}Favoritter{% endblock %}
 
 {% block print %}
-    <div class="print-button-container" style="margin-top: 20px;">
-        <button class="btn btn-outline-dark btn-sm mb-3 py-1" 
-                style="--bs-btn-padding-y: 1.25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"
-                onclick="printAllTables()">Utskrift <i class="bi bi-printer"></i>
-        </button>
-    </div>
+    <button class="btn btn-outline-light btn-sm" onclick="printTables()">
+        <i class="bi bi-printer"></i> Utskrift
+    </button>
 {% endblock %}
 
-
-{% block content %}
-
-
-<div class="container-fluid printable">
-    <div class="row justify-content-center">
-        <div class="col-auto">
-            <div class="table-responsive">
-                <ul class="list-group py-2">
-                    {% for turnus in table_data %}
-                        {% set outer_index = loop.index0 %} <!-- Setter indexen for toggle funksjonen-->
-                        {% for name, data in turnus.items() %}
-                    
-                            <li class="list-group-item mb-2 rounded p-2 small" data-name="{{ name }}" style="border: 1px solid black;"> 
-                                <table>
-                                    <div class="d-flex align-items-center justify-content-between py-1">
-                                        <div class="clickable-row" data-turnus="{{name}}">
-                                            <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
-                                        </div>
-                                        <label for="toggle-favoritt-{{ outer_index }}" class="custom-checkbox" data-toggle="tooltip" data-placement="top" title="Klikk for å velge som favoritt.">
-                                            <input type="checkbox" id="toggle-favoritt-{{ outer_index }}"  class="toggle-favoritt" shift_title="{{ name }}" {% if name in favoritt %}checked{% endif %}>
-                                                <i class="bi bi-star"></i>
-                                                <i class="bi bi-star-fill"></i>
-                                        </label>
-                                        
-                                    </div>
-                                    
-                                    <thead class="text-center">
-                                        <tr>
-                                            <th style="border: 1px solid black;">Uke</th>
-                                            <th style="border: 1px solid black;">Mandag</th>
-                                            <th style="border: 1px solid black;">Tirsdag</th>
-                                            <th style="border: 1px solid black;">Onsdag</th>
-                                            <th style="border: 1px solid black;">Tordag</th>
-                                            <th style="border: 1px solid black;">Fredag</th>
-                                            <th style="border: 1px solid black;">Lørdag</th>
-                                            <th style="border: 1px solid black;">Søndag</th>
-                                        </tr>
-                                    </thead>
-                                    
-                                                
-                                    <tbody class="text-center">
-                                        {% for week_nr, week_data in data.items() %}
-                                            <tr class="align-middle text-nowrap">
-                                                <td style="border: 1px solid black; font-size: small;">{{ week_nr }}</td>
-
-                                                {% for day_nr, day_data in week_data.items() %}
-                                                    <td id="cell" class="min-width-td" style="border: 1px solid black;">
-                                                        <div class="custom-text" style="font-size: xx-small;">{{day_data.dagsverk}}</div>
-                                                        <div class="time-text" style="font-size: small;">
-                                                            {% for time in day_data.tid %}
-                                                                {% if day_data.tid|length == 2 %}
-                                                                    {% if loop.first %}
-                                                                        {{ time }} -
-                                                                    {% else %}
-                                                                        {{ time }}
-                                                                    {% endif %}
-                                                                {% else %}
-                                                                    {{ time }}
-                                
-                                                                {% endif %}
-                                                            {% endfor %}
-                                                    </td>
-                                                    
-                                                    
-                                                {% endfor %}
-                                                </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                                {% for row in df %}
-                                    {% if row.turnus == name %}
-                                        <div class="container-fluid data-felt text-center">
-                                            <div class="row small-text" >
-                                                <div class="col">
-                                                    Dagsverk: <b>{{row.shift_cnt}}</b>
-                                                </div>
-                                                <div class="col">
-                                                    Tidlig: <b>{{row.tidlig}}</b>
-                                                </div>
-                                                <div class="col">
-                                                    Kveld: <b>{{row.ettermiddag}}</b>
-                                                </div>
-                                                <div class="col">
-                                                    Natt: <b>{{row.natt}}</b>
-                                                </div>
-                                                
-                                                
-                                            </div>
-                                            
-                                            <div class="row small-text">
-                                                <div class="col">
-                                                    Helgetimer: <b>{{row.helgetimer}}</b>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="col">
-                                                        Helgtimer dag: <b>{{row.helgetimer_dagtid}}</b>
-                                                    </div>
-                                                </div>
-                                                <div class="col">
-                                                    Starter før 6: <b>{{ row.before_6 }}</b>
-                                                </div>
-                                                <div class="col">
-                                                    Slutt før 20: <b>{{ row.afternoon_ends_before_20 }}</b>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {%endif%}
-                                {% endfor %}
-                                
-
-
-
-
-                            </li>
-                        {% endfor %}
-                    {% endfor %}
-                </ul>
-            </div>  
+{% block filtering %}
+<div class="navbar-filtering d-none d-lg-flex align-items-center me-3">
+    <div class="filter-dropdown">
+        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-funnel"></i> Sorter
+        </button>
+        <div class="dropdown-menu dropdown-menu-end filter-menu">
+            <div class="filter-controls">
+                <div class="filter-item">
+                    <label class="filter-label">Helgetimer</label>
+                    <input type="range" class="form-range filter-slider" id="helgetimer-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Dagsverk</label>
+                    <input type="range" class="form-range filter-slider" id="shift-cnt-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Tidlig</label>
+                    <input type="range" class="form-range filter-slider" id="tidlig-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Natt</label>
+                    <input type="range" class="form-range filter-slider" id="natt-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Ettermiddag</label>
+                    <input type="range" class="form-range filter-slider" id="ettermiddag-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Før 6:00</label>
+                    <input type="range" class="form-range filter-slider" id="before-6-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-item">
+                    <label class="filter-label">Slutt før 20:00</label>
+                    <input type="range" class="form-range filter-slider" id="afternoon-ends-slider" min="-10" max="10" value="0" step="0.5">
+                </div>
+                
+                <div class="filter-actions">
+                    <button id="reset-sorting" class="btn btn-warning btn-sm w-100">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block mobile_sorting %}
+<div class="mobile-sorting-menu">
+    <div class="filter-controls">
+        <div class="filter-item">
+            <label class="filter-label">Helgetimer</label>
+            <input type="range" class="form-range filter-slider" id="helgetimer-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Dagsverk</label>
+            <input type="range" class="form-range filter-slider" id="shift-cnt-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Tidlig</label>
+            <input type="range" class="form-range filter-slider" id="tidlig-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Natt</label>
+            <input type="range" class="form-range filter-slider" id="natt-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Ettermiddag</label>
+            <input type="range" class="form-range filter-slider" id="ettermiddag-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Før 6:00</label>
+            <input type="range" class="form-range filter-slider" id="before-6-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-item">
+            <label class="filter-label">Slutt før 20:00</label>
+            <input type="range" class="form-range filter-slider" id="afternoon-ends-slider-mobile" min="-10" max="10" value="0" step="0.5">
+        </div>
+        
+        <div class="filter-actions">
+            <button id="reset-sorting-mobile" class="btn btn-warning btn-sm w-100">
+                <i class="bi bi-arrow-clockwise"></i> Reset
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-layout">
+
+
+
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Current Sorting Display -->
+        <div class="container-fluid mb-3">
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info" id="sorting-info" style="display: none;">
+                        <strong>Sortering aktiv:</strong> <span id="sorting-criteria">Ingen</span>
+                        <button type="button" class="btn-close float-end" onclick="hideSortingInfo()"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid printable">
+            <div class="row justify-content-center">
+                <div class="col-auto">
+                    <div class="table-responsive">
+                        <ul class="list-group py-2">
+                            {% for turnus in table_data %}
+                                {% set outer_index = loop.index0 %} <!-- Setter indexen for toggle funksjonen-->
+                                {% for name, data in turnus.items() %}
+                            
+                                    <li class="list-group-item mb-2 rounded p-2 small" style="border: 1px solid black;"> 
+                                        <table>
+                                            <div class="d-flex align-items-center justify-content-between py-1">
+                                                <div class="clickable-row" data-turnus="{{name}}">
+                                                    <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
+                                                </div>
+                                                <label for="toggle-favoritt-{{ outer_index }}" class="custom-checkbox" data-toggle="tooltip" data-placement="top" title="Klikk for å velge som favoritt.">
+                                                    <input type="checkbox" id="toggle-favoritt-{{ outer_index }}"  class="toggle-favoritt" shift_title="{{ name }}" {% if name in favoritt %}checked{% endif %}>
+                                                        <i class="bi bi-star"></i>
+                                                        <i class="bi bi-star-fill"></i>
+                                                </label>
+                                                
+                                            </div>
+                                            
+                                            <thead class="text-center">
+                                                <tr>
+                                                    <th style="border: 1px solid black;">Uke</th>
+                                                    <th style="border: 1px solid black;">Mandag</th>
+                                                    <th style="border: 1px solid black;">Tirsdag</th>
+                                                    <th style="border: 1px solid black;">Onsdag</th>
+                                                    <th style="border: 1px solid black;">Tordag</th>
+                                                    <th style="border: 1px solid black;">Fredag</th>
+                                                    <th style="border: 1px solid black;">Lørdag</th>
+                                                    <th style="border: 1px solid black;">Søndag</th>
+                                                </tr>
+                                            </thead>
+                                            
+                                                        
+                                            <tbody class="text-center">
+                                                {% for week_nr, week_data in data.items() %}
+                                                    <tr class="align-middle text-nowrap">
+                                                        <td style="border: 1px solid black; font-size: small;">{{ week_nr }}</td>
+
+                                                        {% for day_nr, day_data in week_data.items() %}
+                                                            <td id="cell" class="min-width-td" style="border: 1px solid black;">
+                                                                <div class="custom-text" style="font-size: xx-small;">{{day_data.dagsverk}}</div>
+                                                                <div class="time-text" style="font-size: small;">
+                                                                    {% for time in day_data.tid %}
+                                                                        {% if day_data.tid|length == 2 %}
+                                                                            {% if loop.first %}
+                                                                                {{ time }} -
+                                                                            {% else %}
+                                                                                {{ time }}
+                                                                            {% endif %}
+                                                                        {% else %}
+                                                                            {{ time }}
+                                    
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                            </td>
+                                                            
+                                                            
+                                                        {% endfor %}
+                                                        </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        {% for row in df %}
+                                            {% if row.turnus == name %}
+                                                <div class="container-fluid data-felt text-center">
+                                                    <div class="row small-text" >
+                                                        <div class="col">
+                                                            Dagsverk: <b>{{row.shift_cnt}}</b>
+                                                        </div>
+                                                        <div class="col">
+                                                            Tidlig: <b>{{row.tidlig}}</b>
+                                                        </div>
+                                                        <div class="col">
+                                                            Kveld: <b>{{row.ettermiddag}}</b>
+                                                        </div>
+                                                        <div class="col">
+                                                            Natt: <b>{{row.natt}}</b>
+                                                        </div>
+                                                        
+                                                        
+                                                    </div>
+                                                    
+                                                    <div class="row small-text">
+                                                        <div class="col">
+                                                            Helgetimer: <b>{{row.helgetimer}}</b>
+                                                        </div>
+                                                        <div class="col">
+                                                            <div class="col">
+                                                                Helgtimer dag: <b>{{row.helgetimer_dagtid}}</b>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col">
+                                                            Starter før 6: <b>{{ row.before_6 }}</b>
+                                                        </div>
+                                                        <div class="col">
+                                                            Slutt før 20: <b>{{ row.afternoon_ends_before_20 }}</b>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {%endif%}
+                                        {% endfor %}
+                                        
+
+
+
+
+                                    </li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>  
+                </div>
+            </div>
+        </div>
+    </main>
+
+</div>
+
 
 {% endblock %}
 

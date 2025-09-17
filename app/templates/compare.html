@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Sammenlign Turnuser{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="row g-3 mb-3">
+    <div class="col-12 d-flex align-items-center gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <span class="form-label m-0">Visning:</span>
+        <div class="btn-group" role="group" aria-label="Visning">
+          <button type="button" id="view-vertical" class="btn btn-outline-primary active" data-mode="vertical">
+            <i class="bi bi-bar-chart"></i> Søyler
+          </button>
+          <button type="button" id="view-pie" class="btn btn-outline-primary" data-mode="pie">
+            <i class="bi bi-pie-chart"></i> Kake
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row g-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Dagsverk</span>
+            <div class="btn-group" role="group" aria-label="Sorter Dagsverk" data-order-container="shift_cnt">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="shift_cnt" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="shift_cnt" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
+          <div id="wrap-chart-shift_cnt" style="position: relative; height: 360px; overflow: auto;">
+            <canvas id="chart-shift_cnt"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Natt</span>
+            <div class="btn-group" role="group" aria-label="Sorter Natt" data-order-container="natt">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="natt" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="natt" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
+          <div id="wrap-chart-natt" style="position: relative; height: 360px; overflow: auto;">
+            <canvas id="chart-natt"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Tidlig</span>
+            <div class="btn-group" role="group" aria-label="Sorter Tidlig" data-order-container="tidlig">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="tidlig" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="tidlig" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
+          <div id="wrap-chart-tidlig" style="position: relative; height: 360px; overflow: auto;">
+            <canvas id="chart-tidlig"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Før 6:00</span>
+            <div class="btn-group" role="group" aria-label="Sorter Før 6:00" data-order-container="before_6">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="before_6" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="before_6" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
+          <div id="wrap-chart-before_6" style="position: relative; height: 360px; overflow: auto;">
+            <canvas id="chart-before_6"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>Helgetimer</span>
+            <div class="btn-group" role="group" aria-label="Sorter Helgetimer" data-order-container="helgetimer">
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="helgetimer" data-order="asc">Minst → Størst</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="helgetimer" data-order="desc">Størst → Minst</button>
+            </div>
+          </h5>
+          <div id="wrap-chart-helgetimer" style="position: relative; height: 360px; overflow: auto;">
+            <canvas id="chart-helgetimer"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script id="compare-labels" type="application/json">{{ labels|tojson }}</script>
+<script id="compare-data" type="application/json">{{ data|tojson }}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+  (function() {
+  if (window.ChartDataLabels) { Chart.register(ChartDataLabels); }
+  const turnusLabels = JSON.parse(document.getElementById('compare-labels').textContent);
+  const metricsData = JSON.parse(document.getElementById('compare-data').textContent);
+
+  const charts = {};
+
+  function buildPalette(count) {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+      const hue = Math.round((360 / Math.max(count, 1)) * i);
+      colors.push(`hsl(${hue} 70% 60% / 0.8)`);
+    }
+    return colors;
+  }
+
+  function computeContainerHeight(numItems) {
+    const perItem = 28; // px per bar (more spacing)
+    const maxHeight = 500; // cap for readability
+    const total = numItems * perItem;
+    // Return container cap; canvas will get full height (scrolls inside container)
+    return Math.min(total, maxHeight);
+  }
+
+  function sortOnly(allLabels, allValues, order) {
+    const zipped = allLabels.map((l, i) => ({ l, v: allValues[i] }));
+    zipped.sort((a, b) => order === 'asc' ? a.v - b.v : b.v - a.v);
+    return { lbls: zipped.map(x => x.l), vals: zipped.map(x => x.v) };
+  }
+
+  function destroyChartIfExists(id) {
+    if (charts[id]) {
+      charts[id].destroy();
+      delete charts[id];
+    }
+  }
+
+  function makeChart(canvasId, labelsArr, valuesArr, label, mode) {
+    const wrap = document.getElementById('wrap-' + canvasId);
+    const canvasEl = document.getElementById(canvasId);
+    // no list element; we rely on scrolling in the chart container
+    // Height handling
+    if (mode === 'pie') {
+      wrap.style.height = '420px';
+      canvasEl.style.height = '400px';
+      canvasEl.style.width = '100%';
+      wrap.style.overflowX = 'hidden';
+      wrap.style.overflowY = 'auto';
+    } else {
+      wrap.style.height = '420px';
+      canvasEl.style.height = '400px';
+      // Ensure horizontal scrolling space for many columns
+      const widthPerBar = 40; // px per column including spacing (increased for readability)
+      const minWidth = Math.max(valuesArr.length * widthPerBar, wrap.clientWidth);
+      // Important: set both CSS size and canvas pixel attributes
+      canvasEl.style.width = minWidth + 'px';
+      canvasEl.style.maxWidth = 'unset';
+      canvasEl.width = minWidth;
+      canvasEl.height = 400;
+      wrap.style.overflowX = 'auto';
+      wrap.style.overflowY = 'hidden';
+      wrap.style.whiteSpace = 'nowrap';
+    }
+    const ctx = canvasEl.getContext('2d');
+    destroyChartIfExists(canvasId);
+    const isPie = mode === 'pie';
+    const chartType = isPie ? 'pie' : 'bar';
+    let useLabels = labelsArr;
+    let useValues = valuesArr;
+    // show all slices for pie; no grouping
+    const palette = buildPalette(useLabels.length);
+    const options = {
+      responsive: isPie ? true : false,
+      maintainAspectRatio: false,
+      animation: false,
+      scales: isPie ? {} : {
+        x: {
+          beginAtZero: true,
+          ticks: {
+            font: { size: 12 },
+            autoSkip: false,
+            maxRotation: 45,
+            minRotation: 0
+          }
+        },
+        y: {
+          ticks: {
+            autoSkip: false,
+            maxRotation: 0,
+            minRotation: 0,
+            padding: 6,
+            font: { size: 14 },
+            callback: function(v, i, ticks) {
+              const label = this.getLabelForValue(v);
+              const maxLen = 24;
+              return label.length > maxLen ? label.slice(0, maxLen - 1) + '…' : label;
+            }
+          }
+        }
+      },
+      indexAxis: isPie ? undefined : 'x',
+      plugins: {
+        legend: isPie ? { display: true, position: 'right', labels: { boxWidth: 12, font: { size: 12 } } } : { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => items[0]?.label || ''
+          }
+        },
+        datalabels: { display: false }
+      }
+    };
+    const datasetCommon = {
+      label: label,
+      data: useValues,
+      backgroundColor: isPie ? palette : palette,
+      borderColor: isPie ? palette.map(c => c.replace('/ 0.8', '/ 1')) : palette.map(c => c.replace('/ 0.8', '/ 1')),
+      borderWidth: 1,
+    };
+    if (!isPie) {
+      datasetCommon.barThickness = 28; // thicker columns
+      datasetCommon.maxBarThickness = 34;
+      datasetCommon.categoryPercentage = 0.1; // spacing between groups
+      datasetCommon.barPercentage = 0.8; // spacing within group
+    }
+
+    charts[canvasId] = new Chart(ctx, {
+      type: chartType,
+      data: {
+        labels: useLabels,
+        datasets: [datasetCommon]
+      },
+      options
+    });
+
+    // no extra list rendering
+  }
+
+  function renderAll(_unused) {
+    const m = {
+      'chart-shift_cnt': { arr: metricsData['shift_cnt'], label: 'Dagsverk' },
+      'chart-natt': { arr: metricsData['natt'], label: 'Natt' },
+      'chart-tidlig': { arr: metricsData['tidlig'], label: 'Tidlig' },
+      'chart-before_6': { arr: metricsData['before_6'], label: 'Før 6:00' },
+      'chart-helgetimer': { arr: metricsData['helgetimer'], label: 'Helgetimer' }
+    };
+
+    for (const [canvasId, cfg] of Object.entries(m)) {
+      // Determine per-chart override; fallback to global orderValue
+      const containerKey = canvasId.replace('chart-','');
+      const activeBtn = document.querySelector(`[data-order-container="${containerKey}"] .order-btn.active`);
+      const perOrder = activeBtn ? activeBtn.getAttribute('data-order') : 'desc';
+      const { lbls, vals } = sortOnly(turnusLabels, cfg.arr, perOrder);
+      const currentMode = document.querySelector('[data-mode].active')?.getAttribute('data-mode') || 'vertical';
+      makeChart(canvasId, lbls, vals, cfg.label, currentMode);
+    }
+  }
+
+  renderAll('desc');
+  // Per-chart order listeners
+  // Per-chart order listeners
+  // Per-chart order toggle buttons
+  function attachOrderGroup(containerKey) {
+    const group = document.querySelector(`[data-order-container="${containerKey}"]`);
+    if (!group) return;
+    group.querySelectorAll('.order-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.order-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderAll('desc');
+      });
+    });
+  }
+  ['shift_cnt','natt','tidlig','before_6','helgetimer'].forEach(attachOrderGroup);
+  // View mode toggle listeners
+  function setActiveMode(btn) {
+    document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderAll('desc');
+  }
+  const viewVertical = document.getElementById('view-vertical');
+  const viewPie = document.getElementById('view-pie');
+  viewVertical.addEventListener('click', () => setActiveMode(viewVertical));
+  viewPie.addEventListener('click', () => setActiveMode(viewPie));
+  })();
+</script>
+{% endblock %}
+
+

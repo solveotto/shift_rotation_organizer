@@ -7,7 +7,7 @@ from config import conf
 
 class DataframeManager():
     def __init__(self) -> None:
-        self.df = pd.read_json(os.path.join(conf.static_dir, 'turnus_df_R25.json'))
+        self.df = pd.read_json(os.path.join(conf.static_dir, 'r25/turnus_df_R25.json'))
         self.username, self.user_id = 'solve', 4
         
         self.helgetimer_dagtid_multip = 0

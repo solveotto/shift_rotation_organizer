@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <div class="header-content">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </div>
+                        <h2 class="card-title-modern">Create New User</h2>
+                        <p class="card-subtitle">Add a new user to the system</p>
+                    </div>
+                </div>
+                <div class="card-body-modern">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert-modern alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    <div class="alert-content">
+                                        <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' if category == 'warning' else 'x-circle-fill' if category == 'danger' else 'info-circle-fill' }}"></i>
+                                        <span>{{ message }}</span>
+                                    </div>
+                                    <button type="button" class="btn-close-modern" data-bs-dismiss="alert">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" class="modern-form">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group-modern">
+                            <div class="input-wrapper">
+                                <i class="bi bi-person input-icon"></i>
+                                {{ form.username(class="form-control-modern" + (" is-invalid" if form.username.errors else "")) }}
+                                <label class="floating-label">{{ form.username.label.text }}</label>
+                            </div>
+                            {% if form.username.errors %}
+                                <div class="error-message">
+                                    {% for error in form.username.errors %}
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group-modern">
+                            <div class="input-wrapper">
+                                <i class="bi bi-lock input-icon"></i>
+                                {{ form.password(class="form-control-modern" + (" is-invalid" if form.password.errors else "")) }}
+                                <label class="floating-label">{{ form.password.label.text }}</label>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="error-message">
+                                    {% for error in form.password.errors %}
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group-modern">
+                            <div class="input-wrapper">
+                                <i class="bi bi-shield-lock input-icon"></i>
+                                {{ form.confirm_password(class="form-control-modern" + (" is-invalid" if form.confirm_password.errors else "")) }}
+                                <label class="floating-label">{{ form.confirm_password.label.text }}</label>
+                            </div>
+                            {% if form.confirm_password.errors %}
+                                <div class="error-message">
+                                    {% for error in form.confirm_password.errors %}
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group-modern checkbox-group">
+                            <div class="custom-checkbox-modern">
+                                {{ form.is_auth(class="form-check-input-modern") }}
+                                <label class="form-check-label-modern" for="{{ form.is_auth.id }}">
+                                    <span class="checkmark"></span>
+                                    <i class="bi bi-shield-check"></i>
+                                    {{ form.is_auth.label.text }}
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <a href="{{ url_for('main.admin') }}" class="btn-modern btn-secondary-modern">
+                                <i class="bi bi-arrow-left"></i>
+                                Cancel
+                            </a>
+                            {{ form.submit(class="btn-modern btn-primary-modern") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.modern-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: none;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modern-card {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.card-header-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    border: none;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.icon-wrapper {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.icon-wrapper i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.card-title-modern {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.card-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+}
+
+.card-body-modern {
+    padding: 2.5rem;
+}
+
+.alert-modern {
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid;
+}
+
+.alert-success {
+    border-left-color: #28a745;
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+}
+
+.alert-info {
+    border-left-color: #17a2b8;
+    background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.alert-content i {
+    font-size: 1.1rem;
+}
+
+.btn-close-modern {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.btn-close-modern:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.modern-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group-modern {
+    position: relative;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    color: #6c757d;
+    font-size: 1.1rem;
+    z-index: 2;
+    transition: color 0.3s ease;
+}
+
+.form-control-modern {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-control-modern:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: #ffffff;
+}
+
+.form-control-modern:focus + .input-icon {
+    color: #667eea;
+}
+
+.form-control-modern.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.floating-label {
+    position: absolute;
+    left: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    background: white;
+    padding: 0 0.25rem;
+}
+
+.form-control-modern:focus + .floating-label,
+.form-control-modern:not(:empty) + .floating-label {
+    top: 0;
+    font-size: 0.75rem;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #dc3545;
+}
+
+.error-message i {
+    font-size: 0.9rem;
+}
+
+.checkbox-group {
+    margin: 1rem 0;
+}
+
+.custom-checkbox-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0.75rem;
+    border-radius: 12px;
+    background: #f8f9fa;
+    transition: background-color 0.3s ease;
+    max-width: 50%;
+}
+
+.custom-checkbox-modern:hover {
+    background: #e9ecef;
+}
+
+.form-check-input-modern {
+    display: none;
+}
+
+.form-check-label-modern {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #495057;
+    margin: 0;
+    font-size: 1.0rem;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    position: relative;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-check-input-modern:checked + .form-check-label-modern .checkmark {
+    background: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-input-modern:checked + .form-check-label-modern .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-modern {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary-modern {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-secondary-modern {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.btn-secondary-modern {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .card-body-modern {
+        padding: 1.5rem;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .card-header-modern {
+        padding: 1.5rem;
+    }
+    
+    .icon-wrapper {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .icon-wrapper i {
+        font-size: 1.25rem;
+    }
+    
+    .card-title-modern {
+        font-size: 1.5rem;
+    }
+}
+
+</style>
+{% endblock %} 
