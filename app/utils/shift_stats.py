@@ -25,7 +25,6 @@ class Turnus():
 
 
         self.get_shift_stats()
-        #self.add_points_to_stats_df()
 
     def JsonToDataframe(self, turnus_json):
         with open(turnus_json, 'r') as f:
@@ -195,8 +194,7 @@ class Turnus():
                 'helgetimer_ettermiddag': [round(helgetimer_ettermiddag)],
                 'before_6': [before_6],
                 'afternoon_ends_before_20': [afternoon_ends_before_20],
-                'afternoons_in_row': [afternons_in_row],
-                'poeng': 0
+                'afternoons_in_row': [afternons_in_row]
                 
                 })
             

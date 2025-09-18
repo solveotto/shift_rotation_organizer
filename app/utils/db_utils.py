@@ -18,15 +18,6 @@ class DBUser(Base):
     password = Column(String(255), nullable=False)
     is_auth = Column(Integer, default=0)
 
-class Points(Base):
-    __tablename__ = 'points'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, nullable=False)
-    shift_title = Column(String(255), nullable=False)
-    user_points = Column(Integer, default=0)
-    rated_at = Column(DateTime, default=func.current_timestamp())
-    __table_args__ = (UniqueConstraint('user_id', 'shift_title'),)
-
 class Favorites(Base):
     __tablename__ = 'favorites'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -65,60 +56,6 @@ def create_tables():
 def get_db_session():
     return SessionLocal()
 
-def set_user_points(user_id, shift_title, amount):
-    session = get_db_session()
-    try:
-        existing = session.query(Points).filter_by(user_id=user_id, shift_title=shift_title).first()
-        if existing:
-            existing.user_points = amount
-            existing.rated_at = func.current_timestamp()
-        else:
-            new_point = Points(user_id=user_id, shift_title=shift_title, user_points=amount)
-            session.add(new_point)
-        session.commit()
-        print("Shift points adjusted.")
-        return True
-    except Exception as e:
-        session.rollback()
-        print(f"Error setting user points: {e}")
-        return False
-    finally:
-        session.close()
-
-
-def get_user_points(user_id, shift_title):
-    session = get_db_session()
-    try:
-        result = session.query(Points.user_points).filter_by(user_id=user_id, shift_title=shift_title).first()
-        if result:
-            return result.user_points
-        else:
-            return 0
-    finally:
-        session.close()
-
-
-def get_shift_rating(user_id, shift_title):
-    session = get_db_session()
-    try:
-        result = session.query(Points).filter_by(user_id=user_id, shift_title=shift_title).first()
-        if result:
-            return result.shift_title, result.user_points  # Same return format as before
-        else:
-            return '', 0
-    finally:
-        session.close()
-    
-    
-def get_all_ratings(user_id):
-    try:
-        session = get_db_session()
-        results = session.query(Points.shift_title, Points.user_points).filter_by(user_id=user_id).all()
-        return [(result.shift_title, result.user_points) for result in results]
-    finally:
-        session.close()
-
-    
 def add_shifts_to_database(file_path):
     session = get_db_session()
     try:
@@ -369,9 +306,6 @@ def delete_user(user_id):
         # Delete associated favorites
         session.query(Favorites).filter_by(user_id=user_id).delete()
         
-        # Delete associated points
-        session.query(Points).filter_by(user_id=user_id).delete()
-        
         # Delete the user
         session.delete(user)
         session.commit()
@@ -401,10 +335,6 @@ def toggle_user_auth(user_id):
 
 if __name__ == '__main__':
     create_new_user('testuser', 'testuser')
-    #add_points_to_user('test1', 10)
-    #username, user_id = login('solve')
-
-    #set_user_points('4', 'OSL_01', 17)
 
     #try:
     #    username = get_user_data('testuser')

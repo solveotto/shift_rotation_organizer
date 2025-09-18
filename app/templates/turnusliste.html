@@ -12,46 +12,76 @@
     </button>
 {% endblock %}
 
+
+<!-- Desktop filtering -->
 {% block filtering %}
 <div class="navbar-filtering d-none d-lg-flex align-items-center me-3">
     <div class="filter-dropdown">
-        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn btn-sm btn-outline-light dropdown-toggle sorter-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-funnel"></i> Sorter
         </button>
         <div class="dropdown-menu dropdown-menu-end filter-menu">
             <div class="filter-controls">
                 <div class="filter-item">
                     <label class="filter-label">Helgetimer</label>
+                    <div class="slider-direction-info">
+                        <span class="direction-left">Få</span>
+                        <span class="direction-right">Mange</span>
+                    </div>
                     <input type="range" class="form-range filter-slider" id="helgetimer-slider" min="-10" max="10" value="0" step="0.5">
                 </div>
                 
                 <div class="filter-item">
                     <label class="filter-label">Dagsverk</label>
+                    <div class="slider-direction-info">
+                        <span class="direction-left">Få</span>
+                        <span class="direction-right">Mange</span>
+                    </div>
                     <input type="range" class="form-range filter-slider" id="shift-cnt-slider" min="-10" max="10" value="0" step="0.5">
                 </div>
                 
                 <div class="filter-item">
                     <label class="filter-label">Tidlig</label>
+                    <div class="slider-direction-info">
+                        <span class="direction-left">Få</span>
+                        <span class="direction-right">Mange</span>
+                    </div>
                     <input type="range" class="form-range filter-slider" id="tidlig-slider" min="-10" max="10" value="0" step="0.5">
                 </div>
                 
                 <div class="filter-item">
                     <label class="filter-label">Natt</label>
+                    <div class="slider-direction-info">
+                        <span class="direction-left">Få</span>
+                        <span class="direction-right">Mange</span>
+                    </div>
                     <input type="range" class="form-range filter-slider" id="natt-slider" min="-10" max="10" value="0" step="0.5">
                 </div>
                 
                 <div class="filter-item">
                     <label class="filter-label">Ettermiddag</label>
+                    <div class="slider-direction-info">
+                        <span class="direction-left">Få</span>
+                        <span class="direction-right">Mange</span>
+                    </div>
                     <input type="range" class="form-range filter-slider" id="ettermiddag-slider" min="-10" max="10" value="0" step="0.5">
                 </div>
                 
                 <div class="filter-item">
                     <label class="filter-label">Før 6:00</label>
+                    <div class="slider-direction-info">
+                        <span class="direction-left">Få</span>
+                        <span class="direction-right">Mange</span>
+                    </div>
                     <input type="range" class="form-range filter-slider" id="before-6-slider" min="-10" max="10" value="0" step="0.5">
                 </div>
                 
                 <div class="filter-item">
                     <label class="filter-label">Slutt før 20:00</label>
+                    <div class="slider-direction-info">
+                        <span class="direction-left">Få</span>
+                        <span class="direction-right">Mange</span>
+                    </div>
                     <input type="range" class="form-range filter-slider" id="afternoon-ends-slider" min="-10" max="10" value="0" step="0.5">
                 </div>
                 
@@ -73,36 +103,64 @@
     <div class="filter-controls">
         <div class="filter-item">
             <label class="filter-label">Helgetimer</label>
+            <div class="slider-direction-info">
+                <span class="direction-left">Lav → Topp</span>
+                <span class="direction-right">Høy → Topp</span>
+            </div>
             <input type="range" class="form-range filter-slider" id="helgetimer-slider-mobile" min="-10" max="10" value="0" step="0.5">
         </div>
         
         <div class="filter-item">
             <label class="filter-label">Dagsverk</label>
+            <div class="slider-direction-info">
+                <span class="direction-left">Lav → Topp</span>
+                <span class="direction-right">Høy → Topp</span>
+            </div>
             <input type="range" class="form-range filter-slider" id="shift-cnt-slider-mobile" min="-10" max="10" value="0" step="0.5">
         </div>
         
         <div class="filter-item">
             <label class="filter-label">Tidlig</label>
+            <div class="slider-direction-info">
+                <span class="direction-left">Lav → Topp</span>
+                <span class="direction-right">Høy → Topp</span>
+            </div>
             <input type="range" class="form-range filter-slider" id="tidlig-slider-mobile" min="-10" max="10" value="0" step="0.5">
         </div>
         
         <div class="filter-item">
             <label class="filter-label">Natt</label>
+            <div class="slider-direction-info">
+                <span class="direction-left">Lav → Topp</span>
+                <span class="direction-right">Høy → Topp</span>
+            </div>
             <input type="range" class="form-range filter-slider" id="natt-slider-mobile" min="-10" max="10" value="0" step="0.5">
         </div>
         
         <div class="filter-item">
             <label class="filter-label">Ettermiddag</label>
+            <div class="slider-direction-info">
+                <span class="direction-left">Lav → Topp</span>
+                <span class="direction-right">Høy → Topp</span>
+            </div>
             <input type="range" class="form-range filter-slider" id="ettermiddag-slider-mobile" min="-10" max="10" value="0" step="0.5">
         </div>
         
         <div class="filter-item">
             <label class="filter-label">Før 6:00</label>
+            <div class="slider-direction-info">
+                <span class="direction-left">Lav → Topp</span>
+                <span class="direction-right">Høy → Topp</span>
+            </div>
             <input type="range" class="form-range filter-slider" id="before-6-slider-mobile" min="-10" max="10" value="0" step="0.5">
         </div>
         
         <div class="filter-item">
             <label class="filter-label">Slutt før 20:00</label>
+            <div class="slider-direction-info">
+                <span class="direction-left">Lav → Topp</span>
+                <span class="direction-right">Høy → Topp</span>
+            </div>
             <input type="range" class="form-range filter-slider" id="afternoon-ends-slider-mobile" min="-10" max="10" value="0" step="0.5">
         </div>
         

@@ -18,21 +18,6 @@ def select_shift():
     else:
         return jsonify({'status': 'error', 'message': 'No shift title provided'})
 
-@api.route('/rate_displayed_shift', methods=['POST'])
-def rate_displayed_shift():
-    data = request.get_json()
-    shift_title = data.get('shift_title')
-    rating = data.get('rating')
-    
-    if not shift_title or rating is None:
-        return jsonify({'status': 'error', 'message': 'Missing shift_title or rating'})
-    
-    try:
-        db_utils.save_rating(current_user.get_id(), shift_title, rating)
-        return jsonify({'status': 'success', 'message': 'Rating saved successfully'})
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': f'Failed to save rating: {str(e)}'})
-
 @api.route('/toggle_favorite', methods=['POST'])
 @login_required
 def toggle_favorite():

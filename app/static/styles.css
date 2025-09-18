@@ -586,7 +586,7 @@ body, html {
 .filter-menu {
     min-width: 300px;
     max-width: 400px;
-    padding: 1rem;
+    padding: 1.0rem 1.75rem;
     border: none;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     border-radius: 0.75rem;
@@ -596,13 +596,14 @@ body, html {
 .filter-controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    gap: 1rem;
+    margin: 0 0.5rem;
 }
 
 .filter-item {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.4rem;
 }
 
 .filter-label {
@@ -610,6 +611,30 @@ body, html {
     font-weight: 600;
     color: #495057;
     margin: 0;
+}
+
+
+/* Slider direction indicators */
+.slider-direction-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.1rem;
+}
+
+.direction-left,
+.direction-right {
+    font-size: 0.55rem;
+    color: #6c757d;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.direction-left {
+    text-align: left;
+}
+
+.direction-right {
+    text-align: right;
 }
 
 .filter-slider {
@@ -720,16 +745,26 @@ body, html {
 
 .mobile-sorting-menu .filter-controls {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .mobile-sorting-menu .filter-item {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .mobile-sorting-menu .filter-label {
     font-size: 0.7rem;
     margin-bottom: 0.25rem;
+}
+
+/* Mobile direction indicators */
+.mobile-sorting-menu .slider-direction-info {
+    margin-bottom: 0.1rem;
+}
+
+.mobile-sorting-menu .direction-left,
+.mobile-sorting-menu .direction-right {
+    font-size: 0.5rem;
 }
 
 /* (Reverted) No custom navbar breakpoint overrides; use Bootstrap defaults */
@@ -988,10 +1023,13 @@ label input[type="checkbox"] {
   overflow-x: auto; /* Adds horizontal scrollbar if needed */
 }
 
+
+
+
 /* Sorting sliders styling */
 .form-range {
-    height: 6px;
-    border-radius: 3px;
+    height: 16px;
+    border-radius: 13px;
     background: #e9ecef;
     outline: none;
     -webkit-appearance: none;
