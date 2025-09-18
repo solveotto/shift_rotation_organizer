@@ -1,9 +1,12 @@
 import os
 import configparser
 
-# Read config.ini
+# Read config.ini from the same directory as this file
+config_dir = os.path.dirname(__file__)
+config_path = os.path.join(config_dir, 'config.ini')
+
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(config_path)
 
 class conf:
     # Flask settings from INI
@@ -14,6 +17,9 @@ class conf:
     CURRENT_TURNUS = config.get('flask', 'current_turnus', fallback='r25')
     if not CURRENT_TURNUS:
         raise ValueError("CURRENT_TURNUS must be set in config.ini")
+    
+    # Export config for db_utils to use
+    CONFIG = config
 
     # Paths
     base_dir = os.path.dirname(__file__)

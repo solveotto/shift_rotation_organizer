@@ -4,7 +4,7 @@ import configparser
 import json
 import bcrypt
 from flask import flash
-
+from config import conf
 
 # SQLAlchemy Models
 Base = declarative_base()
@@ -43,8 +43,7 @@ class Shifts(Base):
 
 
 
-config = configparser.ConfigParser()
-config.read('config.ini')
+config = conf.CONFIG
 db_type = config['general'].get('db_type', 'mysql')
 
 if db_type == 'mysql':
