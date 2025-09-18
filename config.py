@@ -1,10 +1,21 @@
 import os
+import configparser
+
+# Read config.ini
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 class conf:
-    SECRET_KEY = 'secret'
+    # Flask settings from INI
+    # Use environment variable first, then INI, then fail
+    SECRET_KEY = os.environ.get('SECRET_KEY') or config.get('flask', 'secret_key', fallback='PLEASE_SET_SECRET_KEY_IN_CONFIG')
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY must be set in environment or config.ini")
+    CURRENT_TURNUS = config.get('flask', 'current_turnus', fallback='r25')
+    if not CURRENT_TURNUS:
+        raise ValueError("CURRENT_TURNUS must be set in config.ini")
 
-    CURRENT_TURNUS = 'r25'
-
+    # Paths
     base_dir = os.path.dirname(__file__)
     static_dir = os.path.abspath(os.path.join(base_dir, 'app', 'static'))
     utils_dir = os.path.abspath(os.path.join(base_dir, 'app', 'utils'))
