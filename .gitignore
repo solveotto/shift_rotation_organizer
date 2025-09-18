@@ -9,6 +9,7 @@ config.ini
 __pycache__/
 
 instance/
+dummy.db
 
 .pytest_cache/
 .coverage
