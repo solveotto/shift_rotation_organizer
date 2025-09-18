@@ -580,15 +580,53 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateScore(turnus, weights) {
         let score = 0;
         
-        score += turnus.helgetimer * weights.helgetimer;
-        score += turnus.shift_cnt * weights.shift_cnt;
-        score += turnus.tidlig * weights.tidlig;
-        score += turnus.natt * weights.natt;
-        score += turnus.ettermiddag * weights.ettermiddag;
-        score += turnus.before_6 * weights.before_6;
-        score += turnus.afternoon_ends_before_20 * weights.afternoon_ends;
+        // For each criteria, calculate contribution based on weight direction and magnitude
+        Object.entries(weights).forEach(([key, weight]) => {
+            if (weight === 0) return; // Skip neutral weights
+            
+            let value = 0;
+            switch(key) {
+                case 'helgetimer': value = turnus.helgetimer; break;
+                case 'shift_cnt': value = turnus.shift_cnt; break;
+                case 'tidlig': value = turnus.tidlig; break;
+                case 'natt': value = turnus.natt; break;
+                case 'ettermiddag': value = turnus.ettermiddag; break;
+                case 'before_6': value = turnus.before_6; break;
+                case 'afternoon_ends': value = turnus.afternoon_ends_before_20; break;
+            }
+            
+            // Calculate contribution: weight magnitude determines priority
+            // Positive weight: higher values get higher scores
+            // Negative weight: lower values get higher scores
+            let contribution;
+            if (weight > 0) {
+                contribution = value * Math.abs(weight);
+            } else {
+                // For negative weights, invert the value so lower values get higher scores
+                // Use max possible value to create proper inversion
+                const maxValue = getMaxValueForCriteria(key);
+                contribution = (maxValue - value) * Math.abs(weight);
+            }
+            
+            score += contribution;
+        });
         
         return score;
+    }
+    
+    // Get maximum possible value for each criteria for proper score inversion
+    function getMaxValueForCriteria(criteria) {
+        // These are reasonable maximum values based on typical turnus data
+        const maxValues = {
+            helgetimer: 50,        // Max weekend hours
+            shift_cnt: 30,         // Max work days
+            tidlig: 20,            // Max early shifts
+            natt: 20,              // Max night shifts
+            ettermiddag: 20,       // Max afternoon shifts
+            before_6: 20,          // Max shifts before 6
+            afternoon_ends: 20     // Max shifts ending before 20
+        };
+        return maxValues[criteria] || 50;
     }
 
     // Sort turnuser based on current weights
@@ -646,6 +684,20 @@ document.addEventListener('DOMContentLoaded', function() {
             slider.value = 0;
             updateSliderValue(slider);
         });
+        
+        // Clear saved settings
+        try {
+            localStorage.removeItem('turnuslisteSortingSettings');
+            console.log('Sorting settings cleared');
+        } catch (error) {
+            console.error('Error clearing sorting settings:', error);
+        }
+        
+        // Hide sorting info
+        const sortingInfo = document.getElementById('sorting-info');
+        if (sortingInfo) {
+            sortingInfo.style.display = 'none';
+        }
     }
 
     // Update slider value display
@@ -714,8 +766,79 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    // Save sorting settings to localStorage
+    function saveSortingSettings() {
+        try {
+            const settings = {
+                helgetimer: document.getElementById('helgetimer-slider').value,
+                shift_cnt: document.getElementById('shift-cnt-slider').value,
+                tidlig: document.getElementById('tidlig-slider').value,
+                natt: document.getElementById('natt-slider').value,
+                ettermiddag: document.getElementById('ettermiddag-slider').value,
+                before_6: document.getElementById('before-6-slider').value,
+                afternoon_ends: document.getElementById('afternoon-ends-slider').value
+            };
+            localStorage.setItem('turnuslisteSortingSettings', JSON.stringify(settings));
+            console.log('Sorting settings saved:', settings);
+        } catch (error) {
+            console.error('Error saving sorting settings:', error);
+        }
+    }
+
+    // Load sorting settings from localStorage
+    function loadSortingSettings() {
+        try {
+            const saved = localStorage.getItem('turnuslisteSortingSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                console.log('Loading sorting settings:', settings);
+                return settings;
+            }
+        } catch (error) {
+            console.warn('Error loading sorting settings:', error);
+        }
+        return null;
+    }
+
+    // Apply saved settings to sliders
+    function applySavedSettings() {
+        const settings = loadSortingSettings();
+        if (!settings) return false;
+
+        let anySettingsApplied = false;
+        
+        // Apply to desktop sliders
+        Object.entries(settings).forEach(([key, value]) => {
+            const sliderId = key === 'shift_cnt' ? 'shift-cnt-slider' : 
+                           key === 'before_6' ? 'before-6-slider' :
+                           key === 'afternoon_ends' ? 'afternoon-ends-slider' :
+                           `${key}-slider`;
+            
+            const slider = document.getElementById(sliderId);
+            const mobileSlider = document.getElementById(sliderId + '-mobile');
+            
+            if (slider && value !== undefined && value !== '0') {
+                slider.value = value;
+                updateSliderValue(slider);
+                anySettingsApplied = true;
+            }
+            
+            if (mobileSlider && value !== undefined && value !== '0') {
+                mobileSlider.value = value;
+                updateSliderValue(mobileSlider);
+            }
+        });
+
+        return anySettingsApplied;
+    }
+
     // Initialize
     initializeOriginalOrder();
+    
+    // Load and apply saved settings, then sort if any were applied
+    if (applySavedSettings()) {
+        sortTurnuser();
+    }
     
     // Add event listeners to sliders (both desktop and mobile filters)
     const sliders = document.querySelectorAll('input[type="range"]');
@@ -745,6 +868,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             sortTurnuser();
+            saveSortingSettings(); // Save settings after each change
         });
     });
     

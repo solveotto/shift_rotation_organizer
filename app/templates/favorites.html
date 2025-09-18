@@ -2,12 +2,9 @@
 {% block title %}Favoritter{% endblock %}
 
 {% block print %}
-    <div class="print-button-container" style="margin-top: 20px;">
-        <button class="btn btn-outline-dark btn-sm mb-3 py-1" 
-                style="--bs-btn-padding-y: 1.25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"
-                onclick="printTables()">Utskrift <i class="bi bi-printer"></i>
-        </button>
-    </div>
+    <button class="btn btn-outline-light btn-sm" onclick="printTables()">
+        <i class="bi bi-printer"></i> Utskrift
+    </button>
 {% endblock %}
 
 {% block content %}

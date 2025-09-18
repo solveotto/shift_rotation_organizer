@@ -60,11 +60,13 @@ body, html {
 
 .modern-navbar .navbar-brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
   font-weight: 600;
   color: white !important;
   text-decoration: none;
   transition: transform 0.2s ease;
+  margin-right: 5rem;
 }
 
 .modern-navbar .navbar-brand:hover {
@@ -73,7 +75,7 @@ body, html {
 
 .brand-logo {
   border-radius: 50%;
-  margin-right: 0.75rem;
+  /* margin-right: 0.75rem; */
   border: 2px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
 }
@@ -347,34 +349,6 @@ body, html {
 }
 
 
-/* Left Sidebar */
-.sorting-sidebar {
-    width: 280px;
-    background: linear-gradient(135deg, #7cb1d6 0%, #5a8bb3 100%);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    flex-shrink: 0;
-    position: sticky;
-    top: 20px;
-    height: fit-content;
-    max-height: calc(100vh - 140px);
-    overflow-y: auto;
-}
-
-.sidebar-header {
-    background: rgba(0,0,0,0.1);
-    padding: 16px;
-    border-radius: 8px 8px 0 0;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-.sidebar-title {
-    color: white;
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin: 0;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
 
 .sidebar-content {
     padding: 11px;
@@ -424,6 +398,7 @@ body, html {
     background: rgba(255,255,255,0.2);
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
     margin-bottom: 4px;
     position: relative;
     cursor: pointer;
@@ -446,6 +421,7 @@ body, html {
 
 .sidebar-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
+    appearance: none;
     appearance: none;
     width: 18px;
     height: 18px;
@@ -519,39 +495,7 @@ body, html {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* Sidebar Badge Styling */
-.sorting-sidebar .badge {
-    background-color: rgba(255,255,255,0.9) !important;
-    color: #495057 !important;
-    font-size: 0.65rem;
-    padding: 3px 6px;
-    border-radius: 3px;
-    transition: all 0.2s ease;
-    min-width: 1.5rem;
-    font-weight: 600;
-}
 
-.sorting-sidebar .badge:hover {
-    background-color: white !important;
-    transform: scale(1.05);
-}
-
-/* Reset Button in Sidebar */
-.sorting-sidebar #reset-sorting {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.3);
-    color: white;
-    font-size: 0.65rem;
-    padding: 4px;
-    transition: all 0.2s ease;
-}
-
-.sorting-sidebar #reset-sorting:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-    color: white;
-    transform: translateY(-1px);
-}
 
 
 
@@ -643,6 +587,7 @@ body, html {
     background: #e9ecef;
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
     cursor: pointer;
     margin: 0;
     position: relative;
@@ -667,6 +612,7 @@ body, html {
 
 .filter-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
+    appearance: none;
     appearance: none;
     width: 16px;
     height: 16px;
@@ -716,6 +662,9 @@ body, html {
     grid-column: 1 / -1;
     margin-top: 0.5rem;
 }
+
+
+
 
 /* Mobile menu items */
 .mobile-menu-item {
@@ -767,7 +716,7 @@ body, html {
     font-size: 0.5rem;
 }
 
-/* (Reverted) No custom navbar breakpoint overrides; use Bootstrap defaults */
+
 
 /* Responsive Design */
 @media (max-width: 992px) {
@@ -776,37 +725,9 @@ body, html {
         gap: 16px;
     }
     
-    .sorting-sidebar {
-        width: 100%;
-        position: relative;
-        top: 0;
-        max-height: none;
-    }
-    
-    .sidebar-content {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-    }
-    
-    .control-item {
-        margin-bottom: 0;
-    }
 }
 
 @media (max-width: 576px) {
-    .sidebar-content {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    .control-item {
-        padding: 10px;
-    }
-    
-    .sorting-sidebar {
-        font-size: 0.9rem;
-    }
 }
 
 
@@ -1033,10 +954,12 @@ label input[type="checkbox"] {
     background: #e9ecef;
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
 }
 
 .form-range::-webkit-slider-thumb {
     -webkit-appearance: none;
+    appearance: none;
     appearance: none;
     width: 20px;
     height: 20px;
@@ -1197,7 +1120,6 @@ label input[type="checkbox"] {
     color: #7cb1d6;
 }
 
-/* Left sidebar styles moved to sorting.css */
 
 /* Centered navbar with responsive side margins */
 .modern-navbar .container-fluid {

@@ -78,14 +78,14 @@
               <div class="navbar-actions d-flex align-items-center">
                 <!-- Page Title and Navigation -->
               
+                <!-- Filtering Controls -->
+                {% block filtering %}{% endblock %}
 
                 <!-- Print Button -->
-                <div class="action-buttons d-none d-md-flex align-items-center me-3">
+                <div class="action-buttons d-none d-lg-flex align-items-center me-3">
                   {% block print %}{% endblock %}
                 </div>
 
-                <!-- Filtering Controls -->
-                {% block filtering %}{% endblock %}
 
                 <!-- User Menu -->
                 <div class="dropdown">
