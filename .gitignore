@@ -1,15 +1,13 @@
 env/
 venv/
-config.ini
-
-
 .venv/
+instance/
+
+
 
 *.pyc
 __pycache__/
 
-instance/
-dummy.db
 
 .pytest_cache/
 .coverage
@@ -21,3 +19,6 @@ build/
 app.log
 app/logs
 app/utils/sessions
+
+config.ini
+dummy.db
