@@ -18,6 +18,7 @@ class conf:
     if not CURRENT_TURNUS:
         raise ValueError("CURRENT_TURNUS must be set in config.ini")
     
+
     # Export config for db_utils to use
     CONFIG = config
 

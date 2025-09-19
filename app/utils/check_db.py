@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from app.utils.db_utils import create_tables, get_db_session
-from app.utils.db_utils import DBUser, Favorites, Shifts
+from db_utils import create_tables, get_db_session, create_new_user
+from db_utils import DBUser, Favorites, Shifts
 
 def check_database():
     try:
@@ -29,4 +29,5 @@ def check_database():
         print(f"✗ Database error: {e}")
 
 if __name__ == "__main__":
-    check_database() 
+    check_database()
+    create_new_user('testuser', 'testuser')

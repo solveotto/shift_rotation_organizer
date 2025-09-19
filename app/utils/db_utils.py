@@ -1,10 +1,16 @@
+import sys
+import os
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, UniqueConstraint, func
 from sqlalchemy.orm import sessionmaker, declarative_base
-import configparser
 import json
 import bcrypt
 from flask import flash
+
+# Add project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, project_root)
 from config import conf
+print(project_root)
 
 # SQLAlchemy Models
 Base = declarative_base()
@@ -47,7 +53,17 @@ elif db_type == 'sqlite':
     sqlite_path = config['sqlite']['path']
     DATABASE_URL = f"sqlite:///{sqlite_path}"
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    connect_args={
+        'connect_timeout': 20,
+        'read_timeout': 20,
+        'write_timeout': 20,
+    } if db_type == 'mysql' else {}
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def create_tables():
