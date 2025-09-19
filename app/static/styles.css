@@ -34,7 +34,7 @@ body, html {
 
 /* Modern Navigation Styles */
 .modern-navbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0808ff 0%, #040404 100%);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -879,6 +879,34 @@ label input[type="checkbox"] {
 
 .custom-remove-btn {
   margin-top: -10px; /* Adjust the value as needed */
+}
+
+/* Arrow icon styling for move up/down buttons */
+.arrow-icon {
+  transition: color 0.2s ease;
+}
+
+/* Up arrow - green */
+.btn:not(:disabled) .bi-arrow-up {
+  color: #28a745; /* Bootstrap success green */
+}
+
+.btn:not(:disabled) .bi-arrow-up:hover {
+  color: #1e7e34; /* Darker green on hover */
+}
+
+/* Down arrow - red */
+.btn:not(:disabled) .bi-arrow-down {
+  color: #dc3545; /* Bootstrap danger red */
+}
+
+.btn:not(:disabled) .bi-arrow-down:hover {
+  color: #c82333; /* Darker red on hover */
+}
+
+/* Disabled arrows - gray */
+.btn:disabled .arrow-icon {
+  color: #6c757d; /* Bootstrap secondary gray */
 }
 
 @media print {
