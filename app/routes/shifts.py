@@ -1,7 +1,6 @@
 import time
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_login import login_required, current_user
-from app.forms import CalculationForm
 from app.utils import db_utils
 from app.routes.main import df_manager, turnus_data
 

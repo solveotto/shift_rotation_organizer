@@ -1,6 +1,6 @@
 import sys
 import os
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, UniqueConstraint, func
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, UniqueConstraint, func, ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base
 import json
 import bcrypt
@@ -10,7 +10,6 @@ from flask import flash
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, project_root)
 from config import conf
-print(project_root)
 
 # SQLAlchemy Models
 Base = declarative_base()
