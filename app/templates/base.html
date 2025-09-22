@@ -72,47 +72,22 @@
               </ul>
 
               
-              <!-- Turnus Set Switcher (only show if multiple sets available) -->
-              {% if all_turnus_sets and all_turnus_sets|length > 1 %}
-              <div class="navbar-nav">
-                <div class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" id="turnusDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-calendar3"></i>
-                    <span>{{ current_turnus_set.year_identifier if current_turnus_set else 'Year' }}</span>
-                  </a>
-                  <ul class="dropdown-menu" aria-labelledby="turnusDropdown">
-                    {% for ts in all_turnus_sets %}
-                    <li>
-                      <a class="dropdown-item {% if current_turnus_set and ts.id == current_turnus_set.id %}active{% endif %}" 
-                        href="/switch-year/{{ ts.id }}">
-                        <i class="bi bi-{% if current_turnus_set and ts.id == current_turnus_set.id %}check-circle{% else %}circle{% endif %}"></i>
-                        {{ ts.year_identifier }}
-                      </a>
-                    </li>
-                    {% endfor %}
-                  </ul>
-                </div>
-              </div>
-
-
-              <script>
-              function switchTurnusSet(turnusSetId) {
-                  if (turnusSetId) {
-                      window.location.href = '/switch-year/' + turnusSetId;
-                  }
-              }
-              </script>
-              {% endif %}
-
+              
               <!-- Right Side Actions -->
               <div class="navbar-actions d-flex align-items-center">
                 <!-- Page Title and Navigation -->
-              
+                
+                <!-- Turnus Set Switcher (only show if multiple sets available) -->
+                <div class="action-buttons d-none d-lg-flex align-items-center me-3">
+                  {% if current_user.is_authenticated and all_turnus_sets and all_turnus_sets|length > 1 %}
+                      {% include 'components/turnus_selector.html' %}
+                      <div class="me-2"></div>
+                  {% endif %}
+                
                 <!-- Filtering Controls -->
-                {% block filtering %}{% endblock %}
+                  {% block filtering %}{% endblock %}
 
                 <!-- Print Button -->
-                <div class="action-buttons d-none d-lg-flex align-items-center me-3">
                   {% block print %}{% endblock %}
                 </div>
 
@@ -120,7 +95,7 @@
                 <!-- User Menu -->
                 <div class="dropdown">
                   <button class="btn btn-outline-light dropdown-toggle user-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="{{ url_for('static', filename='img/person.svg') }}" alt="User" class="user-avatar">
+                    <i class="bi bi-person"></i>
                     <span class="user-name">{{ current_user.username | capitalize }}</span>
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end">
@@ -172,9 +147,6 @@
       <main>
         {% block content %}{% endblock %}
       </main>
-
-      <!-- Footer removed - navigation moved to header -->
-
 
     </body>
   </html>

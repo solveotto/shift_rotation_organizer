@@ -1,0 +1,31 @@
+<!-- Turnus Set Selector Component -->
+
+<!-- Turnus Set Switcher (only show if multiple sets available) -->
+{% if all_turnus_sets and all_turnus_sets|length > 1 %}
+<div class="dropdown me-1">
+    <a class="btn btn-outline-light btn-sm dropdown-toggle" href="#" id="turnusDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-calendar3"></i>
+    <span>{{ current_turnus_set.year_identifier if current_turnus_set else 'Year' }}</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="turnusDropdown">
+    {% for ts in all_turnus_sets %}
+    <li>
+        <a class="dropdown-item {% if current_turnus_set and ts.id == current_turnus_set.id %}active{% endif %}" 
+        href="/switch-year/{{ ts.id }}">
+        <i class="bi bi-{% if current_turnus_set and ts.id == current_turnus_set.id %}check-circle{% else %}circle{% endif %}"></i>
+        {{ ts.year_identifier }}
+        </a>
+    </li>
+    {% endfor %}
+    </ul>
+</div>
+
+
+<script>
+function switchTurnusSet(turnusSetId) {
+    if (turnusSetId) {
+        window.location.href = '/switch-year/' + turnusSetId;
+    }
+}
+</script>
+{% endif %}

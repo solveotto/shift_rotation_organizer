@@ -1,5 +1,8 @@
 {% extends "base.html" %}
+
 {% block title %}Favoritter{% endblock %}
+
+{% block content %}
 
 {% block print %}
     <button class="btn btn-outline-light btn-sm" onclick="printTables()">
@@ -7,7 +10,7 @@
     </button>
 {% endblock %}
 
-{% block content %}
+
 <div class="col-md-5 offset-md-3">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -32,7 +35,7 @@
                         <h5>Ingen favoritter er valg.</h5>
                     {% endif %}
                 </div>
-                
+               
                 {% for turnus in favorites %}
                     {% set outer_index = loop.index0 %}
                     {% for name, data in turnus.items() %}

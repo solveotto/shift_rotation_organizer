@@ -44,15 +44,20 @@ def switch_user_year(turnus_set_id):
     
     # Store user's choice in their session
     session['user_selected_turnus_set'] = turnus_set_id
+
+    # Get the referring page (where user came from)
+    next_page = request.args.get('next') or request.referrer
     
-    print(f"DEBUG SWITCH: Stored in session: {session.get('user_selected_turnus_set')}")
+    # If no referrer or if it's the same switch route, default to turnusliste
+    if not next_page or '/switch-year/' in next_page:
+        next_page = url_for('shifts.turnusliste')
     
     flash(f'Switched to viewing turnus set', 'success')
-    return redirect(url_for('shifts.turnusliste'))
+    return redirect(next_page)
 
 def get_user_turnus_set():
-    """Get the turnus set for current user (their choice or system default)"""
-    # Check if user has selected a specific year to view
+    """Get the turnus set for current user (their current session choice or database active set)"""
+    # Check if user has selected a specific year to view in THIS session
     user_choice = session.get('user_selected_turnus_set')
     if user_choice:
         from app.utils.db_utils import get_all_turnus_sets
@@ -61,7 +66,7 @@ def get_user_turnus_set():
         if user_set:
             return user_set
     
-    # Fall back to system active set
+    # Always default to the database active set for new sessions
     return db_utils.get_active_turnus_set()
 
 
@@ -99,10 +104,12 @@ def favorites():
     print(f"DEBUG FAVORITES: fav_dict_sorted length = {len(fav_dict_sorted)}")
 
     return render_template('favorites.html',
-                         page_name='Favoritter',
-                         favorites=fav_dict_sorted,
-                         df=user_df_manager.df.to_dict(orient='records') if not user_df_manager.df.empty else [],
-                         current_turnus_set=user_turnus_set)
+                        page_name='Favoritter',
+                        favorites=fav_dict_sorted,
+                        df=user_df_manager.df.to_dict(orient='records') if not user_df_manager.df.empty else [],
+                        current_turnus_set=user_turnus_set,
+                        all_turnus_sets=db_utils.get_all_turnus_sets()
+                        )
 
 @shifts.route('/compare')
 @login_required
@@ -125,7 +132,8 @@ def compare():
         page_name='Sammenlign Turnuser',
         labels=labels,
         data=data,
-        current_turnus_set=user_turnus_set
+        current_turnus_set=user_turnus_set,
+        all_turnus_sets=db_utils.get_all_turnus_sets()
     )
 
 

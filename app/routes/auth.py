@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import logout_user, login_required, login_user as flask_login_user, current_user
 from mysql.connector import Error
 from app.forms import LoginForm
@@ -21,6 +21,10 @@ def login():
             if db_user_data and User.verify_password(db_user_data['password'], form.password.data):
                 user = User(form.username.data, db_user_data['id'], db_user_data['is_auth'])
                 flask_login_user(user)
+
+                # Clear any previous turnus set choice for fresh start
+                session.pop('user_selected_turnus_set', None)
+
                 return redirect(url_for('shifts.turnusliste'))
             else:
                 flash('Login unsuccessful. Please check username and password', 'danger')
@@ -34,5 +38,7 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
+    # Clear turnus set choice on logout
+    session.pop('user_selected_turnus_set', None)
     logout_user()
     return redirect(url_for('auth.login')) 

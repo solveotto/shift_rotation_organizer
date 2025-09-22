@@ -1,0 +1,14 @@
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title d-flex align-items-center justify-content-between">
+            <span>{{ title or 'Chart' }}</span>
+            <div class="btn-group" role="group" aria-label="Sorter {{ title or 'Chart' }}" data-order-container="{{ order_container or 'default' }}">
+                <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="{{ order_container or 'default' }}" data-order="asc">Minst → Størst</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="{{ order_container or 'default' }}" data-order="desc">Størst → Minst</button>
+            </div>
+        </h5>
+        <div id="wrap-chart-{{ chart_id or 'default' }}" style="position: relative; height: 360px; overflow: auto;">
+            <canvas id="chart-{{ chart_id or 'default' }}"></canvas>
+        </div>
+    </div>
+</div>

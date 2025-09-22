@@ -23,85 +23,45 @@
   </div>
   <div class="row g-4">
     <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title d-flex align-items-center justify-content-between">
-            <span>Dagsverk</span>
-            <div class="btn-group" role="group" aria-label="Sorter Dagsverk" data-order-container="shift_cnt">
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="shift_cnt" data-order="asc">Minst → Størst</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="shift_cnt" data-order="desc">Størst → Minst</button>
-            </div>
-          </h5>
-          <div id="wrap-chart-shift_cnt" style="position: relative; height: 360px; overflow: auto;">
-            <canvas id="chart-shift_cnt"></canvas>
-          </div>
-        </div>
-      </div>
+      
+      <!-- Helgetimer Chart -->
+      {% set title = "Helgetimer" %}
+      {% set order_container = "helgetimer" %}
+      {% set chart_id = "helgetimer" %}
+      {% include 'components/chart_card_component.html' with context %}
     </div>
     <div class="col-12 col-lg-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title d-flex align-items-center justify-content-between">
-            <span>Natt</span>
-            <div class="btn-group" role="group" aria-label="Sorter Natt" data-order-container="natt">
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="natt" data-order="asc">Minst → Størst</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="natt" data-order="desc">Størst → Minst</button>
-            </div>
-          </h5>
-          <div id="wrap-chart-natt" style="position: relative; height: 360px; overflow: auto;">
-            <canvas id="chart-natt"></canvas>
-          </div>
-        </div>
-      </div>
+      <!-- Natt Chart -->
+      {% set title = "Natt" %}
+      {% set order_container = "natt" %}
+      {% set chart_id = "natt" %}
+      {% include 'components/chart_card_component.html' with context %}
     </div>
     <div class="col-12 col-lg-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title d-flex align-items-center justify-content-between">
-            <span>Tidlig</span>
-            <div class="btn-group" role="group" aria-label="Sorter Tidlig" data-order-container="tidlig">
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="tidlig" data-order="asc">Minst → Størst</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="tidlig" data-order="desc">Størst → Minst</button>
-            </div>
-          </h5>
-          <div id="wrap-chart-tidlig" style="position: relative; height: 360px; overflow: auto;">
-            <canvas id="chart-tidlig"></canvas>
-          </div>
-        </div>
-      </div>
+      <!-- Tidlig Chart -->
+      {% set title = "Tidlig" %}
+      {% set order_container = "tidlig" %}
+      {% set chart_id = "tidlig" %}
+      {% include 'components/chart_card_component.html' with context %}
     </div>
+
+  
     <div class="col-12 col-lg-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title d-flex align-items-center justify-content-between">
-            <span>Før 6:00</span>
-            <div class="btn-group" role="group" aria-label="Sorter Før 6:00" data-order-container="before_6">
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="before_6" data-order="asc">Minst → Størst</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="before_6" data-order="desc">Størst → Minst</button>
-            </div>
-          </h5>
-          <div id="wrap-chart-before_6" style="position: relative; height: 360px; overflow: auto;">
-            <canvas id="chart-before_6"></canvas>
-          </div>
-        </div>
-      </div>
+      <!-- Tidlig Chart -->
+      {% set title = "Før 6:00" %}
+      {% set order_container = "before_6" %}
+      {% set chart_id = "before_6" %}
+      {% include 'components/chart_card_component.html' with context %}
     </div>
+
     <div class="col-12 col-lg-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title d-flex align-items-center justify-content-between">
-            <span>Helgetimer</span>
-            <div class="btn-group" role="group" aria-label="Sorter Helgetimer" data-order-container="helgetimer">
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn" data-target="helgetimer" data-order="asc">Minst → Størst</button>
-              <button type="button" class="btn btn-outline-secondary btn-sm order-btn active" data-target="helgetimer" data-order="desc">Størst → Minst</button>
-            </div>
-          </h5>
-          <div id="wrap-chart-helgetimer" style="position: relative; height: 360px; overflow: auto;">
-            <canvas id="chart-helgetimer"></canvas>
-          </div>
-        </div>
-      </div>
+      <!-- Dagsverk Chart -->
+      {% set title = "Dagsverk" %}
+      {% set order_container = "shift_cnt" %}
+      {% set chart_id = "shift_cnt" %}
+      {% include 'components/chart_card_component.html' with context %}
     </div>
+
   </div>
 </div>
 
