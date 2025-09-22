@@ -27,13 +27,18 @@ def toggle_favorite():
 
     with favorite_lock:
         try:
+            # Get user's selected turnus set
+            from app.routes.shifts import get_user_turnus_set
+            user_turnus_set = get_user_turnus_set()
+            turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
+            
             if favorite:
-                # Calculate the next order index for the new favorite
-                order_index = db_utils.get_max_ordered_index(current_user.get_id()) + 1
-                db_utils.add_favorite(current_user.get_id(), shift_title, order_index)
+                # Calculate the next order index for the user's selected turnus set
+                order_index = db_utils.get_max_ordered_index(current_user.get_id(), turnus_set_id) + 1
+                db_utils.add_favorite(current_user.get_id(), shift_title, order_index, turnus_set_id)
                 return jsonify({'status': 'success', 'message': 'Added to favorites'})
             else:
-                db_utils.remove_favorite(current_user.get_id(), shift_title)
+                db_utils.remove_favorite(current_user.get_id(), shift_title, turnus_set_id)
                 return jsonify({'status': 'success', 'message': 'Removed from favorites'})
         except Exception as e:
             return jsonify({'status': 'error', 'message': str(e)})

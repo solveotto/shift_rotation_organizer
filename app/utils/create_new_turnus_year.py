@@ -1,51 +1,76 @@
 #!/usr/bin/env python3
 """
-Annual turnus creation script
-Usage: python create_new_turnus_year.py R26 "OSL Train Shifts 2026"
+Annual turnus creation script with flexible file organization
+Usage: python create_new_turnus_year.py R26 "OSL Train Shifts 2026" path/to/turnuser_R26.pdf [--turnusfiler]
 """
 
 import sys
 import os
-sys.path.insert(0, os.path.dirname(__file__))
+import time
+import argparse
 
+# Add the project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
+
+# Now we can import from app
 from app.utils.shiftscraper import ShiftScraper
-from app.utils.db_utils import create_turnus_set, add_shifts_to_turnus_set, get_turnus_set_by_year
+from app.utils.db_utils import create_turnus_set, add_shifts_to_turnus_set, get_turnus_set_by_year, update_turnus_set_paths
 from app.utils.shift_stats import Turnus
 from config import conf
 
-def create_new_turnus(year_id, name, pdf_path=None):
+def create_new_turnus(year_id, name, pdf_path=None, use_turnusfiler=False):
     """Complete workflow for creating a new turnus year"""
     
     print(f"🚀 Creating new turnus set: {year_id}")
     
-    # 1. Create turnus set in database
-    success, message = create_turnus_set(name, year_id, is_active=False)
-    if not success:
-        print(f"❌ Database error: {message}")
-        return False
-    print(f"✅ Created turnus set in database")
-    
-    # 2. Setup directories
-    year_dir = os.path.join(conf.static_dir, year_id.lower())
-    os.makedirs(year_dir, exist_ok=True)
-    print(f"✅ Created directory: {year_dir}")
-    
     if pdf_path and os.path.exists(pdf_path):
-        # 3. Run scraper
+        # Determine where to save files
+        if use_turnusfiler:
+            # Save in organized turnusfiler directory
+            output_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+            os.makedirs(output_dir, exist_ok=True)
+            print(f"📂 Organized mode: Files will be saved in {output_dir}")
+        else:
+            # Save in same directory as PDF
+            output_dir = os.path.dirname(os.path.abspath(pdf_path))
+            print(f"📂 Same-directory mode: Files will be saved in {output_dir}")
+        
+        # Generate file paths
+        turnus_json_path = os.path.join(output_dir, f'turnuser_{year_id}.json')
+        df_json_path = os.path.join(output_dir, f'turnus_df_{year_id}.json')
+        
+        # 1. Create turnus set in database with file paths
+        success, message = create_turnus_set(
+            name, 
+            year_id, 
+            is_active=False,
+            turnus_file_path=turnus_json_path,
+            df_file_path=df_json_path
+        )
+        if not success:
+            print(f"❌ Database error: {message}")
+            return False
+        print(f"✅ Created turnus set in database")
+        
+        # 2. Run scraper
         print(f"📄 Processing PDF: {pdf_path}")
         scraper = ShiftScraper()
         scraper.scrape_pdf(pdf_path)
         
-        # 4. Generate JSON files
-        turnus_json_path = os.path.join(year_dir, f'turnuser_{year_id}.json')
+        # 3. Generate JSON files
         scraper.create_json(turnus_json_path)
         print(f"✅ Created turnus JSON: {turnus_json_path}")
         
-        # 5. Generate statistics
+        # 4. Generate statistics
+        print(f"📊 Generating statistics...")
         stats = Turnus(turnus_json_path)
-        df_json_path = os.path.join(year_dir, f'turnus_df_{year_id}.json')
         stats.stats_df.to_json(df_json_path)
         print(f"✅ Created statistics JSON: {df_json_path}")
+        
+        # 5. Clean up references
+        del stats
+        time.sleep(1)
         
         # 6. Add shifts to database
         turnus_set = get_turnus_set_by_year(year_id)
@@ -57,26 +82,36 @@ def create_new_turnus(year_id, name, pdf_path=None):
             return False
         
         print(f"🎉 Complete turnus set {year_id} created successfully!")
-        print(f"📂 Files created in: {year_dir}")
+        print(f"📂 Files saved in: {output_dir}")
         print(f"💾 Database updated with turnus set ID: {turnus_set['id']}")
+        
+        # List the files created
+        print(f"\n📋 Files created:")
+        print(f"   📄 {turnus_json_path}")
+        print(f"   📊 {df_json_path}")
+        
         return True
     else:
-        print(f"⚠️  Turnus set created in database only. Add JSON files manually to {year_dir}")
-        if pdf_path:
-            print(f"❌ PDF file not found: {pdf_path}")
-        print(f"💡 You can manually place files in {year_dir} and run:")
-        print(f"   - turnuser_{year_id}.json")
-        print(f"   - turnus_df_{year_id}.json")
+        # Create database entry only
+        success, message = create_turnus_set(name, year_id, is_active=False)
+        if not success:
+            print(f"❌ Database error: {message}")
+            return False
+        print(f"✅ Created turnus set in database (no files)")
         return True
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python create_new_turnus_year.py <YEAR_ID> <NAME> [PDF_PATH]")
-        print("Example: python create_new_turnus_year.py R26 'OSL Train Shifts 2026' turnuser_R26.pdf")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description='Create new turnus set')
+    parser.add_argument('year_id', help='Year identifier (e.g., R26)')
+    parser.add_argument('name', help='Turnus set name (e.g., "OSL Train Shifts 2026")')
+    parser.add_argument('pdf_path', nargs='?', help='Path to PDF file')
+    parser.add_argument('--turnusfiler', action='store_true', help='Save files in organized turnusfiler directory')
     
-    year_id = sys.argv[1].upper()  # Ensure uppercase
-    name = sys.argv[2]
-    pdf_path = sys.argv[3] if len(sys.argv) > 3 else None
+    args = parser.parse_args()
     
-    create_new_turnus(year_id, name, pdf_path)
+    create_new_turnus(
+        args.year_id.upper(), 
+        args.name, 
+        args.pdf_path, 
+        args.turnusfiler
+    )

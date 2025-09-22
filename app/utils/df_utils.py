@@ -4,8 +4,6 @@ import json
 import app.utils.db_utils as _db_utils
 from config import conf
 
-
-
 class DataframeManager():
     def __init__(self, turnus_set_id=None):
         """Initialize with either a specific turnus set or the active one"""
@@ -13,7 +11,7 @@ class DataframeManager():
         self.df = pd.DataFrame()  # Empty dataframe as default
         self.turnus_data = []     # Empty list as default
         self.load_turnus_set(turnus_set_id)
-
+    
     def load_turnus_set(self, turnus_set_id=None):
         """Load a specific turnus set or the active one"""
         
@@ -33,11 +31,22 @@ class DataframeManager():
             return False
         
         self.current_turnus_set = turnus_set
-        year_id = turnus_set['year_identifier'].lower()  # Convert R25 to r25
         
         try:
-            # Try to load the dataframe file
-            df_path = os.path.join(conf.static_dir, f'{year_id}/turnus_df_{turnus_set["year_identifier"]}.json')
+            # Try to load files from database paths first
+            if turnus_set.get('turnus_file_path') and turnus_set.get('df_file_path'):
+                # Convert database paths to OS-specific paths
+                turnus_path = os.path.normpath(turnus_set['turnus_file_path'])
+                df_path = os.path.normpath(turnus_set['df_file_path'])
+                print(f"Loading from database paths: {turnus_path}, {df_path}")
+            else:
+                # Fall back to legacy paths
+                year_id = turnus_set['year_identifier'].lower()
+                turnus_path = os.path.join(conf.static_dir, f'{year_id}/turnuser_{turnus_set["year_identifier"]}.json')
+                df_path = os.path.join(conf.static_dir, f'{year_id}/turnus_df_{turnus_set["year_identifier"]}.json')
+                print(f"Loading from legacy paths: {turnus_path}, {df_path}")
+            
+            # Load dataframe
             if os.path.exists(df_path):
                 self.df = pd.read_json(df_path)
                 print(f"Loaded dataframe from {df_path}")
@@ -45,8 +54,7 @@ class DataframeManager():
                 print(f"DataFrame file not found: {df_path}")
                 self.df = pd.DataFrame()
             
-            # Try to load the turnus data file
-            turnus_path = os.path.join(conf.static_dir, f'{year_id}/turnuser_{turnus_set["year_identifier"]}.json')
+            # Load turnus data
             if os.path.exists(turnus_path):
                 with open(turnus_path, 'r') as f:
                     self.turnus_data = json.load(f)
@@ -57,7 +65,7 @@ class DataframeManager():
             
             return True
         except Exception as e:
-            print(f"Error loading turnus set {year_id}: {e}")
+            print(f"Error loading turnus set {turnus_set['year_identifier']}: {e}")
             self.df = pd.DataFrame()
             self.turnus_data = []
             return False

@@ -1,1 +1,267 @@
-[]
+[
+  {
+    "id": 1,
+    "title": "OSL_01",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 2,
+    "title": "OSL_02",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 3,
+    "title": "OSL_03",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 4,
+    "title": "OSL_04",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 5,
+    "title": "OSL_05",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 6,
+    "title": "OSL_06",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 7,
+    "title": "OSL_07",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 8,
+    "title": "OSL_08",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 9,
+    "title": "OSL_09_ERTMS",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 10,
+    "title": "OSL_10_ERTMS",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 11,
+    "title": "OSL_11_ERTMS",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 12,
+    "title": "OSL_12_ERTMS",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 13,
+    "title": "OSL_13_ERTMS",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 14,
+    "title": "OSL_14_ERTMS",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 15,
+    "title": "OSL_15_ERTMS",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 16,
+    "title": "OSL_16",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 17,
+    "title": "OSL_17",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 18,
+    "title": "OSL_18",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 19,
+    "title": "OSL_19",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 20,
+    "title": "OSL_20",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 21,
+    "title": "OSL_21",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 22,
+    "title": "OSL_22",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 23,
+    "title": "OSL_23",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 24,
+    "title": "OSL_24",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 25,
+    "title": "OSL_25",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 26,
+    "title": "OSL_26",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 27,
+    "title": "OSL_27",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 28,
+    "title": "OSL_28",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 29,
+    "title": "OSL_29",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 30,
+    "title": "OSL_30",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 31,
+    "title": "OSL_31",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 32,
+    "title": "OSL_32",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 33,
+    "title": "OSL_33",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 34,
+    "title": "OSL_34",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 35,
+    "title": "OSL_35",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 36,
+    "title": "OSL_Ramme_01",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 37,
+    "title": "OSL_Ramme_02",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 38,
+    "title": "OSL_Ramme_03",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 39,
+    "title": "OSL_Ramme_04",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 40,
+    "title": "OSL_Ramme_05",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 41,
+    "title": "OSL_Ramme_06",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 42,
+    "title": "OSL_Ramme_07",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 43,
+    "title": "OSL_Ramme_08",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 44,
+    "title": "OSL_Ramme_09",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 45,
+    "title": "OSL_Ramme_10",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 46,
+    "title": "OSL_Ramme_11",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 47,
+    "title": "OSL_Ramme_12",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 48,
+    "title": "OSL_Ramme_13",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 49,
+    "title": "OSL_Ramme_14",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 50,
+    "title": "OSL_Ramme_15",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 51,
+    "title": "OSL_Utland_1",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 52,
+    "title": "OSL_Utland_2",
+    "turnus_set_id": 2
+  },
+  {
+    "id": 53,
+    "title": "OSL_Utland_3",
+    "turnus_set_id": 2
+  }
+]

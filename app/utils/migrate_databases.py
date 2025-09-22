@@ -1,11 +1,27 @@
 #!/usr/bin/env python3
 """
-Migration script to add TurnusSet support to existing database
-This script will:
-1. Create new tables (turnus_sets)
-2. Add new columns to existing tables
-3. Migrate existing data to new structure
-4. Create initial R25 turnus set from existing data
+Database Migration Script
+Migrates from single-turnus system to multi-turnus system with database storage
+
+WHEN TO USE:
+- Run this ONCE when upgrading from the old single-turnus system
+- to the new multi-turnus system with database storage
+
+USAGE:
+- From project root: python app/utils/migrate_database.py
+- Creates backup files in project root
+- Safe to run multiple times (checks for existing columns)
+
+WHAT IT DOES:
+1. Creates turnus_sets table
+2. Adds turnus_set_id columns to favorites and shifts tables  
+3. Adds file path columns to turnus_sets table
+4. Migrates existing R25 data to new structure
+5. Updates file paths for existing data
+
+BACKUP:
+- Creates backup_favorites.json and backup_shifts.json before migration
+- Safe to re-run if something goes wrong
 """
 
 import os
@@ -13,11 +29,13 @@ import sys
 import json
 from datetime import datetime
 
-# Add project root to path
-sys.path.insert(0, os.path.dirname(__file__))
+# Add project root to path (go up two levels from app/utils/)
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
 
-from app.utils.db_utils import engine, SessionLocal, Base
+from app.utils.db_utils import engine, SessionLocal, Base, TurnusSet
 from sqlalchemy import text
+from config import conf
 
 def backup_existing_data():
     """Backup existing favorites and shifts data"""
@@ -103,6 +121,25 @@ def add_columns_to_existing_tables():
                 print("ℹ️  turnus_set_id already exists in shifts table")
             else:
                 raise e
+
+        # Add file path columns to turnus_sets table
+        try:
+            session.execute(text("ALTER TABLE turnus_sets ADD COLUMN turnus_file_path VARCHAR(500)"))
+            print("✅ Added turnus_file_path to turnus_sets table")
+        except Exception as e:
+            if "duplicate column" in str(e).lower() or "already exists" in str(e).lower():
+                print("ℹ️  turnus_file_path already exists in turnus_sets table")
+            else:
+                raise e
+                
+        try:
+            session.execute(text("ALTER TABLE turnus_sets ADD COLUMN df_file_path VARCHAR(500)"))
+            print("✅ Added df_file_path to turnus_sets table")
+        except Exception as e:
+            if "duplicate column" in str(e).lower() or "already exists" in str(e).lower():
+                print("ℹ️  df_file_path already exists in turnus_sets table")
+            else:
+                raise e
         
         session.commit()
         
@@ -166,6 +203,69 @@ def create_initial_turnus_set():
         print(f"❌ Error creating initial turnus set: {e}")
         session.rollback()
         return None
+    finally:
+        session.close()
+
+def update_existing_file_paths():
+    """Update file paths for existing turnus sets"""
+    session = SessionLocal()
+    try:
+        print("🔧 Updating file paths for existing turnus sets...")
+        
+        # Check if files are in turnusfiler or legacy locations
+        turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler')
+        
+        # Update R25 paths
+        if os.path.exists(os.path.join(turnusfiler_dir, 'r25')):
+            # Files are in turnusfiler
+            r25_turnus_path = os.path.join(turnusfiler_dir, 'r25/turnuser_R25.json')
+            r25_df_path = os.path.join(turnusfiler_dir, 'r25/turnus_df_R25.json')
+            print("   📂 Using turnusfiler location for R25")
+        else:
+            # Files are in legacy location
+            r25_turnus_path = os.path.join(conf.static_dir, 'r25/turnuser_R25.json')
+            r25_df_path = os.path.join(conf.static_dir, 'r25/turnus_df_R25.json')
+            print("   📂 Using legacy location for R25")
+        
+        session.execute(text("""
+            UPDATE turnus_sets 
+            SET turnus_file_path = :turnus_path, df_file_path = :df_path 
+            WHERE year_identifier = 'R25'
+        """), {
+            'turnus_path': r25_turnus_path,
+            'df_path': r25_df_path
+        })
+        
+        # Update R24 if it exists
+        result = session.execute(text("SELECT id FROM turnus_sets WHERE year_identifier = 'R24'"))
+        if result.fetchone():
+            if os.path.exists(os.path.join(turnusfiler_dir, 'r24')):
+                r24_turnus_path = os.path.join(turnusfiler_dir, 'r24/turnuser_R24.json')
+                r24_df_path = os.path.join(turnusfiler_dir, 'r24/turnus_df_R24.json')
+                print("   📂 Using turnusfiler location for R24")
+            else:
+                r24_turnus_path = os.path.join(conf.static_dir, 'r24/turnuser_R24.json')
+                r24_df_path = os.path.join(conf.static_dir, 'r24/turnus_df_R24.json')
+                print("   📂 Using legacy location for R24")
+            
+            session.execute(text("""
+                UPDATE turnus_sets 
+                SET turnus_file_path = :turnus_path, df_file_path = :df_path 
+                WHERE year_identifier = 'R24'
+            """), {
+                'turnus_path': r24_turnus_path,
+                'df_path': r24_df_path
+            })
+            print("✅ Updated R24 file paths")
+        
+        session.commit()
+        print("✅ Updated file paths for existing turnus sets")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error updating file paths: {e}")
+        session.rollback()
+        return False
     finally:
         session.close()
 

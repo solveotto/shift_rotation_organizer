@@ -30,6 +30,8 @@ class TurnusSet(Base):
     year_identifier = Column(String(10), nullable=False)  # Short identifier like "R25", "R26"
     is_active = Column(Integer, default=0)  # 1 = currently active set, 0 = inactive
     created_at = Column(DateTime, default=func.now())
+    turnus_file_path = Column(String(500), nullable=True)  # Path to turnuser_XX.json
+    df_file_path = Column(String(500), nullable=True)      # Path to turnus_df_XX.json
     __table_args__ = (UniqueConstraint('year_identifier'),)  # Prevent duplicate year IDs
 
 class Favorites(Base):
@@ -84,24 +86,23 @@ def get_db_session():
     return SessionLocal()
 
 ## TURNUS SETS ##
-def create_turnus_set(name, year_identifier, is_active=False):
-    """Create a new turnus set in the database"""
+def create_turnus_set(name, year_identifier, is_active=False, turnus_file_path=None, df_file_path=None):
+    """Create a new turnus set with optional file paths"""
     session = get_db_session()
     try:
-        # Check if this year identifier already exists
         existing = session.query(TurnusSet).filter_by(year_identifier=year_identifier).first()
         if existing:
             return False, f"Turnus set with identifier {year_identifier} already exists"
         
-        # If this should be the active set, deactivate all others first
         if is_active:
             session.query(TurnusSet).update({'is_active': 0})
         
-        # Create the new turnus set
         new_set = TurnusSet(
             name=name,
             year_identifier=year_identifier,
-            is_active=1 if is_active else 0
+            is_active=1 if is_active else 0,
+            turnus_file_path=turnus_file_path,
+            df_file_path=df_file_path
         )
         session.add(new_set)
         session.commit()
@@ -124,13 +125,14 @@ def get_all_turnus_sets():
                 'name': ts.name,
                 'year_identifier': ts.year_identifier,
                 'is_active': ts.is_active,
-                'created_at': ts.created_at
+                'created_at': ts.created_at,
+                'turnus_file_path': ts.turnus_file_path,  # Add this
+                'df_file_path': ts.df_file_path           # Add this
             }
             for ts in sets
         ]
     finally:
         session.close()
-
 
 def get_turnus_set_by_year(year_identifier):
     """Get turnus set by year identifier (e.g., 'R25', 'R26')"""
@@ -143,7 +145,9 @@ def get_turnus_set_by_year(year_identifier):
                 'name': turnus_set.name,
                 'year_identifier': turnus_set.year_identifier,
                 'is_active': turnus_set.is_active,
-                'created_at': turnus_set.created_at
+                'created_at': turnus_set.created_at,
+                'turnus_file_path': turnus_set.turnus_file_path,  # Add this
+                'df_file_path': turnus_set.df_file_path           # Add this
             }
         return None
     finally:
@@ -182,7 +186,9 @@ def get_active_turnus_set():
                 'name': active_set.name,
                 'year_identifier': active_set.year_identifier,
                 'is_active': active_set.is_active,
-                'created_at': active_set.created_at
+                'created_at': active_set.created_at,
+                'turnus_file_path': active_set.turnus_file_path,
+                'df_file_path': active_set.df_file_path
             }
         return None
     finally:
@@ -247,6 +253,25 @@ def delete_turnus_set(turnus_set_id):
     except Exception as e:
         session.rollback()
         return False, f"Error deleting turnus set: {e}"
+    finally:
+        session.close()
+
+
+def update_turnus_set_paths(turnus_set_id, turnus_file_path, df_file_path):
+    """Update file paths for an existing turnus set"""
+    session = get_db_session()
+    try:
+        turnus_set = session.query(TurnusSet).filter_by(id=turnus_set_id).first()
+        if not turnus_set:
+            return False, "Turnus set not found"
+        
+        turnus_set.turnus_file_path = turnus_file_path
+        turnus_set.df_file_path = df_file_path
+        session.commit()
+        return True, "File paths updated successfully"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error updating file paths: {e}"
     finally:
         session.close()
 
@@ -332,23 +357,21 @@ def get_user_password(username):
 ### FAVORITES ###
 
 def get_favorite_lst(user_id, turnus_set_id=None):
-    """Get user's favorite shifts for a specific turnus set"""
     session = get_db_session()
     try:
         query = session.query(Favorites.shift_title).filter_by(user_id=user_id)
         
         if turnus_set_id:
-            # Use the specified turnus set
             query = query.filter_by(turnus_set_id=turnus_set_id)
         else:
-            # If no turnus_set_id specified, use the active one
             active_set = get_active_turnus_set()
             if active_set:
                 query = query.filter_by(turnus_set_id=active_set['id'])
             else:
-                return []  # No active set, return empty list
+                return []
         
-        results = session.query(Favorites.shift_title).filter_by(user_id=user_id).order_by(Favorites.order_index).all()
+        results = query.order_by(Favorites.order_index).all()
+ 
         shift_titles = [result.shift_title for result in results]
         return shift_titles
     finally:
@@ -380,10 +403,21 @@ def update_favorite_order(user_id):
         session.close()
 
 
-def get_max_ordered_index(user_id):
+def get_max_ordered_index(user_id, turnus_set_id=None):
+    """Get the maximum order index for a user's favorites in a specific turnus set"""
     session = get_db_session()
     try:
-        result = session.query(func.max(Favorites.order_index)).filter_by(user_id=user_id).scalar()
+        query = session.query(func.max(Favorites.order_index)).filter_by(user_id=user_id)
+        
+        if turnus_set_id:
+            query = query.filter_by(turnus_set_id=turnus_set_id)
+        else:
+            # Use active turnus set if none specified
+            active_set = get_active_turnus_set()
+            if active_set:
+                query = query.filter_by(turnus_set_id=active_set['id'])
+        
+        result = query.scalar()
         return result if result is not None else 0
     finally:
         session.close()
