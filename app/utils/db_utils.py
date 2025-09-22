@@ -23,18 +23,30 @@ class DBUser(Base):
     password = Column(String(255), nullable=False)
     is_auth = Column(Integer, default=0)
 
+class TurnusSet(Base):
+    __tablename__ = 'turnus_sets'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False)  # Human-readable name like "OSL Train Shifts 2025"
+    year_identifier = Column(String(10), nullable=False)  # Short identifier like "R25", "R26"
+    is_active = Column(Integer, default=0)  # 1 = currently active set, 0 = inactive
+    created_at = Column(DateTime, default=func.now())
+    __table_args__ = (UniqueConstraint('year_identifier'),)  # Prevent duplicate year IDs
+
 class Favorites(Base):
     __tablename__ = 'favorites'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, nullable=False)
-    shift_title = Column(String(255), nullable=False)
-    order_index = Column(Integer, default=0)
-    __table_args__ = (UniqueConstraint('user_id', 'shift_title'),)
+    id = Column(Integer, primary_key=True, autoincrement=True) 
+    user_id = Column(Integer, nullable=False) 
+    shift_title = Column(String(255), nullable=False)  # Title of the shift
+    turnus_set_id = Column(Integer, nullable=False)  # Links to specific turnus set
+    order_index = Column(Integer, default=0)  # Order index for the shift in the turnus set
+    __table_args__ = (UniqueConstraint('user_id', 'shift_title', 'turnus_set_id'),)  # Prevent duplicate favorites for the same user and shift
 
 class Shifts(Base):
     __tablename__ = 'shifts'
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(255), unique=True, nullable=False)
+    turnus_set_id = Column(Integer, nullable=False) # Links to specific turnus set
+    __table_args__ = (UniqueConstraint('title', 'turnus_set_id'),)  # Same shift name can exist in different sets
 
 
 
@@ -71,6 +83,176 @@ def create_tables():
 def get_db_session():
     return SessionLocal()
 
+## TURNUS SETS ##
+def create_turnus_set(name, year_identifier, is_active=False):
+    """Create a new turnus set in the database"""
+    session = get_db_session()
+    try:
+        # Check if this year identifier already exists
+        existing = session.query(TurnusSet).filter_by(year_identifier=year_identifier).first()
+        if existing:
+            return False, f"Turnus set with identifier {year_identifier} already exists"
+        
+        # If this should be the active set, deactivate all others first
+        if is_active:
+            session.query(TurnusSet).update({'is_active': 0})
+        
+        # Create the new turnus set
+        new_set = TurnusSet(
+            name=name,
+            year_identifier=year_identifier,
+            is_active=1 if is_active else 0
+        )
+        session.add(new_set)
+        session.commit()
+        return True, f"Turnus set {year_identifier} created successfully"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error creating turnus set: {e}"
+    finally:
+        session.close()
+
+
+def get_all_turnus_sets():
+    """Get a list of all turnus sets"""
+    session = get_db_session()
+    try:
+        sets = session.query(TurnusSet).order_by(TurnusSet.year_identifier.desc()).all()
+        return [
+            {
+                'id': ts.id,
+                'name': ts.name,
+                'year_identifier': ts.year_identifier,
+                'is_active': ts.is_active,
+                'created_at': ts.created_at
+            }
+            for ts in sets
+        ]
+    finally:
+        session.close()
+
+
+def get_turnus_set_by_year(year_identifier):
+    """Get turnus set by year identifier (e.g., 'R25', 'R26')"""
+    session = get_db_session()
+    try:
+        turnus_set = session.query(TurnusSet).filter_by(year_identifier=year_identifier).first()
+        if turnus_set:
+            return {
+                'id': turnus_set.id,
+                'name': turnus_set.name,
+                'year_identifier': turnus_set.year_identifier,
+                'is_active': turnus_set.is_active,
+                'created_at': turnus_set.created_at
+            }
+        return None
+    finally:
+        session.close()
+
+
+def set_active_turnus_set(turnus_set_id):
+    """Switch which turnus set is currently active"""
+    session = get_db_session()
+    try:
+        # First, make all sets inactive
+        session.query(TurnusSet).update({'is_active': 0})
+        
+        # Then activate the specified set
+        turnus_set = session.query(TurnusSet).filter_by(id=turnus_set_id).first()
+        if not turnus_set:
+            return False, "Turnus set not found"
+        
+        turnus_set.is_active = 1
+        session.commit()
+        return True, f"Turnus set {turnus_set.year_identifier} is now active"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error setting active turnus set: {e}"
+    finally:
+        session.close()       
+
+def get_active_turnus_set():
+    """Get the currently active turnus set"""
+    session = get_db_session()
+    try:
+        active_set = session.query(TurnusSet).filter_by(is_active=1).first()
+        if active_set:
+            return {
+                'id': active_set.id,
+                'name': active_set.name,
+                'year_identifier': active_set.year_identifier,
+                'is_active': active_set.is_active,
+                'created_at': active_set.created_at
+            }
+        return None
+    finally:
+        session.close()
+
+def add_shifts_to_turnus_set(file_path, turnus_set_id):
+    """Load shifts from a JSON file into a specific turnus set"""
+    session = get_db_session()
+    try:
+        with open(file_path, 'r') as f:
+            turnus_data = json.load(f)
+        
+        # Extract shift names from the JSON structure
+        for x in turnus_data:
+            for name in x.keys():
+                # Check if this shift already exists in this turnus set
+                existing = session.query(Shifts).filter_by(
+                    title=name, 
+                    turnus_set_id=turnus_set_id
+                ).first()
+                if not existing:
+                    new_shift = Shifts(title=name, turnus_set_id=turnus_set_id)
+                    session.add(new_shift)
+        
+        session.commit()
+        print(f"Shifts added to turnus set {turnus_set_id} successfully")
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Error adding shifts to turnus set: {e}")
+        return False
+    finally:
+        session.close()
+
+def get_shifts_by_turnus_set(turnus_set_id):
+    """Get all shift names for a specific turnus set"""
+    session = get_db_session()
+    try:
+        shifts = session.query(Shifts).filter_by(turnus_set_id=turnus_set_id).all()
+        return [shift.title for shift in shifts]
+    finally:
+        session.close()
+
+def delete_turnus_set(turnus_set_id):
+    """Delete a turnus set and all its associated data"""
+    session = get_db_session()
+    try:
+        turnus_set = session.query(TurnusSet).filter_by(id=turnus_set_id).first()
+        if not turnus_set:
+            return False, "Turnus set not found"
+        
+        # Delete all shifts belonging to this turnus set
+        session.query(Shifts).filter_by(turnus_set_id=turnus_set_id).delete()
+        
+        # Delete all favorites belonging to this turnus set
+        session.query(Favorites).filter_by(turnus_set_id=turnus_set_id).delete()
+        
+        # Delete the turnus set itself
+        session.delete(turnus_set)
+        session.commit()
+        return True, f"Turnus set {turnus_set.year_identifier} deleted successfully"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error deleting turnus set: {e}"
+    finally:
+        session.close()
+
+## TURNUSSET END ##
+
+
 def add_shifts_to_database(file_path):
     session = get_db_session()
     try:
@@ -97,7 +279,6 @@ def add_shifts_to_database(file_path):
 
 
 #### USER LOGIN AND REG ####
-
 def hash_password(password):
         salt = bcrypt.gensalt()
         hashed_pw = bcrypt.hashpw(password.encode('utf-8'), salt)
@@ -150,9 +331,23 @@ def get_user_password(username):
 
 ### FAVORITES ###
 
-def get_favorite_lst(user_id):
+def get_favorite_lst(user_id, turnus_set_id=None):
+    """Get user's favorite shifts for a specific turnus set"""
     session = get_db_session()
     try:
+        query = session.query(Favorites.shift_title).filter_by(user_id=user_id)
+        
+        if turnus_set_id:
+            # Use the specified turnus set
+            query = query.filter_by(turnus_set_id=turnus_set_id)
+        else:
+            # If no turnus_set_id specified, use the active one
+            active_set = get_active_turnus_set()
+            if active_set:
+                query = query.filter_by(turnus_set_id=active_set['id'])
+            else:
+                return []  # No active set, return empty list
+        
         results = session.query(Favorites.shift_title).filter_by(user_id=user_id).order_by(Favorites.order_index).all()
         shift_titles = [result.shift_title for result in results]
         return shift_titles
@@ -193,14 +388,26 @@ def get_max_ordered_index(user_id):
     finally:
         session.close()
 
-def add_favorite(user_id, title, order_index):
-    print('ADD FAVORITE EXECUTED')
+def add_favorite(user_id, title, order_index, turnus_set_id=None):
+    """Add a shift to user's favorites for a specific turnus set"""
     session = get_db_session()
     try:
-        new_favorite = Favorites(user_id=user_id, shift_title=title, order_index=order_index)
+        if not turnus_set_id:
+            # Use active turnus set if none specified
+            active_set = get_active_turnus_set()
+            if not active_set:
+                print("No active turnus set found")
+                return False
+            turnus_set_id = active_set['id']
+        
+        new_favorite = Favorites(
+            user_id=user_id, 
+            shift_title=title, 
+            order_index=order_index,
+            turnus_set_id=turnus_set_id
+        )
         session.add(new_favorite)
         session.commit()
-        print("Favorite added successfully")
         return True
     except Exception as e:
         session.rollback()
@@ -209,14 +416,24 @@ def add_favorite(user_id, title, order_index):
     finally:
         session.close()
 
-def remove_favorite(user_id, title):
+def remove_favorite(user_id, title, turnus_set_id=None):
+    """Remove a shift from user's favorites for a specific turnus set"""
     session = get_db_session()
     try:
-        favorite = session.query(Favorites).filter_by(user_id=user_id, shift_title=title).first()
+        if not turnus_set_id:
+            # Use active turnus set if none specified
+            active_set = get_active_turnus_set()
+            if not active_set:
+                return False
+            turnus_set_id = active_set['id']
+        favorite = session.query(Favorites).filter_by(
+            user_id=user_id, 
+            shift_title=title,
+            turnus_set_id=turnus_set_id
+        ).first()
         if favorite:
             session.delete(favorite)
             session.commit()
-            print(f"Favorite removed: {title}")
             return True
         return False
     except Exception as e:
@@ -226,8 +443,9 @@ def remove_favorite(user_id, title):
     finally:
         session.close()
 
-### ADMIN FUNCTIONS ###
 
+
+### ADMIN FUNCTIONS ###
 def get_all_users():
     """Get all users from the database"""
     session = get_db_session()

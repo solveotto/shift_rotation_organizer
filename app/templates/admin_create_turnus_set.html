@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Create New Turnus Set</h4>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control") }}
+                            {% if form.name.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.name.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">A descriptive name for this turnus set (e.g., "OSL Train Shifts 2025")</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.year_identifier.label(class="form-label") }}
+                            {{ form.year_identifier(class="form-control") }}
+                            {% if form.year_identifier.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.year_identifier.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Short identifier (e.g., "R25", "R26") - must be unique</small>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            {{ form.is_active(class="form-check-input") }}
+                            {{ form.is_active.label(class="form-check-label") }}
+                            <small class="form-text text-muted d-block">If checked, this will become the active turnus set</small>
+                        </div>
+
+                        <hr>
+                        <h6>Optional: Upload Data Files</h6>
+                        <p class="text-muted small">You can upload JSON files now or add them later through the file system.</p>
+
+                        <div class="mb-3">
+                            {{ form.turnus_file.label(class="form-label") }}
+                            {{ form.turnus_file(class="form-control") }}
+                            {% if form.turnus_file.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.turnus_file.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">The main turnus data file (turnuser_R##.json)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.df_file.label(class="form-label") }}
+                            {{ form.df_file(class="form-control") }}
+                            {% if form.df_file.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.df_file.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">The dataframe statistics file (turnus_df_R##.json)</small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin.manage_turnus_sets') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Turnus Sets
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

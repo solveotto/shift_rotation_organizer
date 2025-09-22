@@ -230,10 +230,9 @@ class ShiftScraper():
 
 
     ### FILE CREATION ###
-    def create_excel(self):
+    def create_excel(self, output_path='turnuser_R25.xlsx'):    
             # Lager et DataFrame av turnusene som er lagret i en Dict.
             df_dict = {}
-            output_path = 'turnuser_R25.xlsx'
             
             for turnus in self.turnuser:
                 for turnus_navn, turnus_verdi in turnus.items():
@@ -345,12 +344,12 @@ class ShiftScraper():
                                                                 'criteria': '=(' + cell + '="XX ")' 'OR (' + cell + '="OO ")' 'OR (' + cell + '="TT ")',
                                                                 'format': turnusfri_format})
 
-    def create_json(self):
-        with open('turnuser_R25.json', 'w') as f:
+    def create_json(self, output_path='turnuser_R25.json'):
+        """Create JSON file with optional custom path"""
+        with open(output_path, 'w') as f:
             json.dump(self.turnuser, f, indent=4)
+        print(f"JSON file created: {output_path}")
 
-    def create_database(self):
-        pass
 
 if __name__ == '__main__':
     shift_scraper = ShiftScraper()

@@ -1,10 +1,75 @@
 import os
 import pandas as pd
+import json
 import app.utils.db_utils as _db_utils
 from config import conf
 
 
 
 class DataframeManager():
-    def __init__(self) -> None:
-        self.df = pd.read_json(os.path.join(conf.static_dir, 'r25/turnus_df_R25.json'))
+    def __init__(self, turnus_set_id=None):
+        """Initialize with either a specific turnus set or the active one"""
+        self.current_turnus_set = None
+        self.df = pd.DataFrame()  # Empty dataframe as default
+        self.turnus_data = []     # Empty list as default
+        self.load_turnus_set(turnus_set_id)
+
+    def load_turnus_set(self, turnus_set_id=None):
+        """Load a specific turnus set or the active one"""
+        
+        if turnus_set_id:
+            # Load specific turnus set by ID
+            all_sets = _db_utils.get_all_turnus_sets()
+            turnus_set = next((ts for ts in all_sets if ts['id'] == turnus_set_id), None)
+        else:
+            # Load the currently active turnus set
+            turnus_set = _db_utils.get_active_turnus_set()
+        
+        if not turnus_set:
+            print("No turnus set found! Using empty data.")
+            self.current_turnus_set = None
+            self.df = pd.DataFrame()
+            self.turnus_data = []
+            return False
+        
+        self.current_turnus_set = turnus_set
+        year_id = turnus_set['year_identifier'].lower()  # Convert R25 to r25
+        
+        try:
+            # Try to load the dataframe file
+            df_path = os.path.join(conf.static_dir, f'{year_id}/turnus_df_{turnus_set["year_identifier"]}.json')
+            if os.path.exists(df_path):
+                self.df = pd.read_json(df_path)
+                print(f"Loaded dataframe from {df_path}")
+            else:
+                print(f"DataFrame file not found: {df_path}")
+                self.df = pd.DataFrame()
+            
+            # Try to load the turnus data file
+            turnus_path = os.path.join(conf.static_dir, f'{year_id}/turnuser_{turnus_set["year_identifier"]}.json')
+            if os.path.exists(turnus_path):
+                with open(turnus_path, 'r') as f:
+                    self.turnus_data = json.load(f)
+                print(f"Loaded turnus data from {turnus_path}")
+            else:
+                print(f"Turnus file not found: {turnus_path}")
+                self.turnus_data = []
+            
+            return True
+        except Exception as e:
+            print(f"Error loading turnus set {year_id}: {e}")
+            self.df = pd.DataFrame()
+            self.turnus_data = []
+            return False
+    
+    def get_current_turnus_info(self):
+        """Get information about the currently loaded turnus set"""
+        return self.current_turnus_set
+    
+    def reload_active_set(self):
+        """Reload the currently active turnus set (useful after switching sets)"""
+        return self.load_turnus_set()
+    
+    def has_data(self):
+        """Check if we have valid data loaded"""
+        return not self.df.empty and len(self.turnus_data) > 0

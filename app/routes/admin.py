@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.forms import CreateUserForm, EditUserForm
+from app.forms import CreateUserForm, EditUserForm, CreateTurnusSetForm, SelectTurnusSetForm
 from app.utils import db_utils
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
@@ -120,3 +120,93 @@ def toggle_auth(user_id):
         flash(message, 'danger')
     
     return redirect(url_for('admin.admin_dashboard')) 
+
+
+
+
+
+
+    
+@admin.route('/turnus-sets')
+@login_required
+def manage_turnus_sets():
+    """Manage turnus sets"""
+    if not current_user.is_admin:
+        flash('Access denied. Admin rights required.', 'danger')
+        return redirect(url_for('shifts.turnusliste'))
+    
+    turnus_sets = db_utils.get_all_turnus_sets()
+    active_set = db_utils.get_active_turnus_set()
+    
+    return render_template('admin_turnus_sets.html',
+                         page_name='Manage Turnus Sets',
+                         turnus_sets=turnus_sets,
+                         active_set=active_set)
+
+@admin.route('/create-turnus-set', methods=['GET', 'POST'])
+@login_required
+def create_turnus_set():
+    """Create a new turnus set"""
+    if not current_user.is_admin:
+        flash('Access denied. Admin rights required.', 'danger')
+        return redirect(url_for('shifts.turnusliste'))
+    
+    form = CreateTurnusSetForm()
+    
+    if form.validate_on_submit():
+        success, message = db_utils.create_turnus_set(
+            name=form.name.data,
+            year_identifier=form.year_identifier.data.upper(),
+            is_active=form.is_active.data
+        )
+        
+        if success:
+            flash(message, 'success')
+            return redirect(url_for('admin.manage_turnus_sets'))
+        else:
+            flash(message, 'danger')
+    
+    return render_template('admin_create_turnus_set.html',
+                         page_name='Create Turnus Set',
+                         form=form)
+
+@admin.route('/switch-turnus-set', methods=['POST'])
+@login_required
+def switch_turnus_set():
+    """Switch to a different turnus set"""
+    if not current_user.is_admin:
+        flash('Access denied. Admin rights required.', 'danger')
+        return redirect(url_for('shifts.turnusliste'))
+    
+    turnus_set_id = request.form.get('turnus_set_id', type=int)
+    success, message = db_utils.set_active_turnus_set(turnus_set_id)
+    
+    if success:
+        # Reload the data manager with new active set
+        from app.routes.main import df_manager
+        df_manager.reload_active_set()
+        flash(message, 'success')
+    else:
+        flash(message, 'danger')
+    
+    return redirect(url_for('admin.manage_turnus_sets'))
+
+@admin.route('/delete-turnus-set/<int:turnus_set_id>', methods=['POST'])
+@login_required
+def delete_turnus_set(turnus_set_id):
+    """Delete a turnus set"""
+    if not current_user.is_admin:
+        flash('Access denied. Admin rights required.', 'danger')
+        return redirect(url_for('shifts.turnusliste'))
+    
+    success, message = db_utils.delete_turnus_set(turnus_set_id)
+    
+    if success:
+        # If we deleted the active set, reload the data manager
+        from app.routes.main import df_manager
+        df_manager.reload_active_set()
+        flash(message, 'success')
+    else:
+        flash(message, 'danger')
+    
+    return redirect(url_for('admin.manage_turnus_sets'))
