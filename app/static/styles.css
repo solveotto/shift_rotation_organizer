@@ -140,6 +140,21 @@ body, html {
   transition: all 0.3s ease;
 }
 
+/* Mobile user menu button (icon only) */
+@media (max-width: 991.98px) {
+  .user-menu-btn {
+    padding: 0.5rem !important;
+    border-radius: 0.5rem !important;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
+  
+  .user-menu-btn .dropdown-toggle::after {
+    display: none;
+  }
+}
+
 /* Dropdown container positioning */
 .modern-navbar .dropdown {
   position: relative;
@@ -209,6 +224,42 @@ body, html {
   font-size: 0.9rem;
 }
 
+/* Mobile Icon Navigation */
+.mobile-icon-nav {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+  margin-right: auto;
+}
+
+.mobile-icon-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  padding: 0.5rem !important;
+  margin: 0 0.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.mobile-icon-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white !important;
+  transform: scale(1.1);
+}
+
+.mobile-icon-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white !important;
+}
+
+.mobile-icon-link i {
+  font-size: 1.2rem;
+}
+
 /* Mobile Styles */
 @media (max-width: 991.98px) {
   .modern-navbar {
@@ -219,26 +270,6 @@ body, html {
     font-size: 1.1rem;
   }
   
-  .navbar-toggler {
-    border: none;
-    padding: 0.25rem 0.5rem;
-  }
-  
-  .navbar-toggler:focus {
-    box-shadow: none;
-  }
-  
-  .navbar-toggler-icon {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-  }
-  
-  .modern-navbar .navbar-collapse {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 0.75rem;
-    margin-top: 0.5rem;
-    padding: 1rem;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  }
   
   .modern-navbar .nav-link {
     color: #495057 !important;
@@ -260,13 +291,49 @@ body, html {
   }
   
   .navbar-actions {
-    flex-direction: column;
+    flex-direction: row;
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 0;
   }
   
   .action-buttons {
     display: flex !important;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+  
+  /* Mobile icon navigation adjustments */
+  .mobile-icon-nav {
+    margin-left: 0.5rem;
+    margin-right: auto;
+  }
+  
+  .mobile-icon-link {
+    width: 36px;
+    height: 36px;
+    margin: 0 0.15rem;
+  }
+  
+  .mobile-icon-link i {
+    font-size: 1.1rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 576px) {
+  .mobile-icon-link {
+    width: 32px;
+    height: 32px;
+    margin: 0 0.1rem;
+  }
+  
+  .mobile-icon-link i {
+    font-size: 1rem;
+  }
+  
+  .mobile-icon-nav {
+    margin-left: 0.25rem;
+    margin-right: auto;
   }
 }
 
