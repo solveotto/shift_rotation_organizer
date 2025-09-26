@@ -38,18 +38,16 @@ class DataframeManager():
                 # Convert database paths to OS-specific paths
                 turnus_path = os.path.normpath(turnus_set['turnus_file_path'])
                 df_path = os.path.normpath(turnus_set['df_file_path'])
-                print(f"Loading from database paths: {turnus_path}, {df_path}")
+                
             else:
                 # Fall back to legacy paths
                 year_id = turnus_set['year_identifier'].lower()
                 turnus_path = os.path.join(conf.static_dir, f'{year_id}/turnuser_{turnus_set["year_identifier"]}.json')
                 df_path = os.path.join(conf.static_dir, f'{year_id}/turnus_df_{turnus_set["year_identifier"]}.json')
-                print(f"Loading from legacy paths: {turnus_path}, {df_path}")
             
             # Load dataframe
             if os.path.exists(df_path):
                 self.df = pd.read_json(df_path)
-                print(f"Loaded dataframe from {df_path}")
             else:
                 print(f"DataFrame file not found: {df_path}")
                 self.df = pd.DataFrame()
@@ -58,7 +56,6 @@ class DataframeManager():
             if os.path.exists(turnus_path):
                 with open(turnus_path, 'r') as f:
                     self.turnus_data = json.load(f)
-                print(f"Loaded turnus data from {turnus_path}")
             else:
                 print(f"Turnus file not found: {turnus_path}")
                 self.turnus_data = []

@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.forms import CreateUserForm, EditUserForm, CreateTurnusSetForm, SelectTurnusSetForm
@@ -154,14 +155,69 @@ def create_turnus_set():
     form = CreateTurnusSetForm()
     
     if form.validate_on_submit():
+        year_id = form.year_identifier.data.upper()
+        
+        # Determine file paths
+        if form.use_existing_files.data:
+            # Use existing files from turnusfiler directory
+            from config import conf
+            turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+            turnus_json_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.json')
+            df_json_path = os.path.join(turnusfiler_dir, f'turnus_df_{year_id}.json')
+            
+            # Check if main turnus file exists
+            if not os.path.exists(turnus_json_path):
+                flash(f'Turnus JSON file not found: {turnus_json_path}', 'danger')
+                return render_template('admin_create_turnus_set.html',
+                                     page_name='Create Turnus Set',
+                                     form=form)
+        else:
+            # Handle PDF upload
+            if not form.pdf_file.data:
+                flash('Please upload a PDF file or use existing files.', 'danger')
+                return render_template('admin_create_turnus_set.html',
+                                     page_name='Create Turnus Set',
+                                     form=form)
+            
+            # PDF upload - scrape it
+            turnus_json_path, df_json_path = handle_pdf_upload(form.pdf_file.data, year_id)
+            if not turnus_json_path:
+                return render_template('admin_create_turnus_set.html',
+                                     page_name='Create Turnus Set',
+                                     form=form)
+        
+        # Generate statistics if missing
+        if not df_json_path or not os.path.exists(df_json_path):
+            try:
+                from app.utils.shift_stats import Turnus
+                from config import conf
+                stats = Turnus(turnus_json_path)
+                df_json_path = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower(), f'turnus_df_{year_id}.json')
+                stats.stats_df.to_json(df_json_path)
+                flash('Statistics JSON generated automatically.', 'info')
+            except Exception as e:
+                flash(f'Error generating statistics: {e}', 'danger')
+                return render_template('admin_create_turnus_set.html',
+                                     page_name='Create Turnus Set',
+                                     form=form)
+        
+        # Create turnus set in database
         success, message = db_utils.create_turnus_set(
             name=form.name.data,
-            year_identifier=form.year_identifier.data.upper(),
-            is_active=form.is_active.data
+            year_identifier=year_id,
+            is_active=form.is_active.data,
+            turnus_file_path=turnus_json_path,
+            df_file_path=df_json_path
         )
         
         if success:
-            flash(message, 'success')
+            # Add shifts to database
+            turnus_set = db_utils.get_turnus_set_by_year(year_id)
+            if turnus_set:
+                db_utils.add_shifts_to_turnus_set(turnus_json_path, turnus_set['id'])
+                flash(f'Turnus set {year_id} created successfully!', 'success')
+            else:
+                flash('Turnus set created but shifts not added.', 'warning')
             return redirect(url_for('admin.manage_turnus_sets'))
         else:
             flash(message, 'danger')
@@ -169,6 +225,35 @@ def create_turnus_set():
     return render_template('admin_create_turnus_set.html',
                          page_name='Create Turnus Set',
                          form=form)
+
+def handle_pdf_upload(pdf_file, year_id):
+    """Handle PDF upload and scraping"""
+    try:
+        from config import conf
+        from app.utils.shiftscraper import ShiftScraper
+        
+        # Create turnusfiler directory
+        turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+        os.makedirs(turnusfiler_dir, exist_ok=True)
+        
+        # Save PDF file
+        pdf_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.pdf')
+        pdf_file.save(pdf_path)
+        
+        # Scrape PDF
+        scraper = ShiftScraper()
+        scraper.scrape_pdf(pdf_path, year_id)
+        
+        # Generate JSON files
+        turnus_json_path = scraper.create_json(year_id=year_id)
+        excel_path = scraper.create_excel(year_id=year_id)
+        
+        flash(f'PDF scraped successfully! Created JSON and Excel files.', 'success')
+        return turnus_json_path, None  # df_json_path will be generated later
+        
+    except Exception as e:
+        flash(f'Error scraping PDF: {e}', 'danger')
+        return None, None
 
 @admin.route('/switch-turnus-set', methods=['POST'])
 @login_required

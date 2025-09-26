@@ -3,7 +3,6 @@
 
 export class ShiftColors {
     constructor() {
-        console.log('ShiftColors module initializing...');
         this.defaultTimeThresholds = {
             lateShift: 16 * 60,  // 16:00 in minutes
             nightShift: 19 * 60  // 19:00 in minutes
@@ -23,22 +22,16 @@ export class ShiftColors {
     }
 
     applyShiftColors() {
-        console.log('ShiftColors.applyShiftColors() called');
-        console.log('localStorage shiftColorSettings:', localStorage.getItem('shiftColorSettings'));
-        
         // Skip if custom color settings are active (user has configured custom colors)
         if (localStorage.getItem('shiftColorSettings')) {
-            console.log('Custom color settings detected, skipping default colors');
             return;
         }
 
-        console.log('Applying default shift colors...');
         this.colorAllCells();
     }
 
     colorAllCells() {
         const tds = document.querySelectorAll('td[id="cell"]');
-        console.log(`Found ${tds.length} table cells to color`);
         
         tds.forEach(td => this.colorCell(td));
     }

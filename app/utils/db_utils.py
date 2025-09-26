@@ -371,23 +371,36 @@ def get_favorite_lst(user_id, turnus_set_id=None):
                 return []
         
         results = query.order_by(Favorites.order_index).all()
- 
         shift_titles = [result.shift_title for result in results]
         return shift_titles
     finally:
         session.close()
 
 
-def update_favorite_order(user_id):
+def update_favorite_order(user_id, turnus_set_id=None):
     session = get_db_session()
     try:
-        # Fetch the current order of the favorites
-        current_favorites = session.query(Favorites).filter_by(user_id=user_id).all()
+        if not turnus_set_id:
+            # Use active turnus set if none specified
+            active_set = get_active_turnus_set()
+            if not active_set:
+                return False
+            turnus_set_id = active_set['id']
+        
+        # Fetch the current order of the favorites FOR THE SPECIFIC TURNUS SET
+        current_favorites = session.query(Favorites).filter_by(
+            user_id=user_id, 
+            turnus_set_id=turnus_set_id
+        ).all()
         current_shift_titles = [favorite.shift_title for favorite in current_favorites]
 
-        # Update current favorites order in database
+        # Update current favorites order in database FOR THE SPECIFIC TURNUS SET
         for index, shift_title in enumerate(current_shift_titles):
-            favorite = session.query(Favorites).filter_by(user_id=user_id, shift_title=shift_title).first()
+            favorite = session.query(Favorites).filter_by(
+                user_id=user_id, 
+                shift_title=shift_title,
+                turnus_set_id=turnus_set_id
+            ).first()
             if favorite:
                 favorite.order_index = index
         
@@ -397,7 +410,6 @@ def update_favorite_order(user_id):
     except Exception as e:
         session.rollback()
         print(f"Failed to modify database. Changes only stored locally. Error = {e}")
-        flash(f'Failed to modify database. Changes only stored locally. Error = {e}', 'danger')
         return False
     finally:
         session.close()
@@ -430,9 +442,18 @@ def add_favorite(user_id, title, order_index, turnus_set_id=None):
             # Use active turnus set if none specified
             active_set = get_active_turnus_set()
             if not active_set:
-                print("No active turnus set found")
                 return False
             turnus_set_id = active_set['id']
+        
+        # Check if favorite already exists
+        existing = session.query(Favorites).filter_by(
+            user_id=user_id, 
+            shift_title=title,
+            turnus_set_id=turnus_set_id
+        ).first()
+        
+        if existing:
+            return False
         
         new_favorite = Favorites(
             user_id=user_id, 
@@ -445,7 +466,6 @@ def add_favorite(user_id, title, order_index, turnus_set_id=None):
         return True
     except Exception as e:
         session.rollback()
-        print(f"Error adding favorite: {e}")
         return False
     finally:
         session.close()
@@ -460,6 +480,7 @@ def remove_favorite(user_id, title, turnus_set_id=None):
             if not active_set:
                 return False
             turnus_set_id = active_set['id']
+        
         favorite = session.query(Favorites).filter_by(
             user_id=user_id, 
             shift_title=title,

@@ -3,7 +3,6 @@
 
 export class SortingSystem {
     constructor() {
-        console.log('SortingSystem module initializing...');
         this.originalOrder = [];
         this.currentOrder = [];
         this.init();
@@ -48,14 +47,11 @@ export class SortingSystem {
             return { element: item, name: turnusName };
         });
         this.currentOrder = [...this.originalOrder];
-        console.log(`Initialized original order with ${this.originalOrder.length} items`);
     }
 
     getTurnusData() {
         const turnusData = [];
         const turnusItems = document.querySelectorAll('.list-group-item');
-        
-        console.log('Found turnus items:', turnusItems.length);
         
         turnusItems.forEach((item, index) => {
             const turnusName = item.querySelector('.t-name');
@@ -80,7 +76,6 @@ export class SortingSystem {
                     const before6 = parseInt(dataRow.querySelector('.row:nth-child(2) .col:nth-child(3) b').textContent) || 0;
                     const afternoonEnds = parseInt(dataRow.querySelector('.row:nth-child(2) .col:nth-child(4) b').textContent) || 0;
                     
-                    console.log(`Turnus ${name}:`, { shiftCnt, tidlig, ettermiddag, natt, helgetimer, before6, afternoonEnds });
                     
                     turnusData.push({
                         name: name,

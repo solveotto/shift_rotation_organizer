@@ -14,18 +14,11 @@ def turnusliste():
     user_turnus_set = get_user_turnus_set()
     turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
     
-    print(f"DEBUG: user_turnus_set = {user_turnus_set}")
-    print(f"DEBUG: turnus_set_id = {turnus_set_id}")
-    
     # Get favorites for current user and active turnus set
     favoritt = db_utils.get_favorite_lst(current_user.get_id(), turnus_set_id) if current_user.is_authenticated else []
     
     # Load data for user's selected year
     user_df_manager = df_utils.DataframeManager(turnus_set_id)
-    
-    print(f"DEBUG: user_df_manager.turnus_data length = {len(user_df_manager.turnus_data)}")
-    print(f"DEBUG: user_df_manager.df.empty = {user_df_manager.df.empty}")
-    print(f"DEBUG: user_df_manager.current_turnus_set = {user_df_manager.current_turnus_set}")
     
     return render_template('turnusliste.html', 
                          page_name='Turnusliste',
@@ -57,6 +50,9 @@ def switch_user_year(turnus_set_id):
 
 def get_user_turnus_set():
     """Get the turnus set for current user (their current session choice or database active set)"""
+    # Get the current database active set
+    active_set = db_utils.get_active_turnus_set()
+    
     # Check if user has selected a specific year to view in THIS session
     user_choice = session.get('user_selected_turnus_set')
     if user_choice:
@@ -64,30 +60,25 @@ def get_user_turnus_set():
         all_sets = get_all_turnus_sets()
         user_set = next((ts for ts in all_sets if ts['id'] == user_choice), None)
         if user_set:
+            # If user's session choice exists, use it
             return user_set
+        else:
+            # If user's session choice doesn't exist anymore, clear it
+            session.pop('user_selected_turnus_set', None)
     
-    # Always default to the database active set for new sessions
-    return db_utils.get_active_turnus_set()
+    # Always default to the database active set
+    return active_set
 
 
 @shifts.route('/favorites')
 @login_required
 def favorites():
-    # Debug: Check what's stored in session
-    user_choice = session.get('user_selected_turnus_set')
-    print(f"DEBUG FAVORITES: user_choice from session = {user_choice}")
-    
     # Get user's selected turnus set (same logic as turnusliste)
     user_turnus_set = get_user_turnus_set()
     turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
     
-    print(f"DEBUG FAVORITES: user_turnus_set = {user_turnus_set}")
-    print(f"DEBUG FAVORITES: turnus_set_id = {turnus_set_id}")
-    
     # Get favorites for the user's selected turnus set
     fav_order_lst = db_utils.get_favorite_lst(current_user.get_id(), turnus_set_id)
-    
-    print(f"DEBUG FAVORITES: fav_order_lst = {fav_order_lst}")
     
     # Load data for the user's selected turnus set
     user_df_manager = df_utils.DataframeManager(turnus_set_id)
@@ -100,8 +91,6 @@ def favorites():
             if name in fav_order_lst:
                 fav_dict_lookup[name] = data
     fav_dict_sorted = [{name: fav_dict_lookup[name]} for name in fav_order_lst if name in fav_dict_lookup]
-
-    print(f"DEBUG FAVORITES: fav_dict_sorted length = {len(fav_dict_sorted)}")
 
     return render_template('favorites.html',
                         page_name='Favoritter',
@@ -136,17 +125,3 @@ def compare():
         all_turnus_sets=db_utils.get_all_turnus_sets()
     )
 
-
-@shifts.route('/debug-favorites')
-@login_required
-def debug_favorites():
-    user_turnus_set = get_user_turnus_set()
-    turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
-    fav_order_lst = db_utils.get_favorite_lst(current_user.get_id(), turnus_set_id)
-    
-    return {
-        'user_turnus_set': user_turnus_set,
-        'turnus_set_id': turnus_set_id,
-        'favorites_list': fav_order_lst,
-        'session_choice': session.get('user_selected_turnus_set')
-    }

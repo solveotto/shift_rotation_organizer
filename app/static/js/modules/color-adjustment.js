@@ -80,11 +80,9 @@ export class ColorAdjustment {
 
     applyColorsToTable() {
         const settings = this.loadColorSettings();
-        console.log('Applying colors with settings:', settings);
         
         // Remove existing color classes
         const tds = document.querySelectorAll('td[id="cell"]');
-        console.log(`Found ${tds.length} table cells to color`);
         
         tds.forEach(td => {
             td.classList.remove('early', 'late', 'night', 'day_off', 'h-dag', 'early-and-late');
@@ -94,8 +92,6 @@ export class ColorAdjustment {
 
         // Apply new colors based on settings
         tds.forEach(td => this.colorCell(td, settings));
-        
-        console.log('Color application completed');
     }
 
     colorCell(td, settings) {

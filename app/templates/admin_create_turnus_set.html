@@ -56,35 +56,36 @@
                         </div>
 
                         <hr>
-                        <h6>Optional: Upload Data Files</h6>
-                        <p class="text-muted small">You can upload JSON files now or add them later through the file system.</p>
-
-                        <div class="mb-3">
-                            {{ form.turnus_file.label(class="form-label") }}
-                            {{ form.turnus_file(class="form-control") }}
-                            {% if form.turnus_file.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.turnus_file.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <small class="form-text text-muted">The main turnus data file (turnuser_R##.json)</small>
+                        <h6>File Handling Options</h6>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.use_existing_files(class="form-check-input", id="use_existing_files") }}
+                            {{ form.use_existing_files.label(class="form-check-label") }}
+                            <small class="form-text text-muted d-block">
+                                If checked, will look for existing files in <code>turnusfiler/{year_id}/</code> directory
+                            </small>
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.df_file.label(class="form-label") }}
-                            {{ form.df_file(class="form-control") }}
-                            {% if form.df_file.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.df_file.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            <small class="form-text text-muted">The dataframe statistics file (turnus_df_R##.json)</small>
+                        <div class="file-upload-section">
+                            <h6>Upload PDF File</h6>
+                            <p class="text-muted small">Upload a PDF file to automatically scrape and generate JSON/Excel files.</p>
+                        
+                            <div class="mb-3">
+                                {{ form.pdf_file.label(class="form-label") }}
+                                {{ form.pdf_file(class="form-control") }}
+                                {% if form.pdf_file.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.pdf_file.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    <strong>PDF will be automatically scraped</strong> to generate JSON and Excel files
+                                </small>
+                            </div>
                         </div>
-
+                        
                         <div class="d-flex justify-content-between">
                             <a href="{{ url_for('admin.manage_turnus_sets') }}" class="btn btn-secondary">
                                 <i class="bi bi-arrow-left"></i> Back to Turnus Sets
@@ -97,4 +98,18 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleFileUploads() {
+    const useExisting = document.getElementById('use_existing_files').checked;
+    const fileUploads = document.querySelectorAll('.file-upload-section');
+    
+    fileUploads.forEach(section => {
+        section.style.display = useExisting ? 'none' : 'block';
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', toggleFileUploads);
+</script>
 {% endblock %}

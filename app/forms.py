@@ -37,10 +37,16 @@ class CreateTurnusSetForm(FlaskForm):
                                  validators=[DataRequired(), Length(min=2, max=10)],
                                  render_kw={"placeholder": "e.g., R25, R26"})
     is_active = BooleanField('Set as active turnus set')
-    turnus_file = FileField('Turnus JSON File (optional)', 
-                           validators=[FileAllowed(['json'], 'JSON files only!')])
-    df_file = FileField('DataFrame JSON File (optional)', 
-                       validators=[FileAllowed(['json'], 'JSON files only!')])
+    
+    # File handling options
+    use_existing_files = BooleanField('Use existing files from turnusfiler directory', 
+                                    default=True,
+                                    render_kw={"onchange": "toggleFileUploads()"})
+    
+    # PDF upload option
+    pdf_file = FileField('Upload PDF File (to scrape and generate JSON)', 
+                        validators=[FileAllowed(['pdf'], 'PDF files only!')])
+    
     submit = SubmitField('Create Turnus Set')
 
 class SelectTurnusSetForm(FlaskForm):

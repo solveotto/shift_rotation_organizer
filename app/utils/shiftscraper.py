@@ -1,12 +1,41 @@
 """
-Programmet laster inn en pdf med turnuser i tableller og lager en python dict av det.
+Shift Scraper - PDF to JSON/Excel Converter
 
-- scrape the shift pdf by typing: shiftscraper.scrape_pdf('filepath.pdf')
-- Generer en excel fil med fargekodede celler ut i fra om det er dag, ettermiddag, kveld eller nattevakter
-  ved å skrive: shiftscraper.create_excel()
-- Generer JSON-fil ved å skrive shiftscraper.create_json()
+This script scrapes PDF files containing shift schedules and converts them into 
+structured JSON and Excel files with color-coded formatting.
 
+Features:
+- Scrapes PDF turnus files with shift schedules
+- Generates structured JSON data for database import
+- Creates color-coded Excel files with conditional formatting
+- Automatically organizes files in turnusfiler directory structure
+- Supports command-line usage for batch processing
 
+Usage:
+    Command Line:
+        python shiftscraper.py path/to/file.pdf R24
+        python shiftscraper.py path/to/file.pdf R24 --output-dir custom/path
+        eksempel: python "D:\programmering\Python Projects\shift_rotation_organizer\app\static\turnusfiler\r23\turnuser_R23.pdf" "r25"
+    
+    Programmatic:
+        scraper = ShiftScraper()
+        scraper.scrape_pdf('file.pdf', 'R24')
+        scraper.create_json(year_id='R24')  # Auto-saves to turnusfiler/r24/
+        scraper.create_excel(year_id='R24') # Auto-saves to turnusfiler/r24/
+
+Color Coding (Excel):
+    - Yellow: H-days (holidays)
+    - Blue: Early shifts (3-16)
+    - Orange: Early-Evening shifts (3-8, 16+)
+    - Red: Evening shifts (9-18)
+    - Purple: Night shifts (18-23)
+    - Green: Free days (XX, OO, TT)
+    - Light Purple: Hidden free days (empty cells)
+
+Workflow Integration:
+    1. Run shiftscraper.py to generate JSON and Excel files
+    2. Use create_new_turnus_year.py to import JSON into database
+    3. Files are automatically organized in turnusfiler structure
 """
 
 from datetime import datetime
@@ -43,7 +72,7 @@ class ShiftScraper():
 
 
     # Scraper og sorterer pdf med turnuser
-    def scrape_pdf(self, pdf_path='turnuser_R25.pdf'):
+    def scrape_pdf(self, pdf_path='turnuser_R25.pdf', year_id=None):
         
         pdf = pdfplumber.open(pdf_path)
         pages_in_pdf = pdf.pages
@@ -230,133 +259,201 @@ class ShiftScraper():
 
 
     ### FILE CREATION ###
-    def create_excel(self, output_path='turnuser_R25.xlsx'):    
-            # Lager et DataFrame av turnusene som er lagret i en Dict.
-            df_dict = {}
+    def create_excel(self, output_path='turnuser_R25.xlsx', year_id=None):    
+        """Create Excel file with optional custom path"""
+        # If year_id is provided and output_path is default, create path in turnusfiler
+        if year_id and output_path == 'turnuser_R25.xlsx':
+            import os
+            import sys
+            # Add project root to path to import config
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            sys.path.insert(0, project_root)
+            from config import conf
             
-            for turnus in self.turnuser:
-                for turnus_navn, turnus_verdi in turnus.items():
-                    df_data = {'Uke': [1, 2, 3, 4, 5, 6],
-                    'Mandag': [], 'Tirsdag': [], 'Onsdag': [], 'Torsdag': [],
-                    'Fredag': [], 'Lørdag': [], 'Søndag': []}
-                    
-                    # Pakker opp turnuser i uker og dager og legger de i rikigt ukedag
-                    for uke in turnus_verdi.values():
-                        for dag in uke.values():
-                            if len(dag['tid']) == 0:
-                                df_data[dag['ukedag']].append('')
-                            else:
-                                df_data[dag['ukedag']].append(" - ".join(dag['tid'])+ " " + dag['dagsverk'])
-                                
-                    df_dict.update({turnus_navn : pd.DataFrame(df_data)})
+            # Create turnusfiler directory structure
+            turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+            os.makedirs(turnusfiler_dir, exist_ok=True)
+            output_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.xlsx')
+        
+        # Lager et DataFrame av turnusene som er lagret i en Dict.
+        df_dict = {}
+        
+        for turnus in self.turnuser:
+            for turnus_navn, turnus_verdi in turnus.items():
+                df_data = {'Uke': [1, 2, 3, 4, 5, 6],
+                'Mandag': [], 'Tirsdag': [], 'Onsdag': [], 'Torsdag': [],
+                'Fredag': [], 'Lørdag': [], 'Søndag': []}
+                
+                # Pakker opp turnuser i uker og dager og legger de i rikigt ukedag
+                for uke in turnus_verdi.values():
+                    for dag in uke.values():
+                        if len(dag['tid']) == 0:
+                            df_data[dag['ukedag']].append('')
+                        else:
+                            df_data[dag['ukedag']].append(" - ".join(dag['tid'])+ " " + dag['dagsverk'])
+                            
+                df_dict.update({turnus_navn : pd.DataFrame(df_data)})
 
-            # Lagrer DataFrame som Excel-fil og lager et sheet i excel-filen per turnus i dataframe
-            with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
-                for sheet_name, df in df_dict.items():
-                    df.to_excel(writer, sheet_name=sheet_name, index=False)
-                    workbook  = writer.book
-                    worksheet = writer.sheets[sheet_name]
-                        
-                    # Define a format for the cell background color.
-                    hdag_format = workbook.add_format({'bg_color': '#dbcc27',
+        # Lagrer DataFrame som Excel-fil og lager et sheet i excel-filen per turnus i dataframe
+        with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
+            for sheet_name, df in df_dict.items():
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+                workbook  = writer.book
+                worksheet = writer.sheets[sheet_name]
+                    
+                # Define a format for the cell background color.
+                hdag_format = workbook.add_format({'bg_color': '#dbcc27',
+                                                'font_color': '#000000'})
+                tidlig_format = workbook.add_format({'bg_color': '#7abfff',
                                                     'font_color': '#000000'})
-                    tidlig_format = workbook.add_format({'bg_color': '#7abfff',
-                                                        'font_color': '#000000'})
-                    tidlig_kveld_format = workbook.add_format({'bg_color': '#d68f6d',
-                                                        'font_color': '#000000'})
-                    kveld_format = workbook.add_format({'bg_color': '#fa7f7f',
-                                                        'font_color': '#000000'})
-                    natt_format = workbook.add_format({'bg_color': '#c34fe3',
-                                                        'font_color': '#000000'})
-                    turnusfri_format = workbook.add_format({'bg_color': '#13bd57',
-                                                        'font_color': '#000000'})
-                    skjult_fridag_format = workbook.add_format({'bg_color': '#cc9fe3',
-                                                        'font_color': '#000000',
-                                                        'border':2,
-                                                        'border_color': '#c34fe3'})
-                    
-                    centered_format = workbook.add_format({
-                                                        'align': 'center',
-                                                        'valign': 'vcenter',
-                                                        'border':1,
-                                                        'text_wrap': True})
+                tidlig_kveld_format = workbook.add_format({'bg_color': '#d68f6d',
+                                                    'font_color': '#000000'})
+                kveld_format = workbook.add_format({'bg_color': '#fa7f7f',
+                                                    'font_color': '#000000'})
+                natt_format = workbook.add_format({'bg_color': '#c34fe3',
+                                                    'font_color': '#000000'})
+                turnusfri_format = workbook.add_format({'bg_color': '#13bd57',
+                                                    'font_color': '#000000'})
+                skjult_fridag_format = workbook.add_format({'bg_color': '#cc9fe3',
+                                                    'font_color': '#000000',
+                                                    'border':2,
+                                                    'border_color': '#c34fe3'})
+                
+                centered_format = workbook.add_format({
+                                                    'align': 'center',
+                                                    'valign': 'vcenter',
+                                                    'border':1,
+                                                    'text_wrap': True})
 
-                    # Setter høyden på COLUMNS.
-                    worksheet.set_column('B:H', 12) 
-                    worksheet.set_column('A:A', 4)
+                # Setter høyden på COLUMNS.
+                worksheet.set_column('B:H', 12) 
+                worksheet.set_column('A:A', 4)
 
-                    # Setter bredden på ROWS
-                    for row in range(1,7):
-                        worksheet.set_row(row, 40)
-                    
-                    # Apply centered text and borders for the range 'A1:H6'.
-                    for row in range(6):
-                        for col, column_label in enumerate(df.columns):
-                            cell_value = df.at[row, column_label]
-                            worksheet.write(row + 1, col, cell_value, centered_format)
+                # Setter bredden på ROWS
+                for row in range(1,7):
+                    worksheet.set_row(row, 40)
+                
+                # Apply centered text and borders for the range 'A1:H6'.
+                for row in range(6):
+                    for col, column_label in enumerate(df.columns):
+                        cell_value = df.at[row, column_label]
+                        worksheet.write(row + 1, col, cell_value, centered_format)
 
-                    
-                    # Logikken for formatering av celler.
-                    for col in range(1, 8):  # Columns B(1) through H(7)
-                        for row in range(1, 7):  # Rows 2 through 7
-                            cell = xlsxwriter.utility.xl_rowcol_to_cell(row, col)
+                
+                # Logikken for formatering av celler.
+                for col in range(1, 8):  # Columns B(1) through H(7)
+                    for row in range(1, 7):  # Rows 2 through 7
+                        cell = xlsxwriter.utility.xl_rowcol_to_cell(row, col)
 
-  
-                            
-                            
-                            ## Formater ##
-                            # H-Dager
-                            worksheet.conditional_format(cell, {'type': 'formula',
-                                                                'criteria': '=RIGHT(' + cell +', 1)="H"',
-                                                                'format': hdag_format})
-                            # Tidligvakt
-                            worksheet.conditional_format(cell, {'type': 'formula',
-                                                                'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)' 
-                                                                'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1)) < 16)'
-                                                                'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) < 16)'
-                                                                'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) > 3)',
-                                                                'format': tidlig_format})
+      
+                        
+                        
+                        ## Formater ##
+                        # H-Dager
+                        worksheet.conditional_format(cell, {'type': 'formula',
+                                                            'criteria': '=RIGHT(' + cell +', 1)="H"',
+                                                            'format': hdag_format})
+                        # Tidligvakt
+                        worksheet.conditional_format(cell, {'type': 'formula',
+                                                            'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)' 
+                                                            'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1)) < 16)'
+                                                            'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) < 16)'
+                                                            'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) > 3)',
+                                                            'format': tidlig_format})
 
 
-                            # Tidlig og kveld
-                            worksheet.conditional_format(cell, {'type': 'formula',
-                                                                'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)'
-                                                                'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1)) <= 8)'
-                                                                'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) >= 16)',
-                                                                'format': tidlig_kveld_format})
-                            # Kveld                
-                            worksheet.conditional_format(cell, {'type': 'formula',
-                                                                'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=9)'
-                                                                'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=18)',
-                                                                #'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) >= 16)',
-                                                                'format': kveld_format})
-                            # Natt
-                            worksheet.conditional_format(cell, {'type': 'formula',
-                                                                'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=18)'
-                                                                'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=23)',
-                                                                'format': natt_format})
-                            # Tomme celler
-                            worksheet.conditional_format(cell, {'type': 'formula',
-                                                                'criteria': '=(' + cell + '="")',
-                                                                'format': skjult_fridag_format})
-                            # XX, OO og TT celler
-                            worksheet.conditional_format(cell, {'type': 'formula',
-                                                                'criteria': '=(' + cell + '="XX ")' 'OR (' + cell + '="OO ")' 'OR (' + cell + '="TT ")',
-                                                                'format': turnusfri_format})
+                        # Tidlig og kveld
+                        worksheet.conditional_format(cell, {'type': 'formula',
+                                                            'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=3)'
+                                                            'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1)) <= 8)'
+                                                            'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) >= 16)',
+                                                            'format': tidlig_kveld_format})
+                        # Kveld                
+                        worksheet.conditional_format(cell, {'type': 'formula',
+                                                            'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=9)'
+                                                            'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=18)',
+                                                            #'AND (VALUE(MID(' + cell + ', SEARCH(":", ' + cell + ', SEARCH(":", ' + cell + ')+1)-2, 2)) >= 16)',
+                                                            'format': kveld_format})
+                        # Natt
+                        worksheet.conditional_format(cell, {'type': 'formula',
+                                                            'criteria': '=(VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))>=18)'
+                                                            'AND (VALUE(LEFT(' + cell + ',SEARCH(":",' + cell + ')-1))<=23)',
+                                                            'format': natt_format})
+                        # Tomme celler
+                        worksheet.conditional_format(cell, {'type': 'formula',
+                                                            'criteria': '=(' + cell + '="")',
+                                                            'format': skjult_fridag_format})
+                        # XX, OO og TT celler
+                        worksheet.conditional_format(cell, {'type': 'formula',
+                                                            'criteria': '=(' + cell + '="XX ")' 'OR (' + cell + '="OO ")' 'OR (' + cell + '="TT ")',
+                                                            'format': turnusfri_format})
+        
+        print(f"Excel file created: {output_path}")
+        return output_path
 
-    def create_json(self, output_path='turnuser_R25.json'):
+    def create_json(self, output_path='turnuser_R25.json', year_id=None):
         """Create JSON file with optional custom path"""
+        # If year_id is provided and output_path is default, create path in turnusfiler
+        if year_id and output_path == 'turnuser_R25.json':
+            import os
+            import sys
+            # Add project root to path to import config
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            sys.path.insert(0, project_root)
+            from config import conf
+            
+            # Create turnusfiler directory structure
+            turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+            os.makedirs(turnusfiler_dir, exist_ok=True)
+            output_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.json')
+        
         with open(output_path, 'w') as f:
             json.dump(self.turnuser, f, indent=4)
         print(f"JSON file created: {output_path}")
+        return output_path
 
 
 if __name__ == '__main__':
+    import argparse
+    import os
+    import sys
+    
+    parser = argparse.ArgumentParser(description='Scrape PDF turnus files and generate JSON and Excel')
+    parser.add_argument('pdf_path', help='Path to PDF file to scrape')
+    parser.add_argument('year_id', help='Year identifier (e.g., R24, R25, r23)')
+    parser.add_argument('--output-dir', help='Custom output directory (default: turnusfiler/year_id)')
+    
+    args = parser.parse_args()
+    
+    # Validate inputs
+    if not os.path.exists(args.pdf_path):
+        print(f"❌ Error: PDF file {args.pdf_path} does not exist")
+        sys.exit(1)
+    
+    year_id = args.year_id.upper()
+    
+    print(f"🚀 Scraping PDF: {args.pdf_path}")
+    print(f"📅 Year ID: {year_id}")
+    
+    # Initialize scraper and process PDF
     shift_scraper = ShiftScraper()
-
-
-
-    shift_scraper.scrape_pdf()
-    #print(json.dumps(shift_scraper.turnuser, indent=4))
-    shift_scraper.create_json()
-    shift_scraper.create_excel()
+    shift_scraper.scrape_pdf(args.pdf_path, year_id)
+    
+    # Create JSON file
+    if args.output_dir:
+        json_path = os.path.join(args.output_dir, f'turnuser_{year_id}.json')
+        os.makedirs(args.output_dir, exist_ok=True)
+        shift_scraper.create_json(json_path)
+    else:
+        json_path = shift_scraper.create_json(year_id=year_id)
+    
+    # Create Excel file
+    if args.output_dir:
+        excel_path = os.path.join(args.output_dir, f'turnuser_{year_id}.xlsx')
+        shift_scraper.create_excel(excel_path)
+    else:
+        excel_path = shift_scraper.create_excel(year_id=year_id)
+    
+    print(f"✅ Scraping completed successfully!")
+    print(f"📄 JSON file created: {json_path}")
+    print(f"📊 Excel file created: {excel_path}")

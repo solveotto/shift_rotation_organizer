@@ -17,8 +17,6 @@ export class ShiftSelection {
         document.querySelectorAll('.clickable-row').forEach(row => {
             row.addEventListener('click', () => {
                 const turnus = row.getAttribute('data-turnus');
-                console.log('Turnus:', turnus);
-                
                 this.selectShift(turnus);
             });
         });
@@ -47,7 +45,6 @@ export class ShiftSelection {
                 window.location.href = response.url;
             } else {
                 const data = await response.json();
-                console.log('Success:', data);
             }
         } catch (error) {
             console.error('Error:', error);

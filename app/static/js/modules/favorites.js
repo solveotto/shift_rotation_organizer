@@ -11,8 +11,6 @@ export class Favorites {
     }
 
     setupEventListeners() {
-        console.log('Setting up favorites event listeners...');
-        
         // Use event delegation to handle change events on elements with the class 'toggle-favoritt'
         document.body.addEventListener('change', (event) => {
             if (event.target.classList.contains('toggle-favoritt')) {
@@ -23,27 +21,20 @@ export class Favorites {
         // Handle remove favorite button clicks (X buttons)
         document.body.addEventListener('click', (event) => {
             if (event.target.classList.contains('remove-favorite-btn')) {
-                console.log('Remove favorite button clicked!');
                 this.handleRemoveFavorite(event);
             }
         });
-        
-        console.log('Favorites event listeners set up successfully');
     }
 
     handleToggleFavorite(event) {
         const isChecked = event.target.checked;
         const shiftTitle = event.target.getAttribute('shift_title');
-        
-        console.log('isChecked: ', isChecked, ',', 'ShiftTitle: ', shiftTitle);
 
         this.updateFavoriteStatus(isChecked, shiftTitle);
     }
 
     handleRemoveFavorite(event) {
         const shiftTitle = event.target.getAttribute('data-shift-title');
-        
-        console.log('Removing favorite:', shiftTitle);
 
         if (!shiftTitle) {
             console.error('No shift title found for remove button');
@@ -57,7 +48,6 @@ export class Favorites {
                     const favoriteItem = event.target.closest('.list-group-item');
                     if (favoriteItem) {
                         favoriteItem.remove();
-                        console.log('Favorite removed from page');
                     } else {
                         console.warn('Could not find favorite item to remove from page');
                     }
@@ -74,19 +64,20 @@ export class Favorites {
 
     async updateFavoriteStatus(favorite, shiftTitle) {
         try {
+            const requestData = { favorite: favorite, shift_title: shiftTitle };
+            
             const response = await fetch('/api/toggle_favorite', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ favorite: favorite, shift_title: shiftTitle })
+                body: JSON.stringify(requestData)
             });
 
             const data = await response.json();
-            console.log('Success:', data);
             return data;
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error updating favorite status:', error);
             throw error;
         }
     }

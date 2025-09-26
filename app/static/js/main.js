@@ -29,10 +29,7 @@ class App {
 
         // Initialize shift colors if we have table cells (applies CSS classes)
         if (document.querySelector('td[id="cell"]')) {
-            console.log('Table cells found, initializing ShiftColors...');
             this.modules.shiftColors = new ShiftColors();
-        } else {
-            console.log('No table cells found (td[id="cell"]), skipping ShiftColors');
         }
 
         // Initialize shift selection if we have clickable rows
@@ -48,11 +45,8 @@ class App {
 
         // Initialize sorting if we're on the turnusliste page
         if (document.querySelector('#helgetimer-slider')) {
-            console.log('Sorting controls found, initializing SortingSystem...');
             this.modules.sorting = new SortingSystem();
         }
-
-        console.log('App initialized with modules:', Object.keys(this.modules));
     }
 
     getModule(name) {
