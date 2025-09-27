@@ -40,7 +40,7 @@
                     {% set outer_index = loop.index0 %}
                     {% for name, data in turnus.items() %}
                         <div class="list-group-item mb-2 rounded p-2 small" style="border: 1px solid black;">
-                            <div class="d-flex align-items-center justify-content-between py-1">
+                            <div class="d-flex align-items-center py-1">
                                 <div class="d-flex align-items-center">
                                     <h5 class="t-num me-3">#{{ outer_index+1 }}</h5>
                                     
@@ -72,13 +72,12 @@
                                     </div>
                                 </div>
                                 
-                                <div class="d-flex align-items-center">
-                                    <div class="clickable-row me-3" data-turnus="{{name}}">
-                                        <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
-                                    </div>
-                                    
-                                    <button class="btn btn-outline-danger btn-sm custom-remove-btn remove-favorite-btn" data-shift-title="{{name}}">X</button>
+                                <div class="flex-grow-1 text-center clickable-row" data-turnus="{{name}}">
+                                    <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
+                                    <p class="fs-6 fst-italic text-decoration-underline text-danger">{%if current_turnus_set.id != active_set.id %}Obs! Gammel turnus. {{current_turnus_set.year_identifier}}.{% endif %}</p>
                                 </div>
+                                
+                                <button class="btn btn-outline-danger btn-sm custom-remove-btn remove-favorite-btn" data-shift-title="{{name}}">X</button>
                             </div>
                             
                             <!-- ... existing table content ... -->

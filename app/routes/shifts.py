@@ -13,6 +13,7 @@ def turnusliste():
     # Get the turnus set for this user (their choice or system default)
     user_turnus_set = get_user_turnus_set()
     turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
+    active_set = db_utils.get_active_turnus_set()
     
     # Get favorites for current user and active turnus set
     favoritt = db_utils.get_favorite_lst(current_user.get_id(), turnus_set_id) if current_user.is_authenticated else []
@@ -26,6 +27,7 @@ def turnusliste():
                          df=user_df_manager.df.to_dict(orient='records') if not user_df_manager.df.empty else [], 
                          favoritt=favoritt,
                          current_turnus_set=user_turnus_set,
+                         active_set=active_set,
                          all_turnus_sets=db_utils.get_all_turnus_sets())
 
 
@@ -76,6 +78,7 @@ def favorites():
     # Get user's selected turnus set (same logic as turnusliste)
     user_turnus_set = get_user_turnus_set()
     turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
+    active_set = db_utils.get_active_turnus_set()
     
     # Get favorites for the user's selected turnus set
     fav_order_lst = db_utils.get_favorite_lst(current_user.get_id(), turnus_set_id)
@@ -97,6 +100,7 @@ def favorites():
                         favorites=fav_dict_sorted,
                         df=user_df_manager.df.to_dict(orient='records') if not user_df_manager.df.empty else [],
                         current_turnus_set=user_turnus_set,
+                        active_set=active_set,
                         all_turnus_sets=db_utils.get_all_turnus_sets()
                         )
 

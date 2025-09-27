@@ -207,6 +207,9 @@
                                                 <div class="clickable-row" data-turnus="{{name}}">
                                                     <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
                                                 </div>
+                                                <div>
+                                                    <p class="fs-6 fst-italic text-decoration-underline text-danger">{%if current_turnus_set.id != active_set.id %}Obs! Gammel turnus. {{current_turnus_set.year_identifier}}.{% endif %}</p>
+                                                </div>
                                                 <label for="toggle-favoritt-{{ outer_index }}" class="custom-checkbox" data-toggle="tooltip" data-placement="top" title="Klikk for å velge som favoritt.">
                                                     <input type="checkbox" id="toggle-favoritt-{{ outer_index }}"  class="toggle-favoritt" shift_title="{{ name }}" {% if name in favoritt %}checked{% endif %}>
                                                         <i class="bi bi-star"></i>
