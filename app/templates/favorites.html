@@ -2,13 +2,21 @@
 
 {% block title %}Favoritter{% endblock %}
 
-{% block content %}
-
 {% block print %}
-    <button class="btn btn-outline-light btn-sm" onclick="printTables()">
-        <i class="bi bi-printer"></i> Utskrift
+    <button class="btn btn-outline-light btn-sm print-btn" onclick="printTables()">
+        <i class="bi bi-printer"></i> <span>Utskrift</span>
     </button>
 {% endblock %}
+
+{% block mobile_print %}
+<li class="d-lg-none">
+  <a class="dropdown-item mobile-print-item" href="#" onclick="printTables(); return false;">
+    <i class="bi bi-printer"></i> Utskrift!
+  </a>
+</li>
+{% endblock %}
+
+{% block content %}
 
 
 <div class="col-md-5 offset-md-3">
@@ -81,7 +89,8 @@
                             </div>
                             
                             <!-- ... existing table content ... -->
-                            <table>
+                            <div class="table-scroll-wrapper">
+                                <table>
                                 <thead class="text-center">
                                     <tr>
                                         <th style="border: 1px solid black;">Uke</th>
@@ -121,7 +130,8 @@
                                         </tr>
                                     {% endfor %}
                                 </tbody>
-                            </table>
+                                </table>
+                            </div>
                             
                             <!-- ... existing stats content ... -->
                             {% for row in df %}

@@ -7,16 +7,31 @@
 {% block title %}Favoritter{% endblock %}
 
 {% block print %}
-    <button class="btn btn-outline-light btn-sm" onclick="printTables()">
-        <i class="bi bi-printer"></i> Utskrift
+    <button class="btn btn-outline-light btn-sm print-btn" onclick="printTables()">
+        <i class="bi bi-printer"></i> <span>Utskrift</span>
     </button>
 {% endblock %}
 
+{% block mobile_print %}
+<li class="d-lg-none">
+  <a class="dropdown-item mobile-print-item" href="#" onclick="printTables(); return false;">
+    <i class="bi bi-printer"></i> Utskrift
+  </a>
+</li>
+{% endblock %}
 
 
+{% block mobile_sorter %}
+<div class="mobile-sorter d-lg-none me-2">
+    <button class="btn btn-sm btn-outline-light mobile-sorter-btn" type="button" data-bs-toggle="modal" data-bs-target="#mobileSorterModal">
+        <i class="bi bi-funnel"></i>
+    </button>
+</div>
+{% endblock %}
 
 <!-- Desktop filtering -->
 {% block filtering %}
+<!-- Desktop filtering (hidden on small screens) -->
 <div class="navbar-filtering d-none d-lg-flex align-items-center me-3">
     <div class="filter-dropdown">
         <button class="btn btn-sm btn-outline-light dropdown-toggle sorter-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -202,22 +217,24 @@
                                 {% for name, data in turnus.items() %}
                             
                                     <li class="list-group-item mb-2 rounded p-2 small" style="border: 1px solid black;"> 
-                                        <table>
-                                            <div class="d-flex align-items-center justify-content-between py-1">
-                                                <div class="clickable-row" data-turnus="{{name}}">
-                                                    <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
-                                                </div>
-                                                <div>
-                                                    <p class="fs-6 fst-italic text-decoration-underline text-danger">{%if current_turnus_set.id != active_set.id %}Obs! Gammel turnus. {{current_turnus_set.year_identifier}}.{% endif %}</p>
-                                                </div>
-                                                <label for="toggle-favoritt-{{ outer_index }}" class="custom-checkbox" data-toggle="tooltip" data-placement="top" title="Klikk for å velge som favoritt.">
-                                                    <input type="checkbox" id="toggle-favoritt-{{ outer_index }}"  class="toggle-favoritt" shift_title="{{ name }}" {% if name in favoritt %}checked{% endif %}>
-                                                        <i class="bi bi-star"></i>
-                                                        <i class="bi bi-star-fill"></i>
-                                                </label>
-                                                
+                                        <!-- Title section outside scroll wrapper -->
+                                        <div class="d-flex align-items-center justify-content-between py-1 mb-2">
+                                            <div class="clickable-row" data-turnus="{{name}}">
+                                                <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
                                             </div>
-                                            
+                                            <div>
+                                                <p class="fs-6 fst-italic text-decoration-underline text-danger">{%if current_turnus_set.id != active_set.id %}Obs! Gammel turnus. {{current_turnus_set.year_identifier}}.{% endif %}</p>
+                                            </div>
+                                            <label for="toggle-favoritt-{{ outer_index }}" class="custom-checkbox" data-toggle="tooltip" data-placement="top" title="Klikk for å velge som favoritt.">
+                                                <input type="checkbox" id="toggle-favoritt-{{ outer_index }}"  class="toggle-favoritt" shift_title="{{ name }}" {% if name in favoritt %}checked{% endif %}>
+                                                    <i class="bi bi-star"></i>
+                                                    <i class="bi bi-star-fill"></i>
+                                            </label>
+                                        </div>
+                                        
+                                        <!-- Table with scroll wrapper -->
+                                        <div class="table-scroll-wrapper">
+                                            <table>
                                             <thead class="text-center">
                                                 <tr>
                                                     <th style="border: 1px solid black;">Uke</th>
@@ -261,6 +278,7 @@
                                                 {% endfor %}
                                             </tbody>
                                         </table>
+                                        </div>
                                         {% for row in df %}
                                             {% if row.turnus == name %}
                                                 <div class="container-fluid data-felt text-center">
@@ -317,6 +335,133 @@
 
 </div>
 
+<!-- Mobile Sorter Modal -->
+<div class="modal fade" id="mobileSorterModal" tabindex="-1" aria-labelledby="mobileSorterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mobileSorterModalLabel">
+                    <i class="bi bi-funnel"></i> Sorter Turnusliste
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mobile-sorting-controls">
+                    <div class="mb-3">
+                        <label class="form-label mobile-filter-label">Helgetimer</label>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="direction-left">Mindre</span>
+                            <span class="direction-right">Flere</span>
+                        </div>
+                        <input type="range" class="form-range mobile-filter-slider" id="mobile-helgetimer-slider" min="-10" max="10" value="0" step="0.5" data-value="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label mobile-filter-label">Dagsverk</label>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="direction-left">Mindre</span>
+                            <span class="direction-right">Flere</span>
+                        </div>
+                        <input type="range" class="form-range mobile-filter-slider" id="mobile-shift-cnt-slider" min="-10" max="10" value="0" step="0.5" data-value="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label mobile-filter-label">Tidlig</label>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="direction-left">Mindre</span>
+                            <span class="direction-right">Flere</span>
+                        </div>
+                        <input type="range" class="form-range mobile-filter-slider" id="mobile-early-slider" min="-10" max="10" value="0" step="0.5" data-value="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label mobile-filter-label">Sen</label>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="direction-left">Mindre</span>
+                            <span class="direction-right">Flere</span>
+                        </div>
+                        <input type="range" class="form-range mobile-filter-slider" id="mobile-late-slider" min="-10" max="10" value="0" step="0.5" data-value="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label mobile-filter-label">Natt</label>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="direction-left">Mindre</span>
+                            <span class="direction-right">Flere</span>
+                        </div>
+                        <input type="range" class="form-range mobile-filter-slider" id="mobile-night-slider" min="-10" max="10" value="0" step="0.5" data-value="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label mobile-filter-label">Fridager</label>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="direction-left">Mindre</span>
+                            <span class="direction-right">Flere</span>
+                        </div>
+                        <input type="range" class="form-range mobile-filter-slider" id="mobile-off-slider" min="-10" max="10" value="0" step="0.5" data-value="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="mobile-reset-sorting">
+                    <i class="bi bi-arrow-clockwise"></i> Tilbakestill
+                </button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="bi bi-check"></i> Bruk sortering
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 
+<script>
+// Mobile sorter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Update mobile slider values using data-value attribute
+    const mobileSliders = document.querySelectorAll('.mobile-filter-slider');
+    mobileSliders.forEach(slider => {
+        slider.addEventListener('input', function() {
+            this.setAttribute('data-value', this.value);
+        });
+    });
+    
+    // Sync mobile sliders with desktop sliders
+    function syncSliders() {
+        const desktopSliders = document.querySelectorAll('.filter-slider');
+        desktopSliders.forEach(desktopSlider => {
+            const mobileId = 'mobile-' + desktopSlider.id;
+            const mobileSlider = document.getElementById(mobileId);
+            if (mobileSlider) {
+                mobileSlider.value = desktopSlider.value;
+                mobileSlider.setAttribute('data-value', desktopSlider.value);
+            }
+        });
+    }
+    
+    // Sync mobile values to desktop when modal opens
+    document.getElementById('mobileSorterModal').addEventListener('show.bs.modal', syncSliders);
+    
+    // Apply mobile sorting values to desktop sliders when modal closes
+    document.getElementById('mobileSorterModal').addEventListener('hide.bs.modal', function() {
+        mobileSliders.forEach(mobileSlider => {
+            const desktopId = mobileSlider.id.replace('mobile-', '');
+            const desktopSlider = document.getElementById(desktopId);
+            if (desktopSlider) {
+                desktopSlider.value = mobileSlider.value;
+                // Trigger the change event to update the sorting
+                desktopSlider.dispatchEvent(new Event('input'));
+            }
+        });
+    });
+    
+    // Mobile reset button
+    document.getElementById('mobile-reset-sorting').addEventListener('click', function() {
+        mobileSliders.forEach(slider => {
+            slider.value = 0;
+            slider.setAttribute('data-value', '0');
+        });
+    });
+});
+</script>
