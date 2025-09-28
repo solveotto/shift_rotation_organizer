@@ -192,6 +192,24 @@
 
 {% block content %}
 
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container-fluid mb-3">
+            <div class="row">
+                <div class="col-12">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endwith %}
+
 <div class="page-layout">
     <!-- Main Content Area -->
     <main class="main-content">
@@ -219,8 +237,8 @@
                                     <li class="list-group-item mb-2 rounded p-2 small" style="border: 1px solid black;"> 
                                         <!-- Title section outside scroll wrapper -->
                                         <div class="d-flex align-items-center justify-content-between py-1 mb-2">
-                                            <div class="clickable-row" data-turnus="{{name}}">
-                                                <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
+                                            <div data-turnus="{{name}}">
+                                                <h5 class="h4-hover t-name">{{name}}</h5>
                                             </div>
                                             <div>
                                                 <p class="fs-6 fst-italic text-decoration-underline text-danger">{%if current_turnus_set.id != active_set.id %}Obs! Gammel turnus. {{current_turnus_set.year_identifier}}.{% endif %}</p>

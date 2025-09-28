@@ -47,7 +47,6 @@ def switch_user_year(turnus_set_id):
     if not next_page or '/switch-year/' in next_page:
         next_page = url_for('shifts.turnusliste')
     
-    flash(f'Switched to viewing turnus set', 'success')
     return redirect(next_page)
 
 def get_user_turnus_set():

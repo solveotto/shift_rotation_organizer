@@ -1347,12 +1347,19 @@ label input[type="checkbox"] {
 
 /* Table scroll wrapper for horizontal scrolling */
 .table-scroll-wrapper {
-  overflow-x: auto;
+  overflow-x: hidden; /* Hide scroll bar by default */
   overflow-y: hidden;
   width: 100%;
   border: 1px solid #dee2e6;
   border-radius: 0.375rem;
   margin: 0.5rem 0;
+}
+
+/* Show scroll bar only when needed on smaller screens */
+@media (max-width: 768px) {
+  .table-scroll-wrapper {
+    overflow-x: auto;
+  }
 }
 
 /* Make tables inside scroll wrapper horizontally scrollable */
