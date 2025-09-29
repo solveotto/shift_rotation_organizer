@@ -130,6 +130,12 @@
                         <i class="bi bi-file-earmark-zip"></i> Lagre Turnusnøkler
                       </a>
                     </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <a class="dropdown-item" href="{{ url_for('minside.user_minside') }}">
+                        <i class="bi bi-person-gear"></i> Min Side
+                      </a>
+                    </li>
                     <!-- Turnus Set Selector for small screens -->
                     {% if current_user.is_authenticated and all_turnus_sets and all_turnus_sets|length > 1 %}
                     <li class="d-lg-none">

@@ -52,3 +52,10 @@ class CreateTurnusSetForm(FlaskForm):
 class SelectTurnusSetForm(FlaskForm):
     turnus_set = SelectField('Select Turnus Set', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Switch to Selected Set')
+
+# User Profile Forms
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
+    submit = SubmitField('Change Password')

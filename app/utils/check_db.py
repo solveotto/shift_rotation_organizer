@@ -30,4 +30,4 @@ def check_database():
 
 if __name__ == "__main__":
     check_database()
-    create_new_user('testuser', 'testuser')
+    create_new_user('admin', 'admin', is_auth=1)

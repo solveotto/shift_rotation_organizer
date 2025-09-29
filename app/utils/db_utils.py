@@ -621,6 +621,28 @@ def toggle_user_auth(user_id):
     finally:
         session.close()
 
+def update_user_password(user_id, current_password, new_password):
+    """Update user password with current password verification"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(id=user_id).first()
+        if not user:
+            return False, "User not found"
+        
+        # Verify current password
+        if not bcrypt.checkpw(current_password.encode('utf-8'), user.password.encode('utf-8')):
+            return False, "Current password is incorrect"
+        
+        # Update password
+        user.password = hash_password(new_password)
+        session.commit()
+        return True, "Password updated successfully"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error updating password: {e}"
+    finally:
+        session.close()
+
 if __name__ == '__main__':
     create_new_user('testuser', 'testuser')
 
