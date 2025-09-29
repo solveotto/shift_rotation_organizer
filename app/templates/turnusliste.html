@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
-
-{% block extra_css %}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/turnusliste/highlighted-turnus.css') }}">
+    {% if highlighted_turnus %}
+    <script src="{{ url_for('static', filename='js/modules/turnusliste.js') }}"></script>
+    {% endif %}
+{% endblock %}
 
 
 {% block title %}Favoritter{% endblock %}
@@ -234,7 +238,7 @@
                                 {% set outer_index = loop.index0 %} <!-- Setter indexen for toggle funksjonen-->
                                 {% for name, data in turnus.items() %}
                             
-                                    <li class="list-group-item mb-2 rounded p-2 small" style="border: 1px solid black;"> 
+                                    <li class="list-group-item mb-2 rounded p-2 small {% if highlighted_turnus and name == highlighted_turnus %}highlighted-turnus{% endif %}" style="border: 1px solid black;"> 
                                         <!-- Title section outside scroll wrapper -->
                                         <div class="d-flex align-items-center justify-content-between py-1 mb-2">
                                             <div data-turnus="{{name}}">
@@ -433,53 +437,3 @@
 </div>
 
 {% endblock %}
-
-<script>
-// Mobile sorter functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Update mobile slider values using data-value attribute
-    const mobileSliders = document.querySelectorAll('.mobile-filter-slider');
-    mobileSliders.forEach(slider => {
-        slider.addEventListener('input', function() {
-            this.setAttribute('data-value', this.value);
-        });
-    });
-    
-    // Sync mobile sliders with desktop sliders
-    function syncSliders() {
-        const desktopSliders = document.querySelectorAll('.filter-slider');
-        desktopSliders.forEach(desktopSlider => {
-            const mobileId = 'mobile-' + desktopSlider.id;
-            const mobileSlider = document.getElementById(mobileId);
-            if (mobileSlider) {
-                mobileSlider.value = desktopSlider.value;
-                mobileSlider.setAttribute('data-value', desktopSlider.value);
-            }
-        });
-    }
-    
-    // Sync mobile values to desktop when modal opens
-    document.getElementById('mobileSorterModal').addEventListener('show.bs.modal', syncSliders);
-    
-    // Apply mobile sorting values to desktop sliders when modal closes
-    document.getElementById('mobileSorterModal').addEventListener('hide.bs.modal', function() {
-        mobileSliders.forEach(mobileSlider => {
-            const desktopId = mobileSlider.id.replace('mobile-', '');
-            const desktopSlider = document.getElementById(desktopId);
-            if (desktopSlider) {
-                desktopSlider.value = mobileSlider.value;
-                // Trigger the change event to update the sorting
-                desktopSlider.dispatchEvent(new Event('input'));
-            }
-        });
-    });
-    
-    // Mobile reset button
-    document.getElementById('mobile-reset-sorting').addEventListener('click', function() {
-        mobileSliders.forEach(slider => {
-            slider.value = 0;
-            slider.setAttribute('data-value', '0');
-        });
-    });
-});
-</script>

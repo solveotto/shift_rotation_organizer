@@ -21,15 +21,20 @@ def turnusliste():
     # Load data for user's selected year
     user_df_manager = df_utils.DataframeManager(turnus_set_id)
     
-    return render_template('turnusliste.html', 
-                         page_name='Turnusliste',
-                         table_data=user_df_manager.turnus_data,  
-                         df=user_df_manager.df.to_dict(orient='records') if not user_df_manager.df.empty else [], 
-                         favoritt=favoritt,
-                         current_turnus_set=user_turnus_set,
-                         active_set=active_set,
-                         all_turnus_sets=db_utils.get_all_turnus_sets())
+    # Get turnus parameter for highlighting specific turnus
+    highlighted_turnus = request.args.get('turnus')
+    print(f"DEBUG: highlighted_turnus = {highlighted_turnus}")  # Debug print
 
+
+    return render_template('turnusliste.html', 
+                        page_name='Turnusliste',
+                        table_data=user_df_manager.turnus_data,  
+                        df=user_df_manager.df.to_dict(orient='records') if not user_df_manager.df.empty else [], 
+                        favoritt=favoritt,
+                        current_turnus_set=user_turnus_set,
+                        active_set=active_set,
+                        all_turnus_sets=db_utils.get_all_turnus_sets(),
+                        highlighted_turnus=highlighted_turnus)
 
 @shifts.route('/switch-year/<int:turnus_set_id>')
 @login_required
