@@ -120,14 +120,10 @@
                       </div>
                     </li>
                     <li><hr class="dropdown-divider"></li>
+                 
                     <li>
-                      <a class="dropdown-item" href="{{ url_for('downloads.download_excel') }}">
-                        <i class="bi bi-file-earmark-excel"></i> Lagre Excel-file
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="{{ url_for('downloads.download_turnusnokler_zip') }}">
-                        <i class="bi bi-file-earmark-zip"></i> Lagre Turnusnøkler
+                      <a class="dropdown-item" href="{{ url_for('downloads.download_pdf') }}">
+                        <i class="bi bi-file-earmark-zip"></i> Lagre orginal PDF
                       </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
@@ -167,7 +163,6 @@
                     </li>
                     {% endblock %}
                     {% if current_user.is_admin %}
-                    <li><hr class="dropdown-divider"></li>
                     <li>
                       <a class="dropdown-item" href="{{ url_for('admin.admin_dashboard') }}">
                         <i class="bi bi-gear"></i> Admin Panel

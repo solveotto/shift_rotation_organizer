@@ -1216,7 +1216,7 @@ label input[type="checkbox"] {
 .custom-checkbox .bi {
   color: gold;
   position: absolute;
-  top: -1.2em;
+  top: -0.8em;
   left: -3.25em;
   font-size: 0.35em;
 }
@@ -1241,6 +1241,25 @@ label input[type="checkbox"] {
 }
 
 /* Favorites star end */
+
+/* Key button hover effect */
+.custom-key-btn {
+  position: relative;
+  cursor: pointer;
+}
+
+.custom-key-btn .bi-key-fill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.custom-key-btn:hover .bi-key-fill {
+  opacity: 1;
+}
 
 
 

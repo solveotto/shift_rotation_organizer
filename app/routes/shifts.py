@@ -23,7 +23,6 @@ def turnusliste():
     
     # Get turnus parameter for highlighting specific turnus
     highlighted_turnus = request.args.get('turnus')
-    print(f"DEBUG: highlighted_turnus = {highlighted_turnus}")  # Debug print
 
 
     return render_template('turnusliste.html', 

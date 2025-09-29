@@ -25,6 +25,8 @@ def get_user_turnus_set():
     # Always default to the database active set
     return active_set
 
+
+# Legacy route
 @downloads.route('/download_excel')
 def download_excel():
     # Get user's selected turnus set (same logic as other routes)
@@ -50,8 +52,8 @@ def download_excel():
     
     return send_from_directory(directory, filename, as_attachment=True)
 
-@downloads.route('/download_turnusnokler_zip')
-def download_turnusnokler_zip():
+@downloads.route('/download_pdf')
+def download_pdf():
     # Get user's selected turnus set (same logic as other routes)
     turnus_set = get_user_turnus_set()
     if not turnus_set:
@@ -60,13 +62,9 @@ def download_turnusnokler_zip():
     
     # Construct file path based on turnus set
     year_id = turnus_set['year_identifier'].lower()
-    filename = f'turnusnøkler_{turnus_set["year_identifier"]}.zip'
+    filename = f'turnuser_{turnus_set["year_identifier"]}.pdf'
     directory = os.path.join(conf.turnusfiler_dir, year_id)
     file_path = os.path.join(directory, filename)
-        
-    print(f"Directory: {directory}")
-    print(f"Filename: {filename}")
-    print(f"Full path: {file_path}")
     
     # Check if file exists
     if not os.path.exists(file_path):

@@ -153,6 +153,25 @@ def get_turnus_set_by_year(year_identifier):
     finally:
         session.close()
 
+def get_turnus_set_by_id(turnus_set_id):
+    """Get turnus set by ID"""
+    session = get_db_session()
+    try:
+        turnus_set = session.query(TurnusSet).filter_by(id=turnus_set_id).first()
+        if turnus_set:
+            return {
+                'id': turnus_set.id,
+                'name': turnus_set.name,
+                'year_identifier': turnus_set.year_identifier,
+                'is_active': turnus_set.is_active,
+                'created_at': turnus_set.created_at,
+                'turnus_file_path': turnus_set.turnus_file_path,
+                'df_file_path': turnus_set.df_file_path
+            }
+        return None
+    finally:
+        session.close()
+
 
 def set_active_turnus_set(turnus_set_id):
     """Switch which turnus set is currently active"""

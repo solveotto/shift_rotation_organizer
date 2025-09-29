@@ -123,4 +123,67 @@ def move_favorite():
         if 'session' in locals():
             session.rollback()
             session.close()
-        return jsonify({'status': 'error', 'message': str(e)}) 
+        return jsonify({'status': 'error', 'message': str(e)})
+
+@api.route('/generate-turnusnokkel', methods=['POST'])
+@login_required
+def generate_turnusnokkel():
+    data = request.get_json()
+    turnus_name = data.get('turnus_name')
+    turnus_set_id = data.get('turnus_set_id')
+    
+    if not turnus_name or not turnus_set_id:
+        return jsonify({'status': 'error', 'message': 'Missing turnus name or turnus set ID'})
+    
+    try:
+        print(f"DEBUG API: Generating turnusnøkkel for turnus_name={turnus_name}, turnus_set_id={turnus_set_id}")
+        
+        # Import the turnusnøkkel generator
+        from app.utils.turnusnokkel_gen import TurnusnokkelGen
+        from flask import send_file
+        import tempfile
+        import os
+        
+        # Create generator instance and generate the turnusnøkkel
+        generator = TurnusnokkelGen(turnus_name, turnus_set_id)
+        result = generator.generate_single_turnus_nokkel()
+        
+        print(f"DEBUG API: Generator result: {result}")
+        
+        if result['success']:
+            # Get the workbook object from the result
+            workbook = result.get('workbook')
+            filename = result['filename']
+            
+            if workbook:
+                # Save workbook to a temporary file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as temp_file:
+                    workbook.save(temp_file.name)
+                    temp_file_path = temp_file.name
+                
+                try:
+                    # Send the file as a download
+                    response = send_file(
+                        temp_file_path,
+                        as_attachment=True,
+                        download_name=filename,
+                        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    )
+                    
+                    # Clean up temp file after sending
+                    if os.path.exists(temp_file_path):
+                        os.unlink(temp_file_path)
+                    
+                    return response
+                except Exception as e:
+                    # Clean up temp file on error
+                    if os.path.exists(temp_file_path):
+                        os.unlink(temp_file_path)
+                    raise e
+            else:
+                return jsonify({'status': 'error', 'message': 'Generated workbook not found'})
+        else:
+            return jsonify({'status': 'error', 'message': result['error']})
+            
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Failed to generate turnusnøkkel: {str(e)}'}) 
