@@ -65,10 +65,13 @@
   </div>
 </div>
 
+
 <script id="compare-labels" type="application/json">{{ labels|tojson }}</script>
 <script id="compare-data" type="application/json">{{ data|tojson }}</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<!-- <script src="{{ url_for('static', filename='js/modules/graphs.js') }}"></script> -->
+
 <script>
   (function() {
   if (window.ChartDataLabels) { Chart.register(ChartDataLabels); }
@@ -145,6 +148,17 @@
       responsive: isPie ? true : false,
       maintainAspectRatio: false,
       animation: false,
+      onClick: (event, elements) => {
+        if (elements.length > 0) {
+          const elementIndex = elements[0].index;
+          const turnusName = useLabels[elementIndex];
+          // Navigate to turnusliste with the specific turnus highlighted
+          window.location.href = `/?turnus=${encodeURIComponent(turnusName)}`;
+        }
+      },
+      onHover: (event, elements) => {
+        event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+      },
       scales: isPie ? {} : {
         x: {
           beginAtZero: true,

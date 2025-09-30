@@ -33,17 +33,16 @@ class DataframeManager():
         self.current_turnus_set = turnus_set
         
         try:
-            # Try to load files from database paths first
+            # Use database file paths if available
             if turnus_set.get('turnus_file_path') and turnus_set.get('df_file_path'):
                 # Convert database paths to OS-specific paths
                 turnus_path = os.path.normpath(turnus_set['turnus_file_path'])
                 df_path = os.path.normpath(turnus_set['df_file_path'])
-                
             else:
-                # Fall back to legacy paths
+                # Construct paths based on turnus set identifier
                 year_id = turnus_set['year_identifier'].lower()
-                turnus_path = os.path.join(conf.static_dir, f'{year_id}/turnuser_{turnus_set["year_identifier"]}.json')
-                df_path = os.path.join(conf.static_dir, f'{year_id}/turnus_df_{turnus_set["year_identifier"]}.json')
+                turnus_path = os.path.join(conf.turnusfiler_dir, year_id, f'turnuser_{turnus_set["year_identifier"]}.json')
+                df_path = os.path.join(conf.turnusfiler_dir, year_id, f'turnus_df_{turnus_set["year_identifier"]}.json')
             
             # Load dataframe
             if os.path.exists(df_path):

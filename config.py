@@ -39,14 +39,9 @@ class conf:
     SECRET_KEY = os.environ.get('SECRET_KEY') or config.get('flask', 'secret_key', fallback='PLEASE_SET_SECRET_KEY_IN_CONFIG')
     if not SECRET_KEY:
         raise ValueError("SECRET_KEY must be set in environment or config.ini")
-    CURRENT_TURNUS = config.get('flask', 'current_turnus', fallback='r25')
-    if not CURRENT_TURNUS:
-        raise ValueError("CURRENT_TURNUS must be set in config.ini")
     
-
     # Export config for db_utils to use
     CONFIG = config
-
 
     # Database-specific engine options
     db_type = config.get('general', 'db_type', fallback='sqlite')
@@ -66,4 +61,4 @@ class conf:
     utils_dir = os.path.abspath(os.path.join(base_dir, 'app', 'utils'))
     sessions_dir = os.path.abspath(os.path.join(base_dir, 'app', 'utils', 'sessions'))
     log_dir = os.path.abspath(os.path.join(base_dir, 'app', 'logs'))
-    turnus_dir = os.path.abspath(os.path.join(base_dir, 'app', 'static', CURRENT_TURNUS))
+    turnusfiler_dir = os.path.abspath(os.path.join(base_dir, 'app', 'static', 'turnusfiler'))

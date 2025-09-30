@@ -2,13 +2,26 @@
 
 {% block title %}Favoritter{% endblock %}
 
-{% block content %}
-
 {% block print %}
-    <button class="btn btn-outline-light btn-sm" onclick="printTables()">
-        <i class="bi bi-printer"></i> Utskrift
+    <button class="btn btn-outline-light btn-sm print-btn" onclick="printTables()">
+        <i class="bi bi-printer"></i> <span>Utskrift</span>
     </button>
 {% endblock %}
+
+{% block mobile_print %}
+<li class="d-lg-none">
+  <a class="dropdown-item mobile-print-item" href="#" onclick="printTables(); return false;">
+    <i class="bi bi-printer"></i> Utskrift!
+  </a>
+</li>
+{% endblock %}
+
+{% block extra_css %}
+    <script src="{{ url_for('static', filename='js/modules/turnusliste.js') }}"></script>
+
+{% endblock %}
+
+{% block content %}
 
 
 <div class="col-md-5 offset-md-3">
@@ -25,7 +38,7 @@
     {% endwith %}
 </div>
 
-<div class="container-fluid printable">
+<div class="container-fluid printable" data-current-turnus-set-id="{{ current_turnus_set.id if current_turnus_set else '' }}">
     <div class="row justify-content-center">
         <div class="col-auto">
             <div class="table-responsive">
@@ -40,7 +53,7 @@
                     {% set outer_index = loop.index0 %}
                     {% for name, data in turnus.items() %}
                         <div class="list-group-item mb-2 rounded p-2 small" style="border: 1px solid black;">
-                            <div class="d-flex align-items-center justify-content-between py-1">
+                            <div class="d-flex align-items-center py-1">
                                 <div class="d-flex align-items-center">
                                     <h5 class="t-num me-3">#{{ outer_index+1 }}</h5>
                                     
@@ -72,17 +85,25 @@
                                     </div>
                                 </div>
                                 
-                                <div class="d-flex align-items-center">
-                                    <div class="clickable-row me-3" data-turnus="{{name}}">
-                                        <h5 class="h4-hover t-name">{{name}} <i class="bi bi-info-circle"></i></h5>
-                                    </div>
+                                <div class="flex-grow-1 text-center" data-turnus="{{name}}">
+                                    <h5 class="h4-hover t-name">{{name}}</h5>
+                                    <p class="fs-6 fst-italic text-decoration-underline text-danger">{%if current_turnus_set.id != active_set.id %}Obs! Gammel turnus. {{current_turnus_set.year_identifier}}.{% endif %}</p>
+                                    
+                                </div>
+                                
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm py-1 px-1 custom-key-btn" data-toggle="tooltip" data-placement="top" title="Klikk for å lagre turnusnøkkel." onclick="handleKeyFunction('{{ name }}')" style="margin-top: -10px;">
+                                        <i class="bi bi-key fs-6 text-primary"></i>
+                                        <i class="bi bi-key-fill fs-6 text-white"></i>
+                                    </button>
                                     
                                     <button class="btn btn-outline-danger btn-sm custom-remove-btn remove-favorite-btn" data-shift-title="{{name}}">X</button>
                                 </div>
                             </div>
                             
                             <!-- ... existing table content ... -->
-                            <table>
+                            <div class="table-scroll-wrapper">
+                                <table>
                                 <thead class="text-center">
                                     <tr>
                                         <th style="border: 1px solid black;">Uke</th>
@@ -122,7 +143,8 @@
                                         </tr>
                                     {% endfor %}
                                 </tbody>
-                            </table>
+                                </table>
+                            </div>
                             
                             <!-- ... existing stats content ... -->
                             {% for row in df %}

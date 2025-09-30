@@ -153,6 +153,25 @@ def get_turnus_set_by_year(year_identifier):
     finally:
         session.close()
 
+def get_turnus_set_by_id(turnus_set_id):
+    """Get turnus set by ID"""
+    session = get_db_session()
+    try:
+        turnus_set = session.query(TurnusSet).filter_by(id=turnus_set_id).first()
+        if turnus_set:
+            return {
+                'id': turnus_set.id,
+                'name': turnus_set.name,
+                'year_identifier': turnus_set.year_identifier,
+                'is_active': turnus_set.is_active,
+                'created_at': turnus_set.created_at,
+                'turnus_file_path': turnus_set.turnus_file_path,
+                'df_file_path': turnus_set.df_file_path
+            }
+        return None
+    finally:
+        session.close()
+
 
 def set_active_turnus_set(turnus_set_id):
     """Switch which turnus set is currently active"""
@@ -618,6 +637,28 @@ def toggle_user_auth(user_id):
     except Exception as e:
         session.rollback()
         return False, f"Error toggling user auth: {e}"
+    finally:
+        session.close()
+
+def update_user_password(user_id, current_password, new_password):
+    """Update user password with current password verification"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(id=user_id).first()
+        if not user:
+            return False, "User not found"
+        
+        # Verify current password
+        if not bcrypt.checkpw(current_password.encode('utf-8'), user.password.encode('utf-8')):
+            return False, "Current password is incorrect"
+        
+        # Update password
+        user.password = hash_password(new_password)
+        session.commit()
+        return True, "Password updated successfully"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error updating password: {e}"
     finally:
         session.close()
 
