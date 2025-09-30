@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Favorite</title>
+</head>
+<body>
+    <h1>Test Add Favorite to R24</h1>
+    <button onclick="testFavorite()">Test Add Favorite</button>
+    <div id="result"></div>
+    
+    <script>
+    function testFavorite() {
+        fetch('/api/debug-add-favorite', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                shift_title: 'OSL_01'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        })
+        .catch(error => {
+            document.getElementById('result').innerHTML = '<pre>Error: ' + error + '</pre>';
+        });
+    }
+    </script>
+</body>
+</html>
