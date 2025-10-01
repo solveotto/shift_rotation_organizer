@@ -8,9 +8,12 @@
                         "13:13",
                         "19:01"
                     ],
-                    "start": "13:13",
-                    "slutt": "19:01",
-                    "dagsverk": "SKNO"
+                    "start": [
+                        "13:13",
+                        "19:01"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "3006 SKNO"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -213,7 +216,7 @@
                     ],
                     "start": "16:18",
                     "slutt": "20:48",
-                    "dagsverk": "LHM"
+                    "dagsverk": "3139 LHM"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -235,7 +238,7 @@
                     ],
                     "start": "6:16",
                     "slutt": "14:39",
-                    "dagsverk": "5"
+                    "dagsverk": "5002-bm73 N05 5"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -265,7 +268,7 @@
                     ],
                     "start": "8:26",
                     "slutt": "18:11",
-                    "dagsverk": "1"
+                    "dagsverk": "3101-N05"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -413,14 +416,14 @@
                         "5:41"
                     ],
                     "slutt": "",
-                    "dagsverk": "1513-N05"
+                    "dagsverk": "1513-N05 3"
                 },
                 "4": {
                     "ukedag": "Torsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": ""
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -508,8 +511,11 @@
                         "17:12",
                         "22:26"
                     ],
-                    "start": "17:12",
-                    "slutt": "22:26",
+                    "start": [
+                        "17:12",
+                        "22:26"
+                    ],
+                    "slutt": "",
                     "dagsverk": "5021-Mod_1"
                 },
                 "6": {
@@ -542,7 +548,7 @@
                     ],
                     "start": "8:26",
                     "slutt": "18:11",
-                    "dagsverk": "1"
+                    "dagsverk": "3101-N05 1"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -571,9 +577,12 @@
                         "13:13",
                         "19:01"
                     ],
-                    "start": "13:13",
-                    "slutt": "19:01",
-                    "dagsverk": "SKNO"
+                    "start": [
+                        "13:13",
+                        "19:01"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "3006 SKNO"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -974,9 +983,12 @@
                         "17:18",
                         "22:26"
                     ],
-                    "start": "17:18",
-                    "slutt": "22:26",
-                    "dagsverk": "LHM"
+                    "start": [
+                        "17:18",
+                        "22:26"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "3141 LHM"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -1251,8 +1263,11 @@
                         "16:21",
                         "22:26"
                     ],
-                    "start": "16:21",
-                    "slutt": "22:26",
+                    "start": [
+                        "16:21",
+                        "22:26"
+                    ],
+                    "slutt": "",
                     "dagsverk": "5019"
                 },
                 "4": {
@@ -1273,7 +1288,7 @@
                     ],
                     "start": "7:01",
                     "slutt": "15:22",
-                    "dagsverk": "14"
+                    "dagsverk": "1423-N05 14"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -1293,7 +1308,7 @@
                     ],
                     "start": "10:01",
                     "slutt": "19:46",
-                    "dagsverk": "5"
+                    "dagsverk": "1714-N05"
                 }
             },
             "6": {
@@ -1336,7 +1351,7 @@
                     ],
                     "start": "6:16",
                     "slutt": "14:39",
-                    "dagsverk": "5"
+                    "dagsverk": "5002-bm73 N05"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -1428,9 +1443,12 @@
                         "17:21",
                         "23:22"
                     ],
-                    "start": "17:21",
-                    "slutt": "23:22",
-                    "dagsverk": "LHM"
+                    "start": [
+                        "17:21",
+                        "23:22"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "3116 LHM"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -1547,7 +1565,7 @@
                     ],
                     "start": "8:26",
                     "slutt": "18:11",
-                    "dagsverk": "1"
+                    "dagsverk": "3101-N05"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -1695,8 +1713,11 @@
                         "16:21",
                         "22:26"
                     ],
-                    "start": "16:21",
-                    "slutt": "22:26",
+                    "start": [
+                        "16:21",
+                        "22:26"
+                    ],
+                    "slutt": "",
                     "dagsverk": "5019"
                 },
                 "3": {
@@ -1919,7 +1940,7 @@
                     ],
                     "start": "12:16",
                     "slutt": "21:31",
-                    "dagsverk": "N05"
+                    "dagsverk": "5012-73 N05"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -2305,7 +2326,7 @@
                     ],
                     "start": "8:37",
                     "slutt": "16:41",
-                    "dagsverk": "3"
+                    "dagsverk": "1432-70 N05 3"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -2335,8 +2356,11 @@
                         "16:21",
                         "22:26"
                     ],
-                    "start": "16:21",
-                    "slutt": "22:26",
+                    "start": [
+                        "16:21",
+                        "22:26"
+                    ],
+                    "slutt": "",
                     "dagsverk": "5019"
                 },
                 "5": {
@@ -2400,7 +2424,7 @@
                     ],
                     "start": "6:16",
                     "slutt": "14:39",
-                    "dagsverk": "5"
+                    "dagsverk": "5002-bm73 N05"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -2465,7 +2489,7 @@
                     ],
                     "start": "6:16",
                     "slutt": "14:39",
-                    "dagsverk": "5"
+                    "dagsverk": "5002-bm73 N05"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -2536,9 +2560,12 @@
                         "13:13",
                         "19:01"
                     ],
-                    "start": "13:13",
-                    "slutt": "19:01",
-                    "dagsverk": "SKNO"
+                    "start": [
+                        "13:13",
+                        "19:01"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "3006 SKNO"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -2569,7 +2596,7 @@
                         "TT"
                     ],
                     "slutt": "",
-                    "dagsverk": "1"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -2856,7 +2883,7 @@
                     ],
                     "start": "5:06",
                     "slutt": "11:55",
-                    "dagsverk": "3"
+                    "dagsverk": "1403-N05"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -2864,9 +2891,12 @@
                         "13:13",
                         "19:01"
                     ],
-                    "start": "13:13",
-                    "slutt": "19:01",
-                    "dagsverk": "SKNO"
+                    "start": [
+                        "13:13",
+                        "19:01"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "3006 SKNO"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -3340,7 +3370,7 @@
                     ],
                     "start": "6:16",
                     "slutt": "14:39",
-                    "dagsverk": "5"
+                    "dagsverk": "5002-bm73-F N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -3374,7 +3404,7 @@
                     ],
                     "start": "6:31",
                     "slutt": "14:25",
-                    "dagsverk": "1"
+                    "dagsverk": "1417-N05 1"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -3461,7 +3491,7 @@
                     ],
                     "start": "12:16",
                     "slutt": "21:31",
-                    "dagsverk": "N05"
+                    "dagsverk": "5012-73 N05"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -3472,7 +3502,7 @@
                         "TT"
                     ],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": ""
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -3492,7 +3522,7 @@
                     ],
                     "start": "7:46",
                     "slutt": "15:36",
-                    "dagsverk": "1"
+                    "dagsverk": "1428-N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -3669,7 +3699,7 @@
         }
     },
     {
-        "OSL_09": {
+        "OSL_09_\u00d8stre_Linje": {
             "1": {
                 "1": {
                     "ukedag": "Mandag",
@@ -4023,7 +4053,7 @@
                     ],
                     "start": "13:48",
                     "slutt": "21:11",
-                    "dagsverk": "5"
+                    "dagsverk": "1440-N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -4033,7 +4063,7 @@
                     ],
                     "start": "10:53",
                     "slutt": "20:48",
-                    "dagsverk": "1618"
+                    "dagsverk": "F 1618"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -4076,7 +4106,7 @@
                     ],
                     "start": "8:26",
                     "slutt": "18:11",
-                    "dagsverk": "1"
+                    "dagsverk": "3101-N05"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -4124,7 +4154,7 @@
         }
     },
     {
-        "OSL_10": {
+        "OSL_10_\u00d8stre_Linje": {
             "1": {
                 "1": {
                     "ukedag": "Mandag",
@@ -4546,14 +4576,14 @@
                         "6:46"
                     ],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": "1323"
                 },
                 "5": {
                     "ukedag": "Fredag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1323"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -4581,7 +4611,7 @@
         }
     },
     {
-        "OSL_11": {
+        "OSL_11_\u00d8stre_Linje": {
             "1": {
                 "1": {
                     "ukedag": "Mandag",
@@ -4706,7 +4736,7 @@
                     ],
                     "start": "6:01",
                     "slutt": "12:56",
-                    "dagsverk": "5"
+                    "dagsverk": "1411-N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -4823,14 +4853,14 @@
                         "6:41"
                     ],
                     "slutt": "",
-                    "dagsverk": "1511-N05"
+                    "dagsverk": "1511-N05 01"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "01"
+                    "dagsverk": ""
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -4853,14 +4883,14 @@
                         "7:25"
                     ],
                     "slutt": "",
-                    "dagsverk": "9"
+                    "dagsverk": "1325"
                 },
                 "5": {
                     "ukedag": "Fredag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1325"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -4929,7 +4959,7 @@
                         "7:31"
                     ],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": "1523"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -4942,14 +4972,14 @@
                         "7:11"
                     ],
                     "slutt": "",
-                    "dagsverk": "1512-N05"
+                    "dagsverk": "1512-N05 1"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1"
+                    "dagsverk": ""
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -5045,7 +5075,7 @@
         }
     },
     {
-        "OSL_12": {
+        "OSL_12_\u00d8stre_Linje": {
             "1": {
                 "1": {
                     "ukedag": "Mandag",
@@ -5510,7 +5540,7 @@
         }
     },
     {
-        "OSL_13": {
+        "OSL_13_\u00d8stre_Linje": {
             "1": {
                 "1": {
                     "ukedag": "Mandag",
@@ -5896,7 +5926,7 @@
                     ],
                     "start": "21:01",
                     "slutt": "6:21",
-                    "dagsverk": "1"
+                    "dagsverk": "1277-N05 1"
                 }
             },
             "6": {
@@ -5911,14 +5941,14 @@
                         "7:25"
                     ],
                     "slutt": "",
-                    "dagsverk": "1277-N05"
+                    "dagsverk": "1325"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1325"
+                    "dagsverk": ""
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -5944,14 +5974,14 @@
                         "6:41"
                     ],
                     "slutt": "",
-                    "dagsverk": "1511-N05"
+                    "dagsverk": "1511-N05 01"
                 },
                 "5": {
                     "ukedag": "Fredag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "01"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -5979,7 +6009,7 @@
         }
     },
     {
-        "OSL_14": {
+        "OSL_14_\u00d8stre_Linje": {
             "1": {
                 "1": {
                     "ukedag": "Mandag",
@@ -6051,7 +6081,7 @@
                     ],
                     "start": "8:48",
                     "slutt": "17:41",
-                    "dagsverk": "5"
+                    "dagsverk": "1712-N05"
                 }
             },
             "2": {
@@ -6089,14 +6119,14 @@
                         "6:41"
                     ],
                     "slutt": "",
-                    "dagsverk": "1511-N05"
+                    "dagsverk": "1511-N05 01"
                 },
                 "4": {
                     "ukedag": "Torsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "01"
+                    "dagsverk": ""
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -6302,7 +6332,7 @@
                     ],
                     "start": "7:05",
                     "slutt": "16:41",
-                    "dagsverk": "3"
+                    "dagsverk": "1425-N05"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -6441,7 +6471,7 @@
         }
     },
     {
-        "OSL_15": {
+        "OSL_15_\u00d8stre_Linje": {
             "1": {
                 "1": {
                     "ukedag": "Mandag",
@@ -7107,7 +7137,7 @@
                     ],
                     "start": "12:16",
                     "slutt": "20:31",
-                    "dagsverk": "N05"
+                    "dagsverk": "5012-73 N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -7117,7 +7147,7 @@
                     ],
                     "start": "9:37",
                     "slutt": "16:47",
-                    "dagsverk": "7462"
+                    "dagsverk": "F 7462"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -7258,7 +7288,7 @@
                     ],
                     "start": "8:26",
                     "slutt": "18:11",
-                    "dagsverk": "1"
+                    "dagsverk": "3101-N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -7686,7 +7716,7 @@
                     ],
                     "start": "7:01",
                     "slutt": "15:22",
-                    "dagsverk": "14"
+                    "dagsverk": "1423-N05 14"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -7696,7 +7726,7 @@
                     ],
                     "start": "6:01",
                     "slutt": "12:56",
-                    "dagsverk": "5"
+                    "dagsverk": "1411-N05"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -8169,7 +8199,7 @@
                     ],
                     "start": "7:05",
                     "slutt": "16:41",
-                    "dagsverk": "3"
+                    "dagsverk": "1425-N05"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -8563,7 +8593,7 @@
                     ],
                     "start": "12:16",
                     "slutt": "21:31",
-                    "dagsverk": "N05"
+                    "dagsverk": "5012-73 N05"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -8574,7 +8604,7 @@
                         "TT"
                     ],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -8783,7 +8813,7 @@
                     ],
                     "start": "7:01",
                     "slutt": "15:22",
-                    "dagsverk": "14"
+                    "dagsverk": "1423-N05 14"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -8793,7 +8823,7 @@
                     ],
                     "start": "7:05",
                     "slutt": "16:41",
-                    "dagsverk": "3"
+                    "dagsverk": "1425-N05"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -8932,7 +8962,7 @@
                     ],
                     "start": "6:01",
                     "slutt": "12:56",
-                    "dagsverk": "5"
+                    "dagsverk": "1411-N05"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -8972,7 +9002,7 @@
                     ],
                     "start": "23:39",
                     "slutt": "6:41",
-                    "dagsverk": "5"
+                    "dagsverk": "1751-N05 5"
                 }
             },
             "4": {
@@ -8987,14 +9017,14 @@
                         "7:11"
                     ],
                     "slutt": "",
-                    "dagsverk": "1751-N05"
+                    "dagsverk": "1519"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1519"
+                    "dagsverk": ""
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -9591,7 +9621,7 @@
                     ],
                     "start": "13:48",
                     "slutt": "22:11",
-                    "dagsverk": "5"
+                    "dagsverk": "1440-N05 5"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -9734,14 +9764,14 @@
                         "7:46"
                     ],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": "1637"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1637"
+                    "dagsverk": ""
                 }
             },
             "2": {
@@ -10051,7 +10081,7 @@
                     ],
                     "start": "10:26",
                     "slutt": "20:03",
-                    "dagsverk": "5"
+                    "dagsverk": "3154-N05"
                 }
             },
             "6": {
@@ -10194,14 +10224,14 @@
                         "7:43"
                     ],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": "1535-N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": ""
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -10211,7 +10241,7 @@
                     ],
                     "start": "15:08",
                     "slutt": "0:11",
-                    "dagsverk": "5"
+                    "dagsverk": "1728-N05 5"
                 }
             },
             "2": {
@@ -10226,7 +10256,7 @@
                         "7:31"
                     ],
                     "slutt": "",
-                    "dagsverk": "1728-N05"
+                    "dagsverk": "1523"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -10239,14 +10269,14 @@
                         "7:03"
                     ],
                     "slutt": "",
-                    "dagsverk": "1523"
+                    "dagsverk": "1521"
                 },
                 "3": {
                     "ukedag": "Onsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1521"
+                    "dagsverk": ""
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -10535,14 +10565,14 @@
                         "6:11"
                     ],
                     "slutt": "",
-                    "dagsverk": "1503-N05"
+                    "dagsverk": "1503-N05 5"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": ""
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -10774,7 +10804,7 @@
                     ],
                     "start": "7:01",
                     "slutt": "15:22",
-                    "dagsverk": "14"
+                    "dagsverk": "1423-N05 14"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -10864,14 +10894,14 @@
                         "7:11"
                     ],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": "1519"
                 },
                 "4": {
                     "ukedag": "Torsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1519"
+                    "dagsverk": ""
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -10916,7 +10946,7 @@
                     ],
                     "start": "6:36",
                     "slutt": "15:36",
-                    "dagsverk": "M"
+                    "dagsverk": "1428-N05 1 M"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -10958,7 +10988,7 @@
                     ],
                     "start": "6:31",
                     "slutt": "14:25",
-                    "dagsverk": "1"
+                    "dagsverk": "1417-N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -11072,7 +11102,7 @@
                     ],
                     "start": "7:11",
                     "slutt": "14:22",
-                    "dagsverk": "1"
+                    "dagsverk": "1207-mod 1"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -11180,7 +11210,7 @@
                     ],
                     "start": "7:01",
                     "slutt": "15:22",
-                    "dagsverk": "14"
+                    "dagsverk": "1423-N05 14"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -11457,7 +11487,7 @@
                     ],
                     "start": "13:48",
                     "slutt": "22:11",
-                    "dagsverk": "5"
+                    "dagsverk": "1440-N05"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -11650,7 +11680,7 @@
                         "TT"
                     ],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -11914,7 +11944,7 @@
                     ],
                     "start": "14:11",
                     "slutt": "22:11",
-                    "dagsverk": "5"
+                    "dagsverk": "1268-N05"
                 }
             },
             "6": {
@@ -12069,7 +12099,7 @@
                         "7:16"
                     ],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": "1636"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -12114,14 +12144,14 @@
                         "5:45"
                     ],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": "5026"
                 },
                 "4": {
                     "ukedag": "Torsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "5026"
+                    "dagsverk": ""
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -12197,7 +12227,7 @@
                     ],
                     "start": "6:31",
                     "slutt": "14:25",
-                    "dagsverk": "1"
+                    "dagsverk": "1417-N05"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -12418,7 +12448,7 @@
                     ],
                     "start": "13:48",
                     "slutt": "22:11",
-                    "dagsverk": "5"
+                    "dagsverk": "1440-N05"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -12560,14 +12590,14 @@
                         "6:26"
                     ],
                     "slutt": "",
-                    "dagsverk": "1517-N05"
+                    "dagsverk": "1517-N05 5"
                 },
                 "3": {
                     "ukedag": "Onsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": ""
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -12784,7 +12814,7 @@
                     ],
                     "start": "7:11",
                     "slutt": "14:22",
-                    "dagsverk": "1"
+                    "dagsverk": "1207-mod"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -12838,7 +12868,7 @@
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": ""
                 }
             },
             "6": {
@@ -12894,7 +12924,7 @@
                         "TT"
                     ],
                     "slutt": "",
-                    "dagsverk": "9"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -13051,7 +13081,7 @@
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -13101,14 +13131,14 @@
                         "6:41"
                     ],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": "1507"
                 },
                 "3": {
                     "ukedag": "Onsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1507"
+                    "dagsverk": ""
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -13172,7 +13202,7 @@
                     ],
                     "start": "7:46",
                     "slutt": "15:36",
-                    "dagsverk": "1"
+                    "dagsverk": "1428-N05"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -13198,14 +13228,14 @@
                         "6:11"
                     ],
                     "slutt": "",
-                    "dagsverk": "1503-N05"
+                    "dagsverk": "1503-N05 5"
                 },
                 "5": {
                     "ukedag": "Fredag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -13255,14 +13285,14 @@
                         "6:41"
                     ],
                     "slutt": "",
-                    "dagsverk": "1511-N05"
+                    "dagsverk": "1511-N05 01"
                 },
                 "3": {
                     "ukedag": "Onsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "01"
+                    "dagsverk": ""
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -13394,7 +13424,7 @@
                     ],
                     "start": "6:01",
                     "slutt": "12:56",
-                    "dagsverk": "5"
+                    "dagsverk": "1411-N05 3 5"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -13452,7 +13482,7 @@
                         "8:51"
                     ],
                     "slutt": "",
-                    "dagsverk": "1"
+                    "dagsverk": "1247"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -13462,7 +13492,7 @@
                     ],
                     "start": "22:31",
                     "slutt": "6:11",
-                    "dagsverk": "1"
+                    "dagsverk": "1744-N05 1"
                 }
             },
             "2": {
@@ -13471,7 +13501,7 @@
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1744-N05"
+                    "dagsverk": ""
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -13746,7 +13776,7 @@
                     ],
                     "start": "7:05",
                     "slutt": "16:41",
-                    "dagsverk": "3"
+                    "dagsverk": "1425-N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -13798,7 +13828,7 @@
                     ],
                     "start": "13:48",
                     "slutt": "22:11",
-                    "dagsverk": "5"
+                    "dagsverk": "1440-N05"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -13878,7 +13908,7 @@
                     ],
                     "start": "7:11",
                     "slutt": "14:22",
-                    "dagsverk": "1"
+                    "dagsverk": "1207-mod"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -13909,7 +13939,7 @@
                     ],
                     "start": "7:01",
                     "slutt": "15:13",
-                    "dagsverk": "1"
+                    "dagsverk": "1606-N05"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -14019,7 +14049,7 @@
                     ],
                     "start": "6:31",
                     "slutt": "14:25",
-                    "dagsverk": "1"
+                    "dagsverk": "1417-N05"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -14029,7 +14059,7 @@
                     ],
                     "start": "7:46",
                     "slutt": "15:36",
-                    "dagsverk": "1"
+                    "dagsverk": "1428-N05"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -14085,14 +14115,14 @@
                         "6:26"
                     ],
                     "slutt": "",
-                    "dagsverk": "1517-N05"
+                    "dagsverk": "1517-N05 5"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": ""
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -14180,7 +14210,7 @@
                     ],
                     "start": "6:31",
                     "slutt": "14:25",
-                    "dagsverk": "1"
+                    "dagsverk": "1417-N05"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -14660,7 +14690,7 @@
                     ],
                     "start": "5:06",
                     "slutt": "11:55",
-                    "dagsverk": "3"
+                    "dagsverk": "1403-N05"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -14692,7 +14722,7 @@
                     ],
                     "start": "5:06",
                     "slutt": "11:55",
-                    "dagsverk": "3"
+                    "dagsverk": "1403-N05 3"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -14979,7 +15009,7 @@
                     ],
                     "start": "14:01",
                     "slutt": "22:03",
-                    "dagsverk": "1"
+                    "dagsverk": "1242-N05"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -15032,7 +15062,7 @@
                     ],
                     "start": "7:46",
                     "slutt": "15:36",
-                    "dagsverk": "1"
+                    "dagsverk": "1428-N05"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -15449,7 +15479,7 @@
                     ],
                     "start": "16:31",
                     "slutt": "0:11",
-                    "dagsverk": "3"
+                    "dagsverk": "3048-N05 3"
                 }
             },
             "4": {
@@ -15727,7 +15757,7 @@
                     ],
                     "start": "5:06",
                     "slutt": "11:55",
-                    "dagsverk": "3"
+                    "dagsverk": "1403-N05"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -15788,14 +15818,14 @@
                         "7:31"
                     ],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": "1526"
                 },
                 "3": {
                     "ukedag": "Onsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1526"
+                    "dagsverk": ""
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -16093,7 +16123,7 @@
                     ],
                     "start": "5:06",
                     "slutt": "11:55",
-                    "dagsverk": "3"
+                    "dagsverk": "1403-N05"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -16824,7 +16854,7 @@
                     ],
                     "start": "15:38",
                     "slutt": "0:41",
-                    "dagsverk": "5"
+                    "dagsverk": "1729-N05 3 5"
                 }
             },
             "4": {
@@ -16869,7 +16899,7 @@
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": ""
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -17016,14 +17046,14 @@
                         "6:21"
                     ],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": "1540"
                 },
                 "4": {
                     "ukedag": "Torsdag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "1540"
+                    "dagsverk": ""
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -17130,7 +17160,7 @@
                         "7:41"
                     ],
                     "slutt": "",
-                    "dagsverk": "3"
+                    "dagsverk": "1645"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -17334,14 +17364,14 @@
                         "6:26"
                     ],
                     "slutt": "",
-                    "dagsverk": "1517-N05"
+                    "dagsverk": "1517-N05 5"
                 },
                 "5": {
                     "ukedag": "Fredag",
                     "tid": [],
                     "start": [],
                     "slutt": "",
-                    "dagsverk": "5"
+                    "dagsverk": ""
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -17898,7 +17928,7 @@
                     ],
                     "start": "13:41",
                     "slutt": "21:11",
-                    "dagsverk": "1"
+                    "dagsverk": "1241-N05"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -18183,7 +18213,7 @@
                     ],
                     "start": "6:01",
                     "slutt": "12:56",
-                    "dagsverk": "5"
+                    "dagsverk": "1411-N05"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -18410,7 +18440,7 @@
                     ],
                     "start": "7:11",
                     "slutt": "14:22",
-                    "dagsverk": "1"
+                    "dagsverk": "1207-mod"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -18997,7 +19027,7 @@
                         "7:00"
                     ],
                     "slutt": "",
-                    "dagsverk": "923000700"
+                    "dagsverk": "923000700 923000700"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -19146,7 +19176,7 @@
                         "7:00"
                     ],
                     "slutt": "",
-                    "dagsverk": "923000700"
+                    "dagsverk": "923000700 923000700"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -19295,7 +19325,7 @@
                         "7:00"
                     ],
                     "slutt": "",
-                    "dagsverk": "923000700"
+                    "dagsverk": "923000700 923000700"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -19942,7 +19972,7 @@
                         "2:00"
                     ],
                     "slutt": "",
-                    "dagsverk": "917000200"
+                    "dagsverk": "917000200 917000200"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -20269,7 +20299,7 @@
                         "2:00"
                     ],
                     "slutt": "",
-                    "dagsverk": "917000200"
+                    "dagsverk": "917000200 917000200"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -20593,7 +20623,7 @@
                         "0:15"
                     ],
                     "slutt": "",
-                    "dagsverk": "914450015"
+                    "dagsverk": "914450015 914450015"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -23249,7 +23279,7 @@
                         "7:30"
                     ],
                     "slutt": "",
-                    "dagsverk": "923300730"
+                    "dagsverk": "923300730 923300730"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -23398,7 +23428,7 @@
                         "7:45"
                     ],
                     "slutt": "",
-                    "dagsverk": "923450745"
+                    "dagsverk": "923450745 923450745"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -23547,7 +23577,7 @@
                         "7:30"
                     ],
                     "slutt": "",
-                    "dagsverk": "923300730"
+                    "dagsverk": "923300730 923300730"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -23701,7 +23731,7 @@
                         "7:00"
                     ],
                     "slutt": "",
-                    "dagsverk": "923000700"
+                    "dagsverk": "923000700 923000700"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -23852,7 +23882,7 @@
                         "7:00"
                     ],
                     "slutt": "",
-                    "dagsverk": "923000700"
+                    "dagsverk": "923000700 923000700"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -24003,7 +24033,7 @@
                         "7:00"
                     ],
                     "slutt": "",
-                    "dagsverk": "923000700"
+                    "dagsverk": "923000700 923000700"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -24317,7 +24347,7 @@
                         "1:00"
                     ],
                     "slutt": "",
-                    "dagsverk": "915000100"
+                    "dagsverk": "915000100 915000100"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -24583,7 +24613,7 @@
                     ],
                     "start": "12:16",
                     "slutt": "21:31",
-                    "dagsverk": "N05"
+                    "dagsverk": "5012-73 N05"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -24591,9 +24621,12 @@
                         "14:15",
                         "22:13"
                     ],
-                    "start": "14:15",
-                    "slutt": "22:13",
-                    "dagsverk": "GTB"
+                    "start": [
+                        "14:15",
+                        "22:13"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "5407 GTB"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -24633,9 +24666,12 @@
                         "10:30",
                         "19:51"
                     ],
-                    "start": "10:30",
-                    "slutt": "19:51",
-                    "dagsverk": "GTB"
+                    "start": [
+                        "10:30",
+                        "19:51"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "5403 GTB"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -24818,9 +24854,12 @@
                         "10:30",
                         "19:51"
                     ],
-                    "start": "10:30",
-                    "slutt": "19:51",
-                    "dagsverk": "GTB"
+                    "start": [
+                        "10:30",
+                        "19:51"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "5403 GTB"
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -24884,9 +24923,12 @@
                         "14:15",
                         "22:13"
                     ],
-                    "start": "14:15",
-                    "slutt": "22:13",
-                    "dagsverk": "GTB"
+                    "start": [
+                        "14:15",
+                        "22:13"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "5407 GTB"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -24916,7 +24958,7 @@
                     ],
                     "start": "8:43",
                     "slutt": "17:10",
-                    "dagsverk": "M"
+                    "dagsverk": "5454 M"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -25015,8 +25057,11 @@
                         "16:21",
                         "22:26"
                     ],
-                    "start": "16:21",
-                    "slutt": "22:26",
+                    "start": [
+                        "16:21",
+                        "22:26"
+                    ],
+                    "slutt": "",
                     "dagsverk": "5019"
                 },
                 "2": {
@@ -25192,9 +25237,12 @@
                         "10:30",
                         "19:51"
                     ],
-                    "start": "10:30",
-                    "slutt": "19:51",
-                    "dagsverk": "GTB"
+                    "start": [
+                        "10:30",
+                        "19:51"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "5403 GTB"
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -25224,7 +25272,7 @@
                     ],
                     "start": "14:15",
                     "slutt": "22:13",
-                    "dagsverk": "GTB"
+                    "dagsverk": "5425 GTB"
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -25365,7 +25413,7 @@
                     ],
                     "start": "13:45",
                     "slutt": "21:13",
-                    "dagsverk": "M"
+                    "dagsverk": "5450 M"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -25405,9 +25453,12 @@
                         "14:15",
                         "22:13"
                     ],
-                    "start": "14:15",
-                    "slutt": "22:13",
-                    "dagsverk": "GTB"
+                    "start": [
+                        "14:15",
+                        "22:13"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "5407 GTB"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -25539,7 +25590,7 @@
                     ],
                     "start": "11:14",
                     "slutt": "20:21",
-                    "dagsverk": "GTB"
+                    "dagsverk": "5433 GTB"
                 }
             },
             "2": {
@@ -25819,7 +25870,7 @@
                     ],
                     "start": "14:15",
                     "slutt": "22:13",
-                    "dagsverk": "GTB"
+                    "dagsverk": "5413 GTB"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -26023,9 +26074,12 @@
                         "10:30",
                         "19:51"
                     ],
-                    "start": "10:30",
-                    "slutt": "19:51",
-                    "dagsverk": "GTB"
+                    "start": [
+                        "10:30",
+                        "19:51"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "5403 GTB"
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -26151,7 +26205,7 @@
                     ],
                     "start": "13:45",
                     "slutt": "22:13",
-                    "dagsverk": "GTB"
+                    "dagsverk": "5437 GTB"
                 }
             },
             "4": {
@@ -26281,7 +26335,7 @@
                     ],
                     "start": "10:30",
                     "slutt": "19:51",
-                    "dagsverk": "GTB"
+                    "dagsverk": "5411-F GTB"
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -26311,9 +26365,12 @@
                         "14:15",
                         "22:13"
                     ],
-                    "start": "14:15",
-                    "slutt": "22:13",
-                    "dagsverk": "GTB"
+                    "start": [
+                        "14:15",
+                        "22:13"
+                    ],
+                    "slutt": "",
+                    "dagsverk": "5407 GTB"
                 },
                 "2": {
                     "ukedag": "Tirsdag",
