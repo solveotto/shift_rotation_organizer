@@ -274,14 +274,18 @@ class ShiftScraper():
                         if prev_match:
                             prev_day_number = int(prev_match.group(1))
                     
-                    # If we found a consecutive number pattern, mark only the FIRST shift with arrow
+                    # If we found a consecutive number pattern, mark both shifts for tooltips
                     if prev_day_number and current_number == prev_day_number + 1:
                         if dag > 1:
-                            # Only mark the previous day (first shift) with arrow
+                            # Mark the previous day (first shift) with arrow
                             turnus[uke][dag-1]['is_consecutive_shift'] = True
+                            # Mark the current day (second shift) as receiver
+                            turnus[uke][dag]['is_consecutive_receiver'] = True
                         elif dag == 1 and uke > 1:
-                            # Only mark the Sunday (first shift) with arrow
+                            # Mark the Sunday (first shift) with arrow
                             turnus[uke-1][7]['is_consecutive_shift'] = True
+                            # Mark the Monday (second shift) as receiver
+                            turnus[uke][dag]['is_consecutive_receiver'] = True
                 
                 # Check if this dagsverk text crosses into next day's column
                 # Look for the current day's x boundary

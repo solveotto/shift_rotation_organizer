@@ -27,7 +27,7 @@
                     "slutt": "9:56",
                     "dagsverk": "3007",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -268,7 +268,7 @@
                     "slutt": "14:33",
                     "dagsverk": "3140",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 }
             },
             "4": {
@@ -622,7 +622,7 @@
                     "slutt": "12:41",
                     "dagsverk": "5022",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -700,7 +700,7 @@
                     "slutt": "9:56",
                     "dagsverk": "3007",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -1180,7 +1180,7 @@
                     "slutt": "13:33",
                     "dagsverk": "3142",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 }
             },
             "2": {
@@ -1510,7 +1510,7 @@
                     "slutt": "12:31",
                     "dagsverk": "5020",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -1585,7 +1585,7 @@
                     "slutt": "16:16",
                     "dagsverk": "1419",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -1722,7 +1722,7 @@
                     "slutt": "14:33",
                     "dagsverk": "3117",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -2042,7 +2042,7 @@
                     "slutt": "12:31",
                     "dagsverk": "5020",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -2278,7 +2278,7 @@
                     "slutt": "15:33",
                     "dagsverk": "5038",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 }
             },
             "2": {
@@ -2472,7 +2472,7 @@
                     "slutt": "12:31",
                     "dagsverk": "5056",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -2801,7 +2801,7 @@
                     "slutt": "12:31",
                     "dagsverk": "5020",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -3043,7 +3043,7 @@
                     "slutt": "9:56",
                     "dagsverk": "3007",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -3432,7 +3432,7 @@
                     "slutt": "9:56",
                     "dagsverk": "3007",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -9587,7 +9587,7 @@
                     "slutt": "20:47",
                     "dagsverk": "7408",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -10784,7 +10784,7 @@
                     "slutt": "15:09",
                     "dagsverk": "1206",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -29098,7 +29098,7 @@
                     "slutt": "12:14",
                     "dagsverk": "5408",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -29151,7 +29151,7 @@
                     "slutt": "10:43",
                     "dagsverk": "5404",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -29373,7 +29373,7 @@
                     "slutt": "10:43",
                     "dagsverk": "5404",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "6": {
                     "ukedag": "L\u00f8rdag",
@@ -29454,7 +29454,7 @@
                     "slutt": "12:14",
                     "dagsverk": "5408",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -29490,7 +29490,7 @@
                     "slutt": "21:44",
                     "dagsverk": "5455",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 }
             },
             "6": {
@@ -29612,7 +29612,7 @@
                     "slutt": "12:31",
                     "dagsverk": "5020",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "3": {
                     "ukedag": "Onsdag",
@@ -29730,7 +29730,7 @@
                     "slutt": "23:49",
                     "dagsverk": "5406",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -29824,7 +29824,7 @@
                     "slutt": "10:43",
                     "dagsverk": "5404",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "5": {
                     "ukedag": "Fredag",
@@ -29860,7 +29860,7 @@
                     "slutt": "13:47",
                     "dagsverk": "5426",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 }
             },
             "4": {
@@ -30027,7 +30027,7 @@
                     "slutt": "18:48",
                     "dagsverk": "5451",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -30080,7 +30080,7 @@
                     "slutt": "12:14",
                     "dagsverk": "5408",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -30238,7 +30238,7 @@
                     "slutt": "10:46",
                     "dagsverk": "5434",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -30568,7 +30568,7 @@
                     "slutt": "13:47",
                     "dagsverk": "5414",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -30621,7 +30621,7 @@
                     "slutt": "",
                     "dagsverk": "5406",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -30813,7 +30813,7 @@
                     "slutt": "10:43",
                     "dagsverk": "5404",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "4": {
                     "ukedag": "Torsdag",
@@ -30965,7 +30965,7 @@
                     "slutt": "12:14",
                     "dagsverk": "5438",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "2": {
                     "ukedag": "Tirsdag",
@@ -31117,7 +31117,7 @@
                     "slutt": "11:47",
                     "dagsverk": "5412",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "7": {
                     "ukedag": "S\u00f8ndag",
@@ -31158,7 +31158,7 @@
                     "slutt": "12:14",
                     "dagsverk": "5408",
                     "is_consecutive_shift": false,
-                    "is_consecutive_receiver": false
+                    "is_consecutive_receiver": true
                 },
                 "3": {
                     "ukedag": "Onsdag",
