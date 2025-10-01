@@ -11,3 +11,83 @@
     50% { box-shadow: 0 0 30px rgba(255, 193, 7, 0.6); }
     100% { box-shadow: 0 0 10px rgba(255, 193, 7, 0.3); }
 }
+
+/* Consecutive Shift Visual Indicators - More prominent options */
+
+/* Clean arrow connection - only on first shift */
+.consecutive-shift-arrow {
+    position: relative;
+}
+
+.consecutive-shift-arrow::after {
+    content: "→";
+    position: absolute;
+    top: 8px; /* Position to align with the dagsverk text */
+    right: -8px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+    z-index: 15;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Option 2: Thicker border around both shifts */
+.consecutive-shift-border {
+    border: 3px solid #ff6b35 !important;
+    box-shadow: 0 0 8px rgba(255, 107, 53, 0.4) !important;
+    background: linear-gradient(135deg, #fff5f0 0%, #ffe8e0 100%) !important;
+}
+
+/* Option 3: Bold dotted line */
+.consecutive-shift-bold-dotted {
+    position: relative;
+}
+
+.consecutive-shift-bold-dotted::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -2px;
+    width: 12px;
+    height: 3px;
+    background: repeating-linear-gradient(
+        to right,
+        #ff6b35 0px,
+        #ff6b35 4px,
+        transparent 4px,
+        transparent 8px
+    );
+    transform: translateY(-50%);
+    z-index: 5;
+}
+
+/* Option 4: Connection line with arrow head */
+.consecutive-shift-line-arrow {
+    position: relative;
+}
+
+.consecutive-shift-line-arrow::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -1px;
+    width: 15px;
+    height: 2px;
+    background: #ff6b35;
+    transform: translateY(-50%);
+    z-index: 5;
+}
+
+.consecutive-shift-line-arrow::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -3px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid #ff6b35;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    transform: translateY(-50%);
+    z-index: 5;
+}

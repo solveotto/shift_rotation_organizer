@@ -282,7 +282,7 @@
                                                         <td style="border: 1px solid black; font-size: small;">{{ week_nr }}</td>
 
                                                         {% for day_nr, day_data in week_data.items() %}
-                                                            <td id="cell" class="min-width-td" style="border: 1px solid black;">
+                                                            <td id="cell" class="min-width-td {% if day_data.is_consecutive_shift %}consecutive-shift-arrow{% endif %}" style="border: 1px solid black;">
                                                                 <div class="custom-text" style="font-size: xx-small;">{{day_data.dagsverk}}</div>
                                                                 <div class="time-text" style="font-size: small;">
                                                                     {% for time in day_data.tid %}

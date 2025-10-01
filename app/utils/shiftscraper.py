@@ -252,6 +252,37 @@ class ShiftScraper():
             else:
                 text_to_add = word['text']
                 
+                # Check for consecutive number pattern (e.g., 3006 -> 3007)
+                # Extract numeric part from dagsverk if it exists
+                if text_to_add and text_to_add.isdigit() and len(text_to_add) >= 3:
+                    current_number = int(text_to_add)
+                    
+                    # Check if previous day has a consecutive number
+                    prev_day_number = None
+                    if dag > 1 and turnus[uke][dag-1]['dagsverk']:
+                        prev_dagsverk = turnus[uke][dag-1]['dagsverk']
+                        # Extract number from previous dagsverk (handle formats like "3006-OSL")
+                        import re
+                        prev_match = re.search(r'^(\d+)', prev_dagsverk)
+                        if prev_match:
+                            prev_day_number = int(prev_match.group(1))
+                    elif dag == 1 and uke > 1 and turnus[uke-1][7]['dagsverk']:
+                        # Check Sunday to Monday transition
+                        prev_dagsverk = turnus[uke-1][7]['dagsverk']
+                        import re
+                        prev_match = re.search(r'^(\d+)', prev_dagsverk)
+                        if prev_match:
+                            prev_day_number = int(prev_match.group(1))
+                    
+                    # If we found a consecutive number pattern, mark only the FIRST shift with arrow
+                    if prev_day_number and current_number == prev_day_number + 1:
+                        if dag > 1:
+                            # Only mark the previous day (first shift) with arrow
+                            turnus[uke][dag-1]['is_consecutive_shift'] = True
+                        elif dag == 1 and uke > 1:
+                            # Only mark the Sunday (first shift) with arrow
+                            turnus[uke-1][7]['is_consecutive_shift'] = True
+                
                 # Check if this dagsverk text crosses into next day's column
                 # Look for the current day's x boundary
                 for dager in self.DAG_POS:
@@ -344,13 +375,13 @@ class ShiftScraper():
         def generer_turnus_mal():
 
 
-            uke_mal = {1:{'ukedag':'Mandag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
-                        2:{'ukedag':'Tirsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
-                        3:{'ukedag':'Onsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
-                        4:{'ukedag':'Torsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""},
-                        5:{'ukedag':'Fredag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
-                        6:{'ukedag':'Lørdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""},
-                        7:{'ukedag':'Søndag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}}
+            uke_mal = {1:{'ukedag':'Mandag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}, 
+                        2:{'ukedag':'Tirsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}, 
+                        3:{'ukedag':'Onsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}, 
+                        4:{'ukedag':'Torsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False},
+                        5:{'ukedag':'Fredag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}, 
+                        6:{'ukedag':'Lørdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False},
+                        7:{'ukedag':'Søndag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}}
             turnus = {}
 
             for uke in range(1,7):
