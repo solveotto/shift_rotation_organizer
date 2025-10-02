@@ -379,10 +379,7 @@ export class SortingSystem {
 
         // Make hideSortingInfo available globally for backward compatibility
         window.hideSortingInfo = () => {
-            const sortingInfo = document.getElementById('sorting-info');
-            if (sortingInfo) {
-                sortingInfo.style.display = 'none';
-            }
+            this.resetOrder();
         };
     }
 }
