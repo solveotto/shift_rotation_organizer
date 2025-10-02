@@ -17,7 +17,7 @@ export class PrintUtils {
             var dataFeltElement = container.querySelector('.data-felt');
             var dataFelt = dataFeltElement ? dataFeltElement.outerHTML : '';
             
-            printContents += '<div class="print-frame"><h4>' + number + name + '</h4>' + table.outerHTML + dataFelt + '</div><br>';
+            printContents += '<div class="print-frame"><h4>' + number + name + '</h4>' + table.outerHTML + dataFelt + '</div>';
         });
 
         var originalContents = document.body.innerHTML;
