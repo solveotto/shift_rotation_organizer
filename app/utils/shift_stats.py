@@ -202,8 +202,16 @@ class Turnus():
 
 
 if __name__ == '__main__':
-    turnus = Turnus(conf.static_dir+'\\turnuser_R25.json')
-
-    turnus.stats_df.to_json(conf.static_dir+'\\turnus_df_R25.json')
-
-    print(turnus.stats_df[['turnus', 'natt_helg', 'helgetimer']])
+    # Generate R26 statistics
+    import os
+    r26_turnus_path = os.path.join(conf.static_dir, 'turnusfiler', 'r26', 'turnuser_R26.json')
+    r26_df_path = os.path.join(conf.static_dir, 'turnusfiler', 'r26', 'turnus_df_R26.json')
+    
+    print(f"Generating statistics for R26...")
+    turnus = Turnus(r26_turnus_path)
+    turnus.stats_df.to_json(r26_df_path)
+    
+    print(f"✅ Statistics generated: {r26_df_path}")
+    print(f"\nTotal turnuses: {len(turnus.stats_df)}")
+    print("\nSample statistics:")
+    print(turnus.stats_df[['turnus', 'shift_cnt', 'tidlig', 'ettermiddag', 'natt', 'helgetimer']].head(10))
