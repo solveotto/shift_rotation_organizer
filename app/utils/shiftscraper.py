@@ -1,4 +1,4 @@
-"""
+r"""
 Shift Scraper - PDF to JSON/Excel Converter
 
 This script scrapes PDF files containing shift schedules and converts them into 
@@ -15,7 +15,7 @@ Usage:
     Command Line:
         python shiftscraper.py path/to/file.pdf R24
         python shiftscraper.py path/to/file.pdf R24 --output-dir custom/path
-        eksempel: python "D:\programmering\Python Projects\shift_rotation_organizer\app\static\turnusfiler\r23\turnuser_R23.pdf" "r25"
+        eksempel: python "D:\\programmering\\Python Projects\\shift_rotation_organizer\\app\\static\\turnusfiler\\r23\\turnuser_R23.pdf" "r25"
     
     Programmatic:
         scraper = ShiftScraper()
@@ -64,7 +64,7 @@ class ShiftScraper():
         self.DAG_POS = [{1:(51, 109)}, {2:(109, 167)}, {3:(167, 224)}, {4:(224, 283)}, {5:(283, 340)}, 
                     {6:(340, 399)}, {7:(399, 514)}]
         self.REMOVE_FILTER = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:',
-                            'Turnus:', 'Stasjoneringssted:', 'OSL', 'HLD']
+                            'Turnus:', 'Stasjoneringssted:', 'OSL']
         self.ALLOW_FILTER = [':', 'XX', 'OO', 'TT']
         self.FRIDAG_FILTER = ['XX', 'OO', 'TT']
         
@@ -81,6 +81,58 @@ class ShiftScraper():
             sorterte_turnuser = self.sort_page(page)
             for sortert_turnus in sorterte_turnuser:
                 self.turnuser.append(sortert_turnus)
+    
+    def extract_turnus_name(self, text_objects, word_pos):
+        """
+        Extracts complete turnus name after 'Turnus:' by collecting all words
+        until a known separator is found.
+        """
+        turnus_parts = []
+        i = word_pos + 1
+        separators = ['Stasjoneringssted:', 'Rutetermin:', 'Uke', 'Materiell:']
+        
+        # Collect words until we hit a separator or run out of words
+        while i < len(text_objects):
+            word = text_objects[i]
+            # Stop if we hit a known separator or the y-position changes significantly
+            if word['text'] in separators or abs(word['top'] - text_objects[word_pos]['top']) > 5:
+                break
+            turnus_parts.append(word['text'])
+            i += 1
+        
+        return '_'.join(turnus_parts) if turnus_parts else 'UNKNOWN'
+    
+    def split_concatenated_times(self, text):
+        """
+        Splits concatenated time values like '19:014:24' into ['19:01', '4:24']
+        Also handles cases like '8:0016:00' -> ['8:00', '16:00']
+        """
+        import re
+        
+        # Pattern to find time values: digits:digits
+        # This will match patterns like 19:01, 4:24, etc.
+        time_pattern = r'(\d{1,2}:\d{2})'
+        
+        matches = re.findall(time_pattern, text)
+        
+        # If we found multiple times in one string, return them separately
+        if len(matches) > 1:
+            return matches
+        elif len(matches) == 1:
+            return [matches[0]]
+        else:
+            return [text]
+    
+    def extract_shift_code(self, text):
+        """
+        Cleans up shift codes (dagsverk) - removes extra whitespace,
+        handles concatenated codes better
+        """
+        # Remove leading/trailing whitespace
+        text = text.strip()
+        
+        # Return cleaned text
+        return text
 
 
     
@@ -119,41 +171,73 @@ class ShiftScraper():
                                     plasseringslogikk_dagsverk(text_obj, uke, dag, turnus)
 
         def plasseringslogikk_tid(word, uke, dag, turnus):
+            # Først, sjekk om teksten inneholder sammenkoblede tider og split dem
+            text_to_process = word["text"]
+            
             # Siler ut objektene som inneholder :, XX, OO, eller TT.
-            if any(sub in word["text"] for sub in self.ALLOW_FILTER):
-                # Hvis det er uke1 og dag 1 så skal det ikke sjekkes om objektet finnes i uken og dagen før,
-                # men lagres i nåværende dag og uke.
-                if (uke == 1 and dag == 1) or word['text'] in self.ALLOW_FILTER:
-                    turnus[uke][dag]['tid'].append(word['text'])
+            if any(sub in text_to_process for sub in self.ALLOW_FILTER):
+                # Split concatenated times if present (e.g., "19:014:24" -> ["19:01", "4:24"])
+                if ':' in text_to_process and text_to_process not in self.ALLOW_FILTER:
+                    split_times = self.split_concatenated_times(text_to_process)
+                    
+                    # Check if the word crosses cell boundaries (indicates split shift)
+                    # Get the current day's x boundary
+                    for dager in self.DAG_POS:
+                        for d, dag_verdi in dager.items():
+                            if d == dag:
+                                current_dag_x_end = dag_verdi[1]
+                                # If word extends beyond current day's boundary and we split times
+                                if word['x1'] > current_dag_x_end and len(split_times) == 2:
+                                    # First time in current day, second time in next day
+                                    turnus[uke][dag]['tid'].append(split_times[0])
+                                    # Place second time in next day if not Sunday
+                                    if dag < 7:
+                                        turnus[uke][dag+1]['tid'].append(split_times[1])
+                                    elif dag == 7 and uke < 6:
+                                        # Sunday to Monday next week
+                                        turnus[uke+1][1]['tid'].append(split_times[1])
+                                    # Skip normal processing
+                                    return
+                    
+                    times_to_add = split_times
+                else:
+                    times_to_add = [text_to_process]
+                
+                # Process each time value normally
+                for time_val in times_to_add:
+                    # Hvis det er uke1 og dag 1 så skal det ikke sjekkes om objektet finnes i uken og dagen før,
+                    # men lagres i nåværende dag og uke.
+                    if (uke == 1 and dag == 1) or time_val in self.ALLOW_FILTER:
+                        turnus[uke][dag]['tid'].append(time_val)
 
-                # Hvis det mandag men ikke uke1.
-                elif uke != 1 and dag == 1:
-                    # Hopper over objekter på mandag hvis søndagen før har to objekter,
-                    # mandagen har null objekter og objektet på søndag er likt det som skal plasseres.
-                    if (len(turnus[uke-1][7]['tid']) == 2 and
-                        len(turnus[uke][dag]['tid']) == 0 and
-                        word['text'] == turnus[uke-1][7]['tid'][1]):
-                        pass
-                    # hvis objektet er :, XX, OO eller TT: lagre i nåværede dag og uke
-                    elif any(val in turnus[uke-1][7]['tid'] for val in self.ALLOW_FILTER):
-                        turnus[uke][dag]['tid'].append(word['text'])
-                    # Hvis det bare er et objekt på søndag uke over: legg objekt til søndag
-                    elif len(turnus[uke-1][7]['tid']) == 1:
-                        turnus[uke-1][7]['tid'].append(word['text'])
-                    else:
-                        turnus[uke][dag]['tid'].append(word['text'])
-                        
+                    # Hvis det mandag men ikke uke1.
+                    elif uke != 1 and dag == 1:
+                        # Hopper over objekter på mandag hvis søndagen før har to objekter,
+                        # mandagen har null objekter og objektet på søndag er likt det som skal plasseres.
+                        if (len(turnus[uke-1][7]['tid']) == 2 and
+                            len(turnus[uke][dag]['tid']) == 0 and
+                            time_val == turnus[uke-1][7]['tid'][1]):
+                            pass
+                        # hvis objektet er :, XX, OO eller TT: lagre i nåværede dag og uke
+                        elif any(val in turnus[uke-1][7]['tid'] for val in self.ALLOW_FILTER):
+                            turnus[uke][dag]['tid'].append(time_val)
+                        # Hvis det bare er et objekt på søndag uke over: legg objekt til søndag
+                        elif len(turnus[uke-1][7]['tid']) == 1:
+                            turnus[uke-1][7]['tid'].append(time_val)
+                        else:
+                            turnus[uke][dag]['tid'].append(time_val)
+                            
 
-                # Hvis det ikke er dag1
-                elif uke >= 1 and dag > 1:
-                    # Putter objekt i nåværende dag hvis dagen før er :, XX, TT, eller OO.
-                    if any(val in turnus[uke][dag-1]['tid'] for val in self.ALLOW_FILTER):
-                        turnus[uke][dag]['tid'].append(word['text'])
-                    # Putter objekt i dagen før hvis det kun er en verdi der.
-                    elif len(turnus[uke][dag-1]['tid']) == 1:
-                        turnus[uke][dag-1]['tid'].append(word['text'])
-                    else:
-                        turnus[uke][dag]['tid'].append(word['text'])
+                    # Hvis det ikke er dag1
+                    elif uke >= 1 and dag > 1:
+                        # Putter objekt i nåværende dag hvis dagen før er :, XX, TT, eller OO.
+                        if any(val in turnus[uke][dag-1]['tid'] for val in self.ALLOW_FILTER):
+                            turnus[uke][dag]['tid'].append(time_val)
+                        # Putter objekt i dagen før hvis det kun er en verdi der.
+                        elif len(turnus[uke][dag-1]['tid']) == 1:
+                            turnus[uke][dag-1]['tid'].append(time_val)
+                        else:
+                            turnus[uke][dag]['tid'].append(time_val)
                 
                 if len(turnus[uke][dag]['tid']) == 2:
                     turnus[uke][dag]['start'] = (turnus[uke][dag]['tid'][0])
@@ -166,40 +250,142 @@ class ShiftScraper():
             if any(sub in word["text"] for sub in self.ALLOW_FILTER):
                 pass
             else:
+                text_to_add = word['text']
+                
+                # Check for consecutive number pattern (e.g., 3006 -> 3007)
+                # Extract numeric part from dagsverk if it exists
+                if text_to_add and text_to_add.isdigit() and len(text_to_add) >= 3:
+                    current_number = int(text_to_add)
+                    
+                    # Check if previous day has a consecutive number
+                    prev_day_number = None
+                    if dag > 1 and turnus[uke][dag-1]['dagsverk']:
+                        prev_dagsverk = turnus[uke][dag-1]['dagsverk']
+                        # Extract number from previous dagsverk (handle formats like "3006-OSL")
+                        import re
+                        prev_match = re.search(r'^(\d+)', prev_dagsverk)
+                        if prev_match:
+                            prev_day_number = int(prev_match.group(1))
+                    elif dag == 1 and uke > 1 and turnus[uke-1][7]['dagsverk']:
+                        # Check Sunday to Monday transition
+                        prev_dagsverk = turnus[uke-1][7]['dagsverk']
+                        import re
+                        prev_match = re.search(r'^(\d+)', prev_dagsverk)
+                        if prev_match:
+                            prev_day_number = int(prev_match.group(1))
+                    
+                    # If we found a consecutive number pattern, mark both shifts for tooltips
+                    if prev_day_number and current_number == prev_day_number + 1:
+                        if dag > 1:
+                            # Mark the previous day (first shift) with arrow
+                            turnus[uke][dag-1]['is_consecutive_shift'] = True
+                            # Mark the current day (second shift) as receiver
+                            turnus[uke][dag]['is_consecutive_receiver'] = True
+                        elif dag == 1 and uke > 1:
+                            # Mark the Sunday (first shift) with arrow
+                            turnus[uke-1][7]['is_consecutive_shift'] = True
+                            # Mark the Monday (second shift) as receiver
+                            turnus[uke][dag]['is_consecutive_receiver'] = True
+                
+                # Check if this dagsverk text crosses into next day's column
+                # Look for the current day's x boundary
+                for dager in self.DAG_POS:
+                    for d, dag_verdi in dager.items():
+                        if d == dag:
+                            current_dag_x_end = dag_verdi[1]
+                            # If word extends beyond current day's boundary
+                            if word['x1'] > current_dag_x_end:
+                                # This dagsverk belongs to current day, but next text object
+                                # might be a continuation (like "1511-N05" + "01")
+                                # We'll mark this and let the next object be added to it
+                                pass
+                
+                # Check if previous day has incomplete dagsverk that this might complete
+                # (e.g., "1511-N05" in Monday, "01" in Tuesday should become "1511-N05 01" in Monday)
+                should_append_to_previous = False
+                if dag > 1 and turnus[uke][dag-1]['dagsverk']:
+                    prev_dagsverk = turnus[uke][dag-1]['dagsverk']
+                    # Get the previous day's end boundary
+                    prev_dag_x_end = self.DAG_POS[dag-2][dag-1][1] if dag > 1 else 0
+                    current_dag_x_start = self.DAG_POS[dag-1][dag][0]
+                    
+                    # Check if previous dagsverk ends with pattern like "N05" or similar
+                    # and current text is very close to the boundary (within 20 pixels of start)
+                    # This catches cases like "1511-N05" + " 01" that span cells
+                    # BUT also check that current day doesn't have times (indicating it's empty)
+                    if (word['x0'] < current_dag_x_start + 20 and  # Very close to current day's start
+                        len(word['text']) <= 3 and  # Short text like "01", "1", "2"
+                        word['text'].isdigit() and  # Is a number
+                        len(turnus[uke][dag]['tid']) == 0 and  # Current day has no times (is empty)
+                        ('-N05' in prev_dagsverk or '-N' in prev_dagsverk)):  # Previous ends with N05 pattern
+                        # Append to previous day
+                        turnus[uke][dag-1]['dagsverk'] = prev_dagsverk + ' ' + text_to_add
+                        return  # Don't process further
+                elif dag == 1 and uke > 1 and turnus[uke-1][7]['dagsverk']:
+                    prev_dagsverk = turnus[uke-1][7]['dagsverk']
+                    # Check for continuation from Sunday to Monday
+                    if (word['x0'] < 130 and  # Close to Monday's start
+                        len(word['text']) <= 3 and
+                        word['text'].isdigit() and
+                        ('-N05' in prev_dagsverk or '-N' in prev_dagsverk)):
+                        turnus[uke-1][7]['dagsverk'] = prev_dagsverk + ' ' + text_to_add
+                        return
+                
+                # Normal placement logic
                 # Hvis det er uke1 og dag1, lagres objektet i nåværende dag og uke.
                 if (uke == 1 and dag == 1) and word['text'] not in self.REMOVE_FILTER:
-                    turnus[uke][dag]['dagsverk'] = word['text']
+                    if turnus[uke][dag]['dagsverk']:
+                        turnus[uke][dag]['dagsverk'] += ' ' + text_to_add
+                    else:
+                        turnus[uke][dag]['dagsverk'] = text_to_add
                 
                 # Mandager som ikke er uke1
                 elif uke != 1 and dag == 1:
                     # Hopper over iterering hvis dagsverket er likt dagsverket i søndagen uka før
                     # og tidene i de to dagene ikke er like.
-                    if (word['text'] == turnus[uke-1][7]['dagsverk'] and 
+                    if (text_to_add == turnus[uke-1][7]['dagsverk'] and 
                         turnus[uke][dag]['tid'] != turnus[uke-1][7]['tid']):
                         pass
                     # Hvis det er to verdier av TID og ingen i DAGSVERK søndag uka før, 
                     elif len(turnus[uke-1][7]['tid']) == 2 and turnus[uke-1][7]['dagsverk'] == "":
-                        turnus[uke][dag-1]['dagsverk'] =  word['text']
+                        turnus[uke-1][7]['dagsverk'] = text_to_add
                     else:
-                        turnus[uke][dag]['dagsverk'] = word['text']
+                        if turnus[uke][dag]['dagsverk']:
+                            turnus[uke][dag]['dagsverk'] += ' ' + text_to_add
+                        else:
+                            turnus[uke][dag]['dagsverk'] = text_to_add
                                     
                 # Hvis det ikke er dag1
                 elif uke >= 1 and dag > 1:
+                    # Check if previous day has 2 times and no dagsverk (shift spanning to current day)
                     if len(turnus[uke][dag-1]['tid']) == 2 and turnus[uke][dag-1]['dagsverk'] == "":
-                        turnus[uke][dag-1]['dagsverk'] =  word['text']
+                        turnus[uke][dag-1]['dagsverk'] = text_to_add
+                    # Also handle case where current day has only 1 time (end of spanning shift) and prev day has 1 time
+                    elif (len(turnus[uke][dag]['tid']) == 1 and len(turnus[uke][dag-1]['tid']) >= 1 and 
+                          turnus[uke][dag-1]['dagsverk'] == "" and len(text_to_add) >= 3):
+                        # This dagsverk likely belongs to the previous day's spanning shift
+                        turnus[uke][dag-1]['dagsverk'] = text_to_add
                     else:
-                        turnus[uke][dag]['dagsverk'] =  word['text']
+                        # Skip single-digit numbers unless they look like valid codes
+                        if len(text_to_add) == 1 and text_to_add.isdigit():
+                            # Single digit - probably metadata, skip unless it's clearly part of a code
+                            pass
+                        else:
+                            if turnus[uke][dag]['dagsverk']:
+                                turnus[uke][dag]['dagsverk'] += ' ' + text_to_add
+                            else:
+                                turnus[uke][dag]['dagsverk'] = text_to_add
        
         def generer_turnus_mal():
 
 
-            uke_mal = {1:{'ukedag':'Mandag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
-                        2:{'ukedag':'Tirsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
-                        3:{'ukedag':'Onsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
-                        4:{'ukedag':'Torsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""},
-                        5:{'ukedag':'Fredag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}, 
-                        6:{'ukedag':'Lørdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""},
-                        7:{'ukedag':'Søndag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':""}}
+            uke_mal = {1:{'ukedag':'Mandag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}, 
+                        2:{'ukedag':'Tirsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}, 
+                        3:{'ukedag':'Onsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}, 
+                        4:{'ukedag':'Torsdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False},
+                        5:{'ukedag':'Fredag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}, 
+                        6:{'ukedag':'Lørdag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False},
+                        7:{'ukedag':'Søndag', 'tid':[], 'start':'', 'slutt':'', 'dagsverk':"", 'is_consecutive_shift':False, 'is_consecutive_receiver':False}}
             turnus = {}
 
             for uke in range(1,7):
@@ -209,36 +395,24 @@ class ShiftScraper():
             return turnus
 
 
-        # Henter ut alle objektene i pdf-en
-        text_objects = page.extract_words(x_tolerance = 1, y_tolerance = 1)
+        # Henter ut alle objektene i pdf-en med bedre toleranse for å få med komplette tall
+        text_objects = page.extract_words(x_tolerance = 3, y_tolerance = 2)
 
-        
+        turnus_1_navn = None
+        turnus_2_navn = None
 
-        # Finne og navgi turns.
-        for turnus_name in text_objects:
-            word_pos = text_objects.index(turnus_name)
-            
-            if turnus_name["text"] in ['OSL']:
-               
-                if turnus_name['top'] > 0 and turnus_name['top'] < 70:
-                    if text_objects[word_pos+1]['text'] in ['Ramme', 'RAMME', 'Utland', 'UTLAND']:
-                        turnus_1_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+text_objects[word_pos+2]['text']
-                    elif text_objects[word_pos+2]['text'] in ['Gjøvik', 'ERTMS']:
-                        turnus_1_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+text_objects[word_pos+2]['text']
-                    else:
-                        turnus_1_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']
-                        
-                    
-                elif turnus_name['top'] > 340 and turnus_name['top'] < 360:
-                    if text_objects[word_pos+1]['text'] in ['Ramme', 'RAMME', 'Utland', 'UTLAND']:
-                        turnus_2_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+text_objects[word_pos+2]['text']
-                    elif text_objects[word_pos+2]['text'] in ['Gjøvik', 'ERTMS']:
-                        turnus_2_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']+'_'+ text_objects[word_pos+2]['text']
-                    else:
-                        turnus_2_navn = text_objects[word_pos]['text']+'_'+text_objects[word_pos+1]['text']
-            else:
-                pass
-
+        # Finne og navgi turnus - forbedret logikk
+        for i, word in enumerate(text_objects):
+            # Ser etter "Turnus:" label
+            if word["text"] == 'Turnus:':
+                # Ekstraher komplett turnus navn etter "Turnus:"
+                extracted_name = self.extract_turnus_name(text_objects, i)
+                
+                # Avgjør hvilken turnus basert på y-posisjon
+                if word['top'] >= 50 and word['top'] <= 80:
+                    turnus_1_navn = extracted_name
+                elif word['top'] >= 330 and word['top'] <= 365:
+                    turnus_2_navn = extracted_name
 
         turnus1 = generer_turnus_mal()
         turnus2 = generer_turnus_mal()
@@ -249,11 +423,11 @@ class ShiftScraper():
 
         sorterte_turnuser_lst = []
 
-        try:
+        # Legg til turnuser hvis de ble funnet
+        if turnus_1_navn:
             sorterte_turnuser_lst.append({turnus_1_navn:turnus1})
+        if turnus_2_navn:
             sorterte_turnuser_lst.append({turnus_2_navn:turnus2})
-        except UnboundLocalError:
-            pass
 
         return sorterte_turnuser_lst
 

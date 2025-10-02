@@ -41,4 +41,4 @@ def logout():
     # Clear turnus set choice on logout
     session.pop('user_selected_turnus_set', None)
     logout_user()
-    return redirect(url_for('auth.login')) 
+    return render_template('logout.html') 

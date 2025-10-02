@@ -1313,6 +1313,10 @@ label input[type="checkbox"] {
       padding: 1px; /* Reduced padding */
       margin: 1px 0; /* Reduced margin */
       page-break-inside: avoid;
+    }
+  .print-frame:nth-of-type(3n+4) {
+        page-break-before: always;
+    }
   }
   table {
       width: 100%;
@@ -1335,10 +1339,6 @@ label input[type="checkbox"] {
   .small-text {
       font-size: 0.9em; /* Reduced font size for small-text class */
   }
-  .print-frame:nth-of-type(3n+1) {
-      page-break-before: always;
-  }
-}
 
 /*Navbar on small screens*/
 @media (max-width: 576px) {
