@@ -608,7 +608,7 @@
                         "22:26"
                     ],
                     "slutt": "",
-                    "dagsverk": "5021-Mod_1",
+                    "dagsverk": "5021-Mod_1 HLD",
                     "is_consecutive_shift": true,
                     "is_consecutive_receiver": false
                 },
@@ -1496,7 +1496,7 @@
                         "22:26"
                     ],
                     "slutt": "",
-                    "dagsverk": "5019",
+                    "dagsverk": "5019 HLD",
                     "is_consecutive_shift": true,
                     "is_consecutive_receiver": false
                 },
@@ -2028,7 +2028,7 @@
                         "22:26"
                     ],
                     "slutt": "",
-                    "dagsverk": "5019",
+                    "dagsverk": "5019 HLD",
                     "is_consecutive_shift": true,
                     "is_consecutive_receiver": false
                 },
@@ -2264,7 +2264,7 @@
                     ],
                     "start": "16:51",
                     "slutt": "22:26",
-                    "dagsverk": "5037",
+                    "dagsverk": "5037 HLD",
                     "is_consecutive_shift": true,
                     "is_consecutive_receiver": false
                 },
@@ -2456,7 +2456,7 @@
                     ],
                     "start": "14:32",
                     "slutt": "22:26",
-                    "dagsverk": "5055",
+                    "dagsverk": "5055 HLD",
                     "is_consecutive_shift": true,
                     "is_consecutive_receiver": false
                 }
@@ -2787,7 +2787,7 @@
                         "22:26"
                     ],
                     "slutt": "",
-                    "dagsverk": "5019",
+                    "dagsverk": "5019 HLD",
                     "is_consecutive_shift": true,
                     "is_consecutive_receiver": false
                 },
@@ -29598,7 +29598,7 @@
                         "22:26"
                     ],
                     "slutt": "",
-                    "dagsverk": "5019",
+                    "dagsverk": "5019 HLD",
                     "is_consecutive_shift": true,
                     "is_consecutive_receiver": false
                 },

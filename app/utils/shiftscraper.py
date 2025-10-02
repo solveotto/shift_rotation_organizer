@@ -64,7 +64,7 @@ class ShiftScraper():
         self.DAG_POS = [{1:(51, 109)}, {2:(109, 167)}, {3:(167, 224)}, {4:(224, 283)}, {5:(283, 340)}, 
                     {6:(340, 399)}, {7:(399, 514)}]
         self.REMOVE_FILTER = ['Materiell:', 'Ruteterminperiode:', 'start:', 'Rutetermin:',
-                            'Turnus:', 'Stasjoneringssted:', 'OSL', 'HLD']
+                            'Turnus:', 'Stasjoneringssted:', 'OSL']
         self.ALLOW_FILTER = [':', 'XX', 'OO', 'TT']
         self.FRIDAG_FILTER = ['XX', 'OO', 'TT']
         
