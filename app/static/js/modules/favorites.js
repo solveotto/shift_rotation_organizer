@@ -75,6 +75,12 @@ export class Favorites {
             });
 
             const data = await response.json();
+
+        // Refresh the page after successful toggle
+        if (data.status === 'success') {
+            window.location.reload();
+        }
+            
             return data;
         } catch (error) {
             console.error('Error updating favorite status:', error);

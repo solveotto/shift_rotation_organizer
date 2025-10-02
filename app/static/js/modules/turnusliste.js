@@ -111,6 +111,26 @@ function getCurrentTurnusSetId() {
     return null;
 }
 
+// Toggle favorites visibility
+function toggleFavoritesVisibility(hideFavorites) {
+    const favoriteItems = document.querySelectorAll('.favorite-item');
+    
+    favoriteItems.forEach(item => {
+        const tableWrapper = item.querySelector('.table-scroll-wrapper');
+        const dataFelt = item.querySelector('.data-felt');
+        
+        if (hideFavorites) {
+            // Hide the table content but keep the header visible
+            if (tableWrapper) tableWrapper.style.display = 'none';
+            if (dataFelt) dataFelt.style.display = 'none';
+        } else {
+            // Show the full table content
+            if (tableWrapper) tableWrapper.style.display = 'block';
+            if (dataFelt) dataFelt.style.display = 'block';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const highlightedElement = document.querySelector('.highlighted-turnus');
     
@@ -133,6 +153,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 const url = new URL(window.location);
                 url.searchParams.delete('turnus');
                 window.history.replaceState({}, '', url);
+            }
+        });
+    }
+    
+    // Set up favorites toggle
+    const hideFavoritesRadio = document.getElementById('hide-favorites');
+    const showAllRadio = document.getElementById('show-all');
+    
+    if (hideFavoritesRadio && showAllRadio) {
+        // Initial state - hide favorites by default
+        toggleFavoritesVisibility(true);
+        
+        // Add event listeners
+        hideFavoritesRadio.addEventListener('change', function() {
+            if (this.checked) {
+                toggleFavoritesVisibility(true);
+            }
+        });
+        
+        showAllRadio.addEventListener('change', function() {
+            if (this.checked) {
+                toggleFavoritesVisibility(false);
             }
         });
     }
