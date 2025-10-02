@@ -34,7 +34,17 @@ class Turnus():
         for turnus in json_data:
             for turnus_navn, turnus_dict in turnus.items():
                 for uke_nr, uke_data in turnus_dict.items():
+                    # Skip non-dict entries (e.g., "materiell", "kl_tim_total", "tj_timer_total")
+                    if not isinstance(uke_data, dict):
+                        continue
                     for dag_nr, dag_data in uke_data.items():
+                        # Skip if dag_data is not a dict (e.g., "materiell" field)
+                        if not isinstance(dag_data, dict):
+                            continue
+                        
+                        # Skip if dag_data doesn't have required fields
+                        if 'tid' not in dag_data:
+                            continue
                         
                         # Konverterer tiden til datetime
                         if len(dag_data['tid']) == 2:
@@ -101,13 +111,14 @@ class Turnus():
                         # Adjust end time if it's on the next day
                         if end < start:
                             end += pd.Timedelta(days=1)
-                            # Counts night shifts
-                            if _dagsverk['slutt'] > pd.to_datetime('03:00', format='%H:%M'):
-                                night_count += 1
-                                # Natt i helg
-                                if ukedag in weekend_days:
-                                    #natt_helg += (end - start).total_seconds() / 3600
-                                    natt_helg += 1
+                        
+                        # Counts night shifts - align with coloring logic (start time ≥ 19:00)
+                        if start.time() >= time(19, 0):
+                            night_count += 1
+                            # Natt i helg
+                            if ukedag in weekend_days:
+                                #natt_helg += (end - start).total_seconds() / 3600
+                                natt_helg += 1
 
 
                         ### WEEKENDS ###
@@ -201,17 +212,45 @@ class Turnus():
             self.stats_df = pd.concat([self.stats_df, new_row], ignore_index=True)
 
 
-if __name__ == '__main__':
-    # Generate R26 statistics
+def generate_statistics_for_year(year_id):
+    """Generate statistics for a specific year"""
     import os
-    r26_turnus_path = os.path.join(conf.static_dir, 'turnusfiler', 'r26', 'turnuser_R26.json')
-    r26_df_path = os.path.join(conf.static_dir, 'turnusfiler', 'r26', 'turnus_df_R26.json')
+    turnus_path = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower(), f'turnuser_{year_id}.json')
+    df_path = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower(), f'turnus_df_{year_id}.json')
     
-    print(f"Generating statistics for R26...")
-    turnus = Turnus(r26_turnus_path)
-    turnus.stats_df.to_json(r26_df_path)
+    if not os.path.exists(turnus_path):
+        print(f"❌ Error: File {turnus_path} does not exist")
+        return
     
-    print(f"✅ Statistics generated: {r26_df_path}")
-    print(f"\nTotal turnuses: {len(turnus.stats_df)}")
+    print(f"Generating statistics for {year_id}...")
+    turnus = Turnus(turnus_path)
+    turnus.stats_df.to_json(df_path)
+    
+    print(f"✅ Statistics generated: {df_path}")
+    print(f"Total turnuses: {len(turnus.stats_df)}")
     print("\nSample statistics:")
     print(turnus.stats_df[['turnus', 'shift_cnt', 'tidlig', 'ettermiddag', 'natt', 'helgetimer']].head(10))
+    return turnus.stats_df
+
+if __name__ == '__main__':
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Generate shift statistics for turnus files')
+    parser.add_argument('year', nargs='?', default='R26', help='Year identifier (e.g., R24, R25, R26). Default: R26')
+    parser.add_argument('--all', action='store_true', help='Generate statistics for all available years')
+    
+    args = parser.parse_args()
+    
+    if args.all:
+        # Generate for all available years
+        import os
+        turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler')
+        years = [d for d in os.listdir(turnusfiler_dir) if os.path.isdir(os.path.join(turnusfiler_dir, d))]
+        years.sort()
+        
+        for year in years:
+            year_upper = year.upper()
+            print(f"\n{'='*50}")
+            generate_statistics_for_year(year_upper)
+    else:
+        generate_statistics_for_year(args.year)
