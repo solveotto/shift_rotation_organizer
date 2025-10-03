@@ -18,6 +18,9 @@ def turnusliste():
     # Get favorites for current user and active turnus set
     favoritt = db_utils.get_favorite_lst(current_user.get_id(), turnus_set_id) if current_user.is_authenticated else []
     
+    # Create a position lookup dictionary for robust favorite numbering
+    favorite_positions = {name: idx + 1 for idx, name in enumerate(favoritt)}
+    
     # Load data for user's selected year
     user_df_manager = df_utils.DataframeManager(turnus_set_id)
     
@@ -30,6 +33,7 @@ def turnusliste():
                         table_data=user_df_manager.turnus_data,  
                         df=user_df_manager.df.to_dict(orient='records') if not user_df_manager.df.empty else [], 
                         favoritt=favoritt,
+                        favorite_positions=favorite_positions,
                         current_turnus_set=user_turnus_set,
                         active_set=active_set,
                         all_turnus_sets=db_utils.get_all_turnus_sets(),
