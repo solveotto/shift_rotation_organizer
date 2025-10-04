@@ -390,7 +390,15 @@ def get_favorite_lst(user_id, turnus_set_id=None):
                 return []
         
         results = query.order_by(Favorites.order_index).all()
-        shift_titles = [result.shift_title for result in results]
+        
+        # Handle duplicates by using set to get unique titles, then preserve order
+        seen = set()
+        shift_titles = []
+        for result in results:
+            if result.shift_title not in seen:
+                seen.add(result.shift_title)
+                shift_titles.append(result.shift_title)
+        
         return shift_titles
     finally:
         session.close()
@@ -453,6 +461,30 @@ def get_max_ordered_index(user_id, turnus_set_id=None):
     finally:
         session.close()
 
+def cleanup_duplicate_favorites(session, user_id, shift_title, turnus_set_id):
+    """Clean up duplicate favorites for a specific user/shift/turnus_set combination"""
+    try:
+        # Find all duplicates for this combination
+        duplicates = session.query(Favorites).filter_by(
+            user_id=user_id,
+            shift_title=shift_title,
+            turnus_set_id=turnus_set_id
+        ).order_by(Favorites.order_index).all()
+        
+        if len(duplicates) > 1:
+            # Keep the first one (lowest order_index), delete the rest
+            keep_entry = duplicates[0]
+            delete_entries = duplicates[1:]
+            
+            for entry in delete_entries:
+                session.delete(entry)
+            
+            print(f"Cleaned up {len(delete_entries)} duplicate favorites for user {user_id}, shift '{shift_title}'")
+            
+    except Exception as e:
+        print(f"Error cleaning up duplicates: {e}")
+        raise
+
 def add_favorite(user_id, title, order_index, turnus_set_id=None):
     """Add a shift to user's favorites for a specific turnus set"""
     session = get_db_session()
@@ -464,7 +496,7 @@ def add_favorite(user_id, title, order_index, turnus_set_id=None):
                 return False
             turnus_set_id = active_set['id']
         
-        # Check if favorite already exists
+        # Check if favorite already exists - handle multiple duplicates
         existing = session.query(Favorites).filter_by(
             user_id=user_id, 
             shift_title=title,
@@ -472,7 +504,9 @@ def add_favorite(user_id, title, order_index, turnus_set_id=None):
         ).first()
         
         if existing:
-            return False
+            # If it already exists, clean up any duplicates and return success
+            cleanup_duplicate_favorites(session, user_id, title, turnus_set_id)
+            return True
         
         new_favorite = Favorites(
             user_id=user_id, 
@@ -485,6 +519,7 @@ def add_favorite(user_id, title, order_index, turnus_set_id=None):
         return True
     except Exception as e:
         session.rollback()
+        print(f"Error adding favorite: {e}")
         return False
     finally:
         session.close()
@@ -500,14 +535,23 @@ def remove_favorite(user_id, title, turnus_set_id=None):
                 return False
             turnus_set_id = active_set['id']
         
-        favorite = session.query(Favorites).filter_by(
+        # Find ALL favorites for this combination (handle duplicates)
+        favorites = session.query(Favorites).filter_by(
             user_id=user_id, 
             shift_title=title,
             turnus_set_id=turnus_set_id
-        ).first()
-        if favorite:
-            session.delete(favorite)
+        ).all()
+        
+        if favorites:
+            # Delete all duplicates
+            deleted_count = 0
+            for favorite in favorites:
+                session.delete(favorite)
+                deleted_count += 1
+            
             session.commit()
+            if deleted_count > 1:
+                print(f"Removed {deleted_count} duplicate favorites for user {user_id}, shift '{title}'")
             return True
         return False
     except Exception as e:

@@ -25,6 +25,13 @@ def toggle_favorite():
     favorite = data.get('favorite')
     shift_title = data.get('shift_title')
 
+    # Validate input
+    if not shift_title:
+        return jsonify({'status': 'error', 'message': 'No shift title provided'})
+    
+    if favorite not in [True, False]:
+        return jsonify({'status': 'error', 'message': 'Invalid favorite value'})
+
     with favorite_lock:
         try:
             # Get user's selected turnus set
@@ -35,22 +42,36 @@ def toggle_favorite():
             if not turnus_set_id:
                 return jsonify({'status': 'error', 'message': 'No turnus set selected'})
             
+            user_id = current_user.get_id()
+            
             if favorite:
+                # Check if already exists first (handle potential duplicates from hibernation)
+                existing_favorites = db_utils.get_favorite_lst(user_id, turnus_set_id)
+                if shift_title in existing_favorites:
+                    # Already exists, just return success (cleanup handled in get_favorite_lst)
+                    return jsonify({'status': 'success', 'message': 'Already in favorites'})
+                
                 # Calculate the next order index for the user's selected turnus set
-                order_index = db_utils.get_max_ordered_index(current_user.get_id(), turnus_set_id) + 1
-                success = db_utils.add_favorite(current_user.get_id(), shift_title, order_index, turnus_set_id)
+                order_index = db_utils.get_max_ordered_index(user_id, turnus_set_id) + 1
+                success = db_utils.add_favorite(user_id, shift_title, order_index, turnus_set_id)
                 if success:
                     return jsonify({'status': 'success', 'message': 'Added to favorites'})
                 else:
-                    return jsonify({'status': 'error', 'message': 'Failed to add favorite'})
+                    return jsonify({'status': 'error', 'message': 'Failed to add favorite - may already exist'})
             else:
-                success = db_utils.remove_favorite(current_user.get_id(), shift_title, turnus_set_id)
+                # Check if exists before trying to remove
+                existing_favorites = db_utils.get_favorite_lst(user_id, turnus_set_id)
+                if shift_title not in existing_favorites:
+                    return jsonify({'status': 'success', 'message': 'Already removed from favorites'})
+                
+                success = db_utils.remove_favorite(user_id, shift_title, turnus_set_id)
                 if success:
                     return jsonify({'status': 'success', 'message': 'Removed from favorites'})
                 else:
                     return jsonify({'status': 'error', 'message': 'Failed to remove favorite'})
         except Exception as e:
-            return jsonify({'status': 'error', 'message': str(e)})
+            print(f"Error in toggle_favorite: {e}")
+            return jsonify({'status': 'error', 'message': f'Server error: {str(e)}'})
 
 @api.route('/move-favorite', methods=['POST'])
 @login_required
