@@ -13544,12 +13544,12 @@
                 "7": {
                     "ukedag": "S\u00f8ndag",
                     "tid": [
-                        "12:48",
-                        "21:41"
+                        "14:23",
+                        "23:08"
                     ],
-                    "start": "12:48",
-                    "slutt": "21:41",
-                    "dagsverk": "1720",
+                    "start": "14:23",
+                    "slutt": "23:08",
+                    "dagsverk": "3156",
                     "is_consecutive_shift": false,
                     "is_consecutive_receiver": false
                 }
@@ -17919,12 +17919,12 @@
                 "7": {
                     "ukedag": "S\u00f8ndag",
                     "tid": [
-                        "14:23",
-                        "23:08"
+                        "12:48",
+                        "21:41"
                     ],
-                    "start": "14:23",
-                    "slutt": "23:08",
-                    "dagsverk": "3156",
+                    "start": "12:48",
+                    "slutt": "21:41",
+                    "dagsverk": "1720",
                     "is_consecutive_shift": false,
                     "is_consecutive_receiver": false
                 }
