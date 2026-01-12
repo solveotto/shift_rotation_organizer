@@ -139,7 +139,89 @@ def move_favorite():
         session.close()
         
         return jsonify({'status': 'success', 'message': 'Favorite moved successfully'})
-        
+
+    except Exception as e:
+        if 'session' in locals():
+            session.rollback()
+            session.close()
+        return jsonify({'status': 'error', 'message': str(e)})
+
+@api.route('/set-favorite-position', methods=['POST'])
+@login_required
+def set_favorite_position():
+    """Move a favorite directly to a specific position."""
+    data = request.get_json()
+    shift_title = data.get('shift_title')
+    new_position = data.get('new_position')  # 1-indexed position from user
+    user_id = current_user.get_id()
+
+    if not shift_title or new_position is None:
+        return jsonify({'status': 'error', 'message': 'Invalid parameters'})
+
+    try:
+        new_position = int(new_position)
+        if new_position < 1:
+            return jsonify({'status': 'error', 'message': 'Position must be at least 1'})
+    except (ValueError, TypeError):
+        return jsonify({'status': 'error', 'message': 'Position must be a number'})
+
+    try:
+        # Get user's selected turnus set
+        from app.routes.shifts import get_user_turnus_set
+        user_turnus_set = get_user_turnus_set()
+        turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
+
+        if not turnus_set_id:
+            return jsonify({'status': 'error', 'message': 'No turnus set selected'})
+
+        session = db_utils.get_db_session()
+
+        # Get current favorites ordered by order_index
+        current_favorites = session.query(db_utils.Favorites).filter_by(
+            user_id=user_id,
+            turnus_set_id=turnus_set_id
+        ).order_by(db_utils.Favorites.order_index).all()
+
+        if not current_favorites:
+            session.close()
+            return jsonify({'status': 'error', 'message': 'No favorites found'})
+
+        # Clamp position to valid range
+        max_position = len(current_favorites)
+        new_position = min(new_position, max_position)
+        new_index = new_position - 1  # Convert to 0-indexed
+
+        # Find the favorite to move
+        favorite_to_move = None
+        current_index = None
+        for i, favorite in enumerate(current_favorites):
+            if favorite.shift_title == shift_title:
+                favorite_to_move = favorite
+                current_index = i
+                break
+
+        if favorite_to_move is None:
+            session.close()
+            return jsonify({'status': 'error', 'message': 'Favorite not found'})
+
+        # If already at the target position, nothing to do
+        if current_index == new_index:
+            session.close()
+            return jsonify({'status': 'success', 'message': 'Already at that position'})
+
+        # Remove the favorite from the list and reinsert at new position
+        current_favorites.pop(current_index)
+        current_favorites.insert(new_index, favorite_to_move)
+
+        # Reassign order_index values based on new positions
+        for i, favorite in enumerate(current_favorites):
+            favorite.order_index = i
+
+        session.commit()
+        session.close()
+
+        return jsonify({'status': 'success', 'message': 'Favorite position updated'})
+
     except Exception as e:
         if 'session' in locals():
             session.rollback()

@@ -56,7 +56,15 @@
                         <div class="list-group-item mb-2 rounded p-2 small" style="border: 1px solid black;">
                             <div class="d-flex align-items-center py-1">
                                 <div class="d-flex align-items-center">
-                                    <h5 class="t-num me-3">#{{ outer_index+1 }}</h5>
+                                    <h5 class="t-num me-3 position-control" style="cursor: pointer;" title="Klikk for å endre posisjon">
+                                        <span class="position-display" data-shift="{{ name }}" data-current="{{ outer_index+1 }}" onclick="showPositionInput(this)">#{{ outer_index+1 }}</span>
+                                        <input type="number" class="position-input form-control form-control-sm"
+                                               data-shift="{{ name }}"
+                                               min="1" max="{{ favorites|length }}"
+                                               style="display: none; width: 60px;"
+                                               onkeydown="handlePositionKeydown(event, this)"
+                                               onblur="hidePositionInput(this)">
+                                    </h5>
                                     
                                     <!-- Move up/down buttons -->
                                     <div class="btn-group-vertical me-3" role="group">
@@ -200,9 +208,9 @@ function moveFavorite(shiftTitle, direction) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-            shift_title: shiftTitle, 
-            direction: direction 
+        body: JSON.stringify({
+            shift_title: shiftTitle,
+            direction: direction
         })
     })
     .then(response => response.json())
@@ -216,6 +224,71 @@ function moveFavorite(shiftTitle, direction) {
     .catch(error => {
         console.error('Error:', error);
         alert('Feil ved flytting av favoritt');
+    });
+}
+
+function showPositionInput(displayElement) {
+    const input = displayElement.nextElementSibling;
+    const currentPosition = displayElement.dataset.current;
+    displayElement.style.display = 'none';
+    input.style.display = 'inline-block';
+    input.value = currentPosition;
+    input.focus();
+    input.select();
+}
+
+function hidePositionInput(inputElement) {
+    const display = inputElement.previousElementSibling;
+    inputElement.style.display = 'none';
+    display.style.display = 'inline';
+}
+
+function handlePositionKeydown(event, inputElement) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        const shiftTitle = inputElement.dataset.shift;
+        const newPosition = parseInt(inputElement.value);
+        const currentPosition = parseInt(inputElement.previousElementSibling.dataset.current);
+
+        if (isNaN(newPosition) || newPosition < 1) {
+            alert('Ugyldig posisjon');
+            hidePositionInput(inputElement);
+            return;
+        }
+
+        if (newPosition === currentPosition) {
+            hidePositionInput(inputElement);
+            return;
+        }
+
+        setFavoritePosition(shiftTitle, newPosition);
+    } else if (event.key === 'Escape') {
+        hidePositionInput(inputElement);
+    }
+}
+
+function setFavoritePosition(shiftTitle, newPosition) {
+    fetch('/api/set-favorite-position', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            shift_title: shiftTitle,
+            new_position: newPosition
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.reload();
+        } else {
+            alert('Feil ved endring av posisjon: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Feil ved endring av posisjon');
     });
 }
 </script>

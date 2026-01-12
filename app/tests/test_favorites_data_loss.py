@@ -471,7 +471,142 @@ class FavoritesTestSuite:
         finally:
             session.close()
     
-    # TEST 7: Turnus Set Switching
+    # TEST 7: Set Favorite Position Directly
+    def test_set_favorite_position(self):
+        """
+        TEST #7: SET FAVORITE POSITION DIRECTLY
+        Test moving a favorite to a specific position (new feature).
+        """
+        print_test("Set Favorite Position - Direct Position Input")
+
+        # Create test user
+        user_id = self.create_test_user(f'test_user_pos_{int(time.time())}')
+        if not user_id:
+            print_fail("Could not create test user")
+            return False
+
+        # Create test turnus set
+        turnus_set_id = self.create_test_turnus_set(f'TEST_POS_{int(time.time())}', 'Test Position Set', is_active=False)
+        if not turnus_set_id:
+            print_fail("Could not create test turnus set")
+            return False
+
+        # Add 5 favorites
+        shifts = ['TEST_POS_A', 'TEST_POS_B', 'TEST_POS_C', 'TEST_POS_D', 'TEST_POS_E']
+        for i, title in enumerate(shifts):
+            success = db_utils.add_favorite(user_id, title, i, turnus_set_id)
+            if not success:
+                print_fail(f"Could not add favorite {title}")
+                return False
+
+        print_info(f"Added 5 favorites: {shifts}")
+
+        # Verify initial order
+        initial_order = db_utils.get_favorite_lst(user_id, turnus_set_id)
+        print_info(f"Initial order: {initial_order}")
+
+        if initial_order != shifts:
+            print_fail(f"Initial order mismatch. Expected {shifts}, got {initial_order}")
+            return False
+
+        # Test: Move last item (E) to position 1
+        session = db_utils.get_db_session()
+        try:
+            # Get current favorites ordered by order_index
+            current_favorites = session.query(db_utils.Favorites).filter_by(
+                user_id=user_id,
+                turnus_set_id=turnus_set_id
+            ).order_by(db_utils.Favorites.order_index).all()
+
+            # Find the favorite to move (E - currently at position 5)
+            shift_to_move = 'TEST_POS_E'
+            new_position = 1  # Move to first position
+            new_index = new_position - 1  # Convert to 0-indexed
+
+            favorite_to_move = None
+            current_index = None
+            for i, fav in enumerate(current_favorites):
+                if fav.shift_title == shift_to_move:
+                    favorite_to_move = fav
+                    current_index = i
+                    break
+
+            if favorite_to_move is None:
+                print_fail("Could not find favorite to move")
+                return False
+
+            print_info(f"Moving {shift_to_move} from position {current_index + 1} to position {new_position}")
+
+            # Remove from list and reinsert at new position
+            current_favorites.pop(current_index)
+            current_favorites.insert(new_index, favorite_to_move)
+
+            # Reassign order_index values
+            for i, fav in enumerate(current_favorites):
+                fav.order_index = i
+
+            session.commit()
+
+            # Verify new order
+            new_order = db_utils.get_favorite_lst(user_id, turnus_set_id)
+            expected_order = ['TEST_POS_E', 'TEST_POS_A', 'TEST_POS_B', 'TEST_POS_C', 'TEST_POS_D']
+
+            print_info(f"New order: {new_order}")
+            print_info(f"Expected: {expected_order}")
+
+            if new_order != expected_order:
+                print_fail(f"Order mismatch after move. Expected {expected_order}, got {new_order}")
+                return False
+
+            print_pass("Successfully moved favorite from position 5 to position 1")
+
+            # Test: Move item from middle to end
+            current_favorites = session.query(db_utils.Favorites).filter_by(
+                user_id=user_id,
+                turnus_set_id=turnus_set_id
+            ).order_by(db_utils.Favorites.order_index).all()
+
+            shift_to_move = 'TEST_POS_B'  # Currently at position 3
+            new_position = 5  # Move to last position
+            new_index = new_position - 1
+
+            for i, fav in enumerate(current_favorites):
+                if fav.shift_title == shift_to_move:
+                    favorite_to_move = fav
+                    current_index = i
+                    break
+
+            print_info(f"Moving {shift_to_move} from position {current_index + 1} to position {new_position}")
+
+            current_favorites.pop(current_index)
+            current_favorites.insert(new_index, favorite_to_move)
+
+            for i, fav in enumerate(current_favorites):
+                fav.order_index = i
+
+            session.commit()
+
+            new_order = db_utils.get_favorite_lst(user_id, turnus_set_id)
+            expected_order = ['TEST_POS_E', 'TEST_POS_A', 'TEST_POS_C', 'TEST_POS_D', 'TEST_POS_B']
+
+            print_info(f"New order: {new_order}")
+            print_info(f"Expected: {expected_order}")
+
+            if new_order != expected_order:
+                print_fail(f"Order mismatch after second move. Expected {expected_order}, got {new_order}")
+                return False
+
+            print_pass("Successfully moved favorite from middle to end")
+            return True
+
+        except Exception as e:
+            session.rollback()
+            print_fail(f"Error during position test: {e}")
+            return False
+        finally:
+            session.close()
+
+    # TEST 8: Turnus Set Switching
     def test_turnus_set_switching(self):
         """
         TEST: Favorites persist when switching between turnus sets
@@ -544,6 +679,7 @@ class FavoritesTestSuite:
             ("Duplicate Favorites", self.test_duplicate_favorites),
             ("No Active Turnus Set", self.test_no_active_turnus_set),
             ("Concurrent Toggles", self.test_concurrent_toggles),
+            ("Set Favorite Position", self.test_set_favorite_position),
             ("Turnus Set Switching", self.test_turnus_set_switching),
         ]
         
