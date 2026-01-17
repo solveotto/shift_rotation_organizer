@@ -51,7 +51,7 @@ def list_backups():
             time_part = basename.split('_')[2].replace('.sql', '')  # HHMMSS
             backup_date = datetime.strptime(f"{date_part}_{time_part}", "%Y%m%d_%H%M%S")
             date_str = backup_date.strftime("%Y-%m-%d %H:%M:%S")
-        except:
+        except (IndexError, ValueError):
             date_str = "Unknown date"
         
         print(f"{i:2d}. {basename:30s} | {date_str} | {size_str:>10s}")

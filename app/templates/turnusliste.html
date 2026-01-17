@@ -303,33 +303,28 @@
                                             
                                                         
                                             <tbody class="text-center">
-                                                {% for week_nr, week_data in data.items() %}
+                                                {% for week_nr, week_data in data.items() if week_data is mapping and week_nr|string|int(-1) >= 0 %}
                                                     <tr class="align-middle text-nowrap">
                                                         <td style="border: 1px solid black; font-size: small;">{{ week_nr }}</td>
 
-                                                        {% if week_data is mapping %}
-                                                            {% for day_nr, day_data in week_data.items() %}
-                                                                <td id="cell" class="min-width-td {% if day_data.is_consecutive_shift %}consecutive-shift-arrow{% elif day_data.is_consecutive_receiver %}consecutive-shift-receiver{% endif %}" style="border: 1px solid black;">
-                                                                    <div class="custom-text" style="font-size: xx-small;">{{day_data.dagsverk}}</div>
-                                                                    <div class="time-text" style="font-size: small;">
-                                                                        {% for time in day_data.tid %}
-                                                                            {% if day_data.tid|length == 2 %}
-                                                                                {% if loop.first %}
-                                                                                    {{ time }} -
-                                                                                {% else %}
-                                                                                    {{ time }}
-                                                                                {% endif %}
+                                                        {% for day_nr, day_data in week_data.items() if day_data is mapping %}
+                                                            <td id="cell" class="min-width-td {% if day_data.is_consecutive_shift %}consecutive-shift-arrow{% elif day_data.is_consecutive_receiver %}consecutive-shift-receiver{% endif %}" style="border: 1px solid black;">
+                                                                <div class="custom-text" style="font-size: xx-small;">{{day_data.dagsverk}}</div>
+                                                                <div class="time-text" style="font-size: small;">
+                                                                    {% for time in day_data.tid %}
+                                                                        {% if day_data.tid|length == 2 %}
+                                                                            {% if loop.first %}
+                                                                                {{ time }} -
                                                                             {% else %}
                                                                                 {{ time }}
                                                                             {% endif %}
-                                                                        {% endfor %}
-                                                                    </div>
-                                                                </td>
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <!-- Skip non-dict week_data entries -->
-                                                            <td colspan="7" style="border: 1px solid black; font-size: small; color: #999;">{{ week_data }}</td>
-                                                        {% endif %}
+                                                                        {% else %}
+                                                                            {{ time }}
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </td>
+                                                        {% endfor %}
                                                     </tr>
                                                 {% endfor %}
                                             </tbody>

@@ -1,7 +1,7 @@
 import sys
 import os
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, UniqueConstraint, func, ForeignKey
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base, Mapped, mapped_column
 import json
 import bcrypt
 from flask import flash
@@ -18,17 +18,17 @@ Base = declarative_base()
 
 class DBUser(Base):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(255), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
-    is_auth = Column(Integer, default=0)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_auth: Mapped[int] = mapped_column(Integer, default=0)
 
 class TurnusSet(Base):
     __tablename__ = 'turnus_sets'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)  # Human-readable name like "OSL Train Shifts 2025"
     year_identifier = Column(String(10), nullable=False)  # Short identifier like "R25", "R26"
-    is_active = Column(Integer, default=0)  # 1 = currently active set, 0 = inactive
+    is_active: Mapped[int] = mapped_column(Integer, default=0)  # 1 = currently active set, 0 = inactive
     created_at = Column(DateTime, default=func.now())
     turnus_file_path = Column(String(500), nullable=True)  # Path to turnuser_XX.json
     df_file_path = Column(String(500), nullable=True)      # Path to turnus_df_XX.json
@@ -40,7 +40,7 @@ class Favorites(Base):
     user_id = Column(Integer, nullable=False) 
     shift_title = Column(String(255), nullable=False)  # Title of the shift
     turnus_set_id = Column(Integer, nullable=False)  # Links to specific turnus set
-    order_index = Column(Integer, default=0)  # Order index for the shift in the turnus set
+    order_index: Mapped[int ]= mapped_column(Integer, default=0)  # Order index for the shift in the turnus set
     __table_args__ = (UniqueConstraint('user_id', 'shift_title', 'turnus_set_id'),)  # Prevent duplicate favorites for the same user and shift
 
 class Shifts(Base):
@@ -329,10 +329,10 @@ def hash_password(password):
         return hashed_pw.decode('utf-8')
 
 
-def create_new_user(username, hashed_password):
+def create_new_user(username, password, is_auth):
     session = get_db_session()
     try:
-        new_user = DBUser(username=username, password=hash_password(hashed_password))
+        new_user = DBUser(username=username, password=hash_password(password), is_auth=is_auth)
         session.add(new_user)
         session.commit()
         print(f"User created")
@@ -707,7 +707,7 @@ def update_user_password(user_id, current_password, new_password):
         session.close()
 
 if __name__ == '__main__':
-    create_new_user('testuser', 'testuser')
+    create_new_user('testuser', 'testuser', 0)
 
     #try:
     #    username = get_user_data('testuser')

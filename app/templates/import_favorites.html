@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}Importer Favoritter{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-box-arrow-in-down"></i>
+                        Importer favoritter fra tidligere turnuser
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Finn turnuser i {{ current_turnus_set.year_identifier if current_turnus_set else 'gjeldende turnus' }}
+                        som har lignende statistikk som dine favoritter fra tidligere turnuser.
+                    </p>
+
+                    {% if not available_sources %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            Du har ingen favoritter i tidligere turnuser som kan importeres.
+                            <br><br>
+                            For å bruke denne funksjonen må du:
+                            <ul class="mb-0 mt-2">
+                                <li>Ha favoritter lagret i en annen turnus (f.eks. {{ current_turnus_set.year_identifier if current_turnus_set else 'R25' }} -> R25)</li>
+                                <li>Statistikkfiler må finnes for begge turnusene</li>
+                            </ul>
+                        </div>
+                        <a href="{{ url_for('shifts.favorites') }}" class="btn btn-primary">
+                            <i class="bi bi-arrow-left"></i> Tilbake til favoritter
+                        </a>
+                    {% else %}
+                        <!-- Step 1: Select source turnus set and match count -->
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <label for="sourceTurnusSet" class="form-label fw-bold">
+                                    1. Velg turnus å importere fra:
+                                </label>
+                                <select class="form-select" id="sourceTurnusSet">
+                                    <option value="">-- Velg turnus --</option>
+                                    {% for ts in available_sources %}
+                                        <option value="{{ ts.id }}">
+                                            {{ ts.year_identifier }} - {{ ts.name }} ({{ ts.favorite_count }} favoritter)
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="matchCount" class="form-label fw-bold">
+                                    Antall treff per favoritt:
+                                </label>
+                                <select class="form-select" id="matchCount">
+                                    <option value="3">Topp 3</option>
+                                    <option value="5" selected>Topp 5</option>
+                                    <option value="10">Topp 10</option>
+                                    <option value="0">Alle</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Preview matches (hidden until source selected) -->
+                        <div id="previewSection" style="display: none;">
+                            <div class="mb-3">
+                                <span class="fw-bold">2. Forhåndsvisning av matchende turnuser:</span>
+                                <span class="text-muted ms-2" id="matchInfo"></span>
+                            </div>
+
+                            <div id="loadingSpinner" class="text-center py-4" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Laster...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Analyserer turnuser...</p>
+                            </div>
+
+                            <div id="matchesContainer"></div>
+
+                            <!-- Step 3: Import button -->
+                            <div id="importActions" class="mt-4" style="display: none;">
+                                <hr>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span id="selectedCount" class="text-muted">0 turnuser valgt</span>
+                                    <div>
+                                        <button class="btn btn-outline-secondary me-2" onclick="selectAll()">
+                                            Velg alle beste treff
+                                        </button>
+                                        <button class="btn btn-outline-secondary me-2" onclick="deselectAll()">
+                                            Fjern alle valg
+                                        </button>
+                                        <button class="btn btn-primary" onclick="importSelected()" id="importBtn">
+                                            <i class="bi bi-plus-circle"></i> Legg til valgte favoritter
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="{{ url_for('shifts.favorites') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Tilbake til favoritter
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.match-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+.match-card-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+.match-card-body {
+    padding: 1rem;
+}
+.match-option {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.match-option:hover {
+    background-color: #f8f9fa;
+}
+.match-option.selected {
+    background-color: #e7f1ff;
+    border: 1px solid #86b7fe;
+}
+.match-option input[type="checkbox"] {
+    margin-right: 0.75rem;
+}
+.similarity-badge {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+.similarity-high {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+.similarity-medium {
+    background-color: #fff3cd;
+    color: #664d03;
+}
+.similarity-low {
+    background-color: #f8d7da;
+    color: #842029;
+}
+.stat-pill {
+    display: inline-block;
+    padding: 0.15rem 0.4rem;
+    margin: 0.1rem;
+    font-size: 0.75rem;
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
+.source-stats {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+</style>
+
+<script>
+document.getElementById('sourceTurnusSet').addEventListener('change', function() {
+    const sourceId = this.value;
+    if (sourceId) {
+        loadPreview(sourceId);
+    } else {
+        document.getElementById('previewSection').style.display = 'none';
+    }
+});
+
+// Reload when match count changes
+document.getElementById('matchCount').addEventListener('change', function() {
+    const sourceId = document.getElementById('sourceTurnusSet').value;
+    if (sourceId) {
+        loadPreview(sourceId);
+    }
+});
+
+function loadPreview(sourceId) {
+    const previewSection = document.getElementById('previewSection');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const matchesContainer = document.getElementById('matchesContainer');
+    const importActions = document.getElementById('importActions');
+    const topN = parseInt(document.getElementById('matchCount').value);
+
+    previewSection.style.display = 'block';
+    loadingSpinner.style.display = 'block';
+    matchesContainer.innerHTML = '';
+    importActions.style.display = 'none';
+
+    fetch('/api/import-favorites-preview', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ source_turnus_set_id: sourceId, top_n: topN })
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingSpinner.style.display = 'none';
+
+        if (data.status === 'error') {
+            matchesContainer.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> ${data.message}
+                </div>
+            `;
+            return;
+        }
+
+        document.getElementById('matchInfo').textContent =
+            `Fra ${data.source_set.year_identifier} til ${data.target_set.year_identifier}`;
+
+        renderMatches(data.matches);
+        importActions.style.display = 'block';
+        updateSelectedCount();
+    })
+    .catch(error => {
+        loadingSpinner.style.display = 'none';
+        matchesContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-x-circle"></i> Feil ved lasting av data: ${error.message}
+            </div>
+        `;
+    });
+}
+
+function renderMatches(matches) {
+    const container = document.getElementById('matchesContainer');
+    container.innerHTML = '';
+
+    matches.forEach((match, index) => {
+        const sourceStats = match.source_stats;
+        const statsHtml = formatStats(sourceStats);
+
+        let matchOptionsHtml = '';
+        match.matches.forEach((m, mIndex) => {
+            const similarityClass = m.similarity >= 0.85 ? 'similarity-high' :
+                                   m.similarity >= 0.7 ? 'similarity-medium' : 'similarity-low';
+            const similarityPercent = Math.round(m.similarity * 100);
+            const isFirst = mIndex === 0;
+
+            matchOptionsHtml += `
+                <div class="match-option ${isFirst ? 'selected' : ''}"
+                     onclick="toggleMatchOption(this, '${m.shift}')">
+                    <input type="checkbox" ${isFirst ? 'checked' : ''}
+                           data-shift="${m.shift}" data-source="${match.source_shift}">
+                    <div class="flex-grow-1">
+                        <strong>${m.shift}</strong>
+                        <span class="similarity-badge ${similarityClass} ms-2">${similarityPercent}% match</span>
+                        <div class="source-stats mt-1">${formatStats(m.stats)}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        const cardHtml = `
+            <div class="match-card">
+                <div class="match-card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${match.source_shift}</strong>
+                            <span class="text-muted ms-2">(din favoritt)</span>
+                        </div>
+                    </div>
+                    <div class="source-stats mt-1">Statistikk: ${statsHtml}</div>
+                </div>
+                <div class="match-card-body">
+                    <div class="text-muted mb-2">Beste treff i ny turnus:</div>
+                    ${matchOptionsHtml}
+                </div>
+            </div>
+        `;
+
+        container.innerHTML += cardHtml;
+    });
+}
+
+function formatStats(stats) {
+    const labels = {
+        'tidlig': 'Tidlig',
+        'ettermiddag': 'Kveld',
+        'natt': 'Natt',
+        'helgetimer': 'Helg-t',
+        'helgedager': 'Helg-d',
+        'before_6': 'Før 6',
+        'natt_helg': 'Natt helg'
+    };
+
+    return Object.entries(stats)
+        .filter(([key, value]) => value !== null && value !== undefined)
+        .map(([key, value]) => {
+            const label = labels[key] || key;
+            const displayValue = typeof value === 'number' && !Number.isInteger(value)
+                ? value.toFixed(1)
+                : value;
+            return `<span class="stat-pill">${label}: ${displayValue}</span>`;
+        })
+        .join('');
+}
+
+function toggleMatchOption(element, shift) {
+    const checkbox = element.querySelector('input[type="checkbox"]');
+    checkbox.checked = !checkbox.checked;
+    element.classList.toggle('selected', checkbox.checked);
+    updateSelectedCount();
+}
+
+function selectAll() {
+    document.querySelectorAll('.match-option').forEach((option, index) => {
+        // Only select first option in each card
+        const card = option.closest('.match-card-body');
+        const allOptions = card.querySelectorAll('.match-option');
+        const isFirst = Array.from(allOptions).indexOf(option) === 0;
+
+        if (isFirst) {
+            const checkbox = option.querySelector('input[type="checkbox"]');
+            checkbox.checked = true;
+            option.classList.add('selected');
+        }
+    });
+    updateSelectedCount();
+}
+
+function deselectAll() {
+    document.querySelectorAll('.match-option').forEach(option => {
+        const checkbox = option.querySelector('input[type="checkbox"]');
+        checkbox.checked = false;
+        option.classList.remove('selected');
+    });
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.match-option input[type="checkbox"]:checked');
+    const count = checked.length;
+    document.getElementById('selectedCount').textContent = `${count} turnus${count !== 1 ? 'er' : ''} valgt`;
+    document.getElementById('importBtn').disabled = count === 0;
+}
+
+function importSelected() {
+    const checked = document.querySelectorAll('.match-option input[type="checkbox"]:checked');
+    const shifts = Array.from(checked).map(cb => cb.dataset.shift);
+
+    if (shifts.length === 0) {
+        alert('Velg minst en turnus å importere');
+        return;
+    }
+
+    const btn = document.getElementById('importBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Importerer...';
+
+    fetch('/api/import-favorites-confirm', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ shifts: shifts })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            let message = `La til ${data.added.length} favoritter.`;
+            if (data.skipped.length > 0) {
+                message += ` ${data.skipped.length} var allerede favoritter.`;
+            }
+            alert(message);
+            window.location.href = '{{ url_for("shifts.favorites") }}';
+        } else {
+            alert('Feil: ' + data.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-plus-circle"></i> Legg til valgte favoritter';
+        }
+    })
+    .catch(error => {
+        alert('Feil ved import: ' + error.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-plus-circle"></i> Legg til valgte favoritter';
+    });
+}
+</script>
+{% endblock %}

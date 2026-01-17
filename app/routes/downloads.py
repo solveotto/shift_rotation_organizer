@@ -1,10 +1,12 @@
 import os
 from flask import Blueprint, send_from_directory, request, session, flash, redirect, url_for
+from flask_login import login_required
 from config import conf
 from app.utils import db_utils
 
 downloads = Blueprint('downloads', __name__)
 
+@login_required
 def get_user_turnus_set():
     """Get the turnus set for current user (their current session choice or database active set)"""
     # Get the current database active set
@@ -28,6 +30,7 @@ def get_user_turnus_set():
 
 # Legacy route
 @downloads.route('/download_excel')
+@login_required
 def download_excel():
     # Get user's selected turnus set (same logic as other routes)
     turnus_set = get_user_turnus_set()
@@ -53,6 +56,7 @@ def download_excel():
     return send_from_directory(directory, filename, as_attachment=True)
 
 @downloads.route('/download_pdf')
+@login_required
 def download_pdf():
     # Get user's selected turnus set (same logic as other routes)
     turnus_set = get_user_turnus_set()

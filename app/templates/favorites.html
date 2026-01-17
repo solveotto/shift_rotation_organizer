@@ -42,11 +42,22 @@
 <div class="container-fluid printable" data-current-turnus-set-id="{{ current_turnus_set.id if current_turnus_set else '' }}">
     <div class="row justify-content-center">
         <div class="col-auto">
+            <!-- Import from previous year button -->
+            <div class="mb-3 text-end no-print">
+                <a href="{{ url_for('shifts.import_favorites') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-box-arrow-in-down"></i> Importer fra tidligere turnus
+                </a>
+            </div>
+            
             <div class="table-responsive">
                 <div class="container">
                     {% if favorites|length == 0 %}
                     <br><br><br><br><br><br><br><br><br>
-                        <h5>Ingen favoritter er valg.</h5>
+                        <h5>Ingen favoritter er valgt.</h5>
+                        <p class="text-muted">
+                            <a href="{{ url_for('shifts.import_favorites') }}">Importer fra tidligere turnus</a>
+                            for å finne lignende turnuser basert på statistikk.
+                        </p>
                     {% endif %}
                 </div>
                
@@ -127,11 +138,11 @@
                                 </thead>
                                 
                                 <tbody class="text-center">
-                                    {% for week_nr, week_data in data.items() %}
+                                    {% for week_nr, week_data in data.items() if week_data is mapping and week_nr|string|int(-1) >= 0 %}
                                         <tr class="align-middle text-nowrap">
                                             <td style="border: 1px solid black; font-size: small;">{{ week_nr }}</td>
 
-                                            {% for day_nr, day_data in week_data.items() %}
+                                            {% for day_nr, day_data in week_data.items() if day_data is mapping %}
                                                 <td id="cell" class="min-width-td {% if day_data.is_consecutive_shift %}consecutive-shift-arrow{% elif day_data.is_consecutive_receiver %}consecutive-shift-receiver{% endif %}" style="border: 1px solid black;">
                                                     <div class="custom-text" style="font-size: xx-small;">{{day_data.dagsverk}}</div>
                                                     <div class="time-text" style="font-size: small;">

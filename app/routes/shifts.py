@@ -43,8 +43,6 @@ def turnusliste():
 @login_required
 def switch_user_year(turnus_set_id):
     """Allow user to switch which year they're viewing (stored in session)"""
-    print(f"DEBUG SWITCH: Switching to turnus_set_id = {turnus_set_id}")
-    
     # Store user's choice in their session
     session['user_selected_turnus_set'] = turnus_set_id
 
@@ -117,10 +115,10 @@ def compare():
     # Get user's selected turnus set
     user_turnus_set = get_user_turnus_set()
     turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
-    
+
     # Load data for user's selected year
     user_df_manager = df_utils.DataframeManager(turnus_set_id)
-    
+
     # Prepare metrics for charts
     df = user_df_manager.df
     metrics = ['natt', 'tidlig', 'shift_cnt', 'before_6', 'helgetimer']
@@ -133,6 +131,38 @@ def compare():
         labels=labels,
         data=data,
         current_turnus_set=user_turnus_set,
+        all_turnus_sets=db_utils.get_all_turnus_sets()
+    )
+
+
+@shifts.route('/import-favorites')
+@login_required
+def import_favorites():
+    """Page for importing favorites from previous turnus years based on shift statistics."""
+    from app.utils import shift_matcher
+
+    # Get user's current turnus set
+    user_turnus_set = get_user_turnus_set()
+    turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
+
+    # Get turnus sets where user has favorites
+    user_id = current_user.get_id()
+    sets_with_stats = shift_matcher.get_all_turnus_sets_with_stats()
+
+    available_sources = []
+    for ts in sets_with_stats:
+        if ts['id'] == turnus_set_id:
+            continue
+        favorites = db_utils.get_favorite_lst(user_id, ts['id'])
+        if favorites:
+            ts['favorite_count'] = len(favorites)
+            available_sources.append(ts)
+
+    return render_template(
+        'import_favorites.html',
+        page_name='Importer Favoritter',
+        current_turnus_set=user_turnus_set,
+        available_sources=available_sources,
         all_turnus_sets=db_utils.get_all_turnus_sets()
     )
 

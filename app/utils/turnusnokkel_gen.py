@@ -52,7 +52,7 @@ class TurnusnokkelGen():
                     workbook = load_workbook(fallback_path)
                     sheet = workbook.active
                     return workbook, sheet
-            except:
+            except (ImportError, AttributeError, FileNotFoundError):
                 pass
             raise FileNotFoundError(f"Excel template file not found: {excel_file}")
 

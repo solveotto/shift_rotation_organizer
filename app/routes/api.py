@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
-from mysql.connector import Error
 from app.utils import db_utils
+from app.utils import shift_matcher
 from app.routes.main import favorite_lock
 
 api = Blueprint('api', __name__, url_prefix='/api')
@@ -289,4 +289,180 @@ def generate_turnusnokkel():
             return jsonify({'status': 'error', 'message': result['error']})
             
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f'Failed to generate turnusnøkkel: {str(e)}'}) 
+        return jsonify({'status': 'error', 'message': f'Failed to generate turnusnøkkel: {str(e)}'})
+
+
+@api.route('/import-favorites-preview', methods=['POST'])
+@login_required
+def import_favorites_preview():
+    """
+    Preview what favorites would be imported from another turnus set.
+    Finds shifts in the current turnus set that are statistically similar
+    to the user's favorites from the source turnus set.
+    """
+    data = request.get_json()
+    source_turnus_set_id = data.get('source_turnus_set_id')
+    top_n = data.get('top_n', 5)
+
+    if not source_turnus_set_id:
+        return jsonify({'status': 'error', 'message': 'No source turnus set provided'})
+
+    try:
+        source_turnus_set_id = int(source_turnus_set_id)
+    except (ValueError, TypeError):
+        return jsonify({'status': 'error', 'message': 'Invalid source turnus set ID'})
+
+    # Handle top_n: 0 means all matches
+    try:
+        top_n = int(top_n)
+        if top_n == 0:
+            top_n = 999  # Effectively all matches
+        elif top_n < 0:
+            top_n = 5
+    except (ValueError, TypeError):
+        top_n = 5
+
+    # Get current turnus set
+    from app.routes.shifts import get_user_turnus_set
+    user_turnus_set = get_user_turnus_set()
+    target_turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
+
+    if not target_turnus_set_id:
+        return jsonify({'status': 'error', 'message': 'No active turnus set selected'})
+
+    if source_turnus_set_id == target_turnus_set_id:
+        return jsonify({'status': 'error', 'message': 'Source and target turnus sets are the same'})
+
+    user_id = current_user.get_id()
+
+    # Get matches for user's favorites
+    matches = shift_matcher.find_matches_for_favorites(
+        user_id=user_id,
+        source_turnus_set_id=source_turnus_set_id,
+        target_turnus_set_id=target_turnus_set_id,
+        top_n=top_n
+    )
+
+    if not matches:
+        return jsonify({
+            'status': 'error',
+            'message': 'No favorites found in source turnus set or stats unavailable'
+        })
+
+    # Get info about the turnus sets
+    source_set = db_utils.get_turnus_set_by_id(source_turnus_set_id)
+    target_set = db_utils.get_turnus_set_by_id(target_turnus_set_id)
+
+    return jsonify({
+        'status': 'success',
+        'source_set': {
+            'id': source_set['id'],
+            'name': source_set['name'],
+            'year_identifier': source_set['year_identifier']
+        },
+        'target_set': {
+            'id': target_set['id'],
+            'name': target_set['name'],
+            'year_identifier': target_set['year_identifier']
+        },
+        'matches': matches
+    })
+
+
+@api.route('/import-favorites-confirm', methods=['POST'])
+@login_required
+def import_favorites_confirm():
+    """
+    Add selected shifts as favorites in the current turnus set.
+    """
+    data = request.get_json()
+    shifts_to_add = data.get('shifts', [])
+
+    if not shifts_to_add:
+        return jsonify({'status': 'error', 'message': 'No shifts provided'})
+
+    if not isinstance(shifts_to_add, list):
+        return jsonify({'status': 'error', 'message': 'Shifts must be a list'})
+
+    # Get current turnus set
+    from app.routes.shifts import get_user_turnus_set
+    user_turnus_set = get_user_turnus_set()
+    turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
+
+    if not turnus_set_id:
+        return jsonify({'status': 'error', 'message': 'No active turnus set selected'})
+
+    user_id = current_user.get_id()
+
+    with favorite_lock:
+        try:
+            # Get existing favorites to avoid duplicates
+            existing_favorites = db_utils.get_favorite_lst(user_id, turnus_set_id)
+            current_max_index = db_utils.get_max_ordered_index(user_id, turnus_set_id)
+
+            added = []
+            skipped = []
+
+            for shift_title in shifts_to_add:
+                if shift_title in existing_favorites:
+                    skipped.append(shift_title)
+                    continue
+
+                current_max_index += 1
+                success = db_utils.add_favorite(user_id, shift_title, current_max_index, turnus_set_id)
+
+                if success:
+                    added.append(shift_title)
+                    existing_favorites.append(shift_title)  # Update local list
+                else:
+                    skipped.append(shift_title)
+
+            return jsonify({
+                'status': 'success',
+                'message': f'Added {len(added)} favorites',
+                'added': added,
+                'skipped': skipped
+            })
+
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': f'Error adding favorites: {str(e)}'})
+
+
+@api.route('/get-turnus-sets-for-import', methods=['GET'])
+@login_required
+def get_turnus_sets_for_import():
+    """
+    Get list of turnus sets that can be used as import sources.
+    Only returns sets where the user has favorites and stats are available.
+    """
+    user_id = current_user.get_id()
+
+    # Get current turnus set to exclude it
+    from app.routes.shifts import get_user_turnus_set
+    user_turnus_set = get_user_turnus_set()
+    current_turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
+
+    # Get all turnus sets with stats
+    sets_with_stats = shift_matcher.get_all_turnus_sets_with_stats()
+
+    # Filter to only sets where user has favorites (and not current set)
+    available_sets = []
+    for ts in sets_with_stats:
+        if ts['id'] == current_turnus_set_id:
+            continue
+
+        # Check if user has favorites in this set
+        favorites = db_utils.get_favorite_lst(user_id, ts['id'])
+        if favorites:
+            ts['favorite_count'] = len(favorites)
+            available_sets.append(ts)
+
+    return jsonify({
+        'status': 'success',
+        'turnus_sets': available_sets,
+        'current_set': {
+            'id': current_turnus_set_id,
+            'name': user_turnus_set['name'] if user_turnus_set else None,
+            'year_identifier': user_turnus_set['year_identifier'] if user_turnus_set else None
+        } if user_turnus_set else None
+    }) 
