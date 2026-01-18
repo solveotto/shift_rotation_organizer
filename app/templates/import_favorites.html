@@ -8,13 +8,13 @@
         <div class="col-lg-10">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="mb-0">
+                    <h6 class="mb-0">
                         <i class="bi bi-box-arrow-in-down"></i>
                         Importer favoritter fra tidligere turnuser
-                    </h4>
+                    </h6>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted">
+                    <p class="text-muted small">
                         Finn turnuser i {{ current_turnus_set.year_identifier if current_turnus_set else 'gjeldende turnus' }}
                         som har lignende statistikk som dine favoritter fra tidligere turnuser.
                     </p>
@@ -34,39 +34,90 @@
                             <i class="bi bi-arrow-left"></i> Tilbake til favoritter
                         </a>
                     {% else %}
-                        <!-- Step 1: Select source turnus set and match count -->
-                        <div class="row mb-4">
-                            <div class="col-md-8">
-                                <label for="sourceTurnusSet" class="form-label fw-bold">
-                                    1. Velg turnus å importere fra:
-                                </label>
-                                <select class="form-select" id="sourceTurnusSet">
-                                    <option value="">-- Velg turnus --</option>
-                                    {% for ts in available_sources %}
-                                        <option value="{{ ts.id }}">
-                                            {{ ts.year_identifier }} - {{ ts.name }} ({{ ts.favorite_count }} favoritter)
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="matchCount" class="form-label fw-bold">
-                                    Antall treff per favoritt:
-                                </label>
-                                <select class="form-select" id="matchCount">
-                                    <option value="3">Topp 3</option>
-                                    <option value="5" selected>Topp 5</option>
-                                    <option value="10">Topp 10</option>
-                                    <option value="0">Alle</option>
-                                </select>
+                        <!-- Step 1: Select source turnus set(s) and match count -->
+                        <div class="selection-panel mb-3 p-2">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label class="form-label d-flex align-items-center small">
+                                        <span class="step-number">1</span>
+                                        <span>Velg turnus(er) å importere fra</span>
+                                    </label>
+
+                                    <!-- Mode toggle with better styling -->
+                                    <div class="mb-2 mode-toggle-container">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input form-check-input-sm" type="checkbox" id="multiSelectMode" role="switch">
+                                            <label class="form-check-label" for="multiSelectMode" style="font-size: 0.8rem;">
+                                                <i class="bi bi-stack" style="font-size: 0.85rem;"></i>
+                                                <strong>Flervalg-modus</strong> - Kombiner favoritter fra flere år
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Single select mode (default) -->
+                                    <select class="form-select" id="sourceTurnusSet">
+                                        <option value="">-- Velg ett år --</option>
+                                        {% for ts in available_sources %}
+                                            <option value="{{ ts.id }}">
+                                                {{ ts.year_identifier }} - {{ ts.name }}
+                                                <span class="text-muted">({{ ts.favorite_count }} favoritter)</span>
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+
+                                    <!-- Multi select mode -->
+                                    <div id="multiSelectContainer" class="multi-select-box">
+                                        <div class="multi-select-header">
+                                            <small class="text-muted" style="font-size: 0.7rem;">
+                                                <i class="bi bi-info-circle" style="font-size: 0.75rem;"></i>
+                                                Velg ett eller flere år å sammenligne
+                                            </small>
+                                        </div>
+                                        {% for ts in available_sources %}
+                                            <div class="multi-select-option">
+                                                <div class="form-check">
+                                                    <input class="form-check-input form-check-input-sm source-checkbox" type="checkbox"
+                                                           value="{{ ts.id }}" id="source_{{ ts.id }}">
+                                                    <label class="form-check-label" for="source_{{ ts.id }}">
+                                                        <span class="year-badge">{{ ts.year_identifier }}</span>
+                                                        <span class="turnus-name">{{ ts.name }}</span>
+                                                        <span class="favorite-count">{{ ts.favorite_count }} favoritter</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="matchCount" class="form-label d-flex align-items-center small">
+                                        <i class="bi bi-sliders me-1"></i>
+                                        <span>Treff per favoritt</span>
+                                    </label>
+                                    <select class="form-select" id="matchCount">
+                                        <option value="3">Topp 3</option>
+                                        <option value="5" selected>Topp 5</option>
+                                        <option value="10">Topp 10</option>
+                                        <option value="0">Alle treff</option>
+                                    </select>
+                                    <small class="form-text text-muted mt-1 d-block" style="font-size: 0.7rem;">
+                                        <i class="bi bi-lightbulb"></i>
+                                        Hvor mange matchende turnuser som vises per favoritt
+                                    </small>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Step 2: Preview matches (hidden until source selected) -->
-                        <div id="previewSection" style="display: none;">
-                            <div class="mb-3">
-                                <span class="fw-bold">2. Forhåndsvisning av matchende turnuser:</span>
-                                <span class="text-muted ms-2" id="matchInfo"></span>
+                        <div id="previewSection" class="preview-section" style="display: none;">
+                            <div class="preview-header mb-2">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="small">
+                                        <span class="step-number">2</span>
+                                        <span class="fw-bold">Forhåndsvisning av matchende turnuser</span>
+                                    </div>
+                                    <div class="match-info-badge" id="matchInfo"></div>
+                                </div>
                             </div>
 
                             <div id="loadingSpinner" class="text-center py-4" style="display: none;">
@@ -111,89 +162,426 @@
 </div>
 
 <style>
-.match-card {
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    overflow: hidden;
+/* Selection Panel Styling */
+.selection-panel {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    padding: 12px;
 }
-.match-card-header {
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #0d6efd;
+    color: white;
+    border-radius: 50%;
+    font-weight: 600;
+    margin-right: 6px;
+    font-size: 0.65rem;
+}
+
+.mode-toggle-container {
     background-color: #f8f9fa;
-    padding: 0.75rem 1rem;
+    border-left: 2px solid #0d6efd;
+    padding: 8px 10px;
+    border-radius: 4px;
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.form-check-input-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+.form-switch .form-check-input-sm {
+    width: 2rem;
+    height: 1rem;
+}
+
+/* Multi-select box styling */
+.multi-select-box {
+    display: none;
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.multi-select-header {
+    padding: 6px 8px;
+    background-color: #f8f9fa;
     border-bottom: 1px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
+
+.multi-select-option {
+    padding: 5px 8px;
+    margin: 0;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background-color 0.15s;
+}
+
+.multi-select-option:hover {
+    background-color: #f8f9fa;
+}
+
+.multi-select-option:last-child {
+    border-bottom: none;
+}
+
+.multi-select-option .form-check {
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    min-height: auto;
+}
+
+.multi-select-option .form-check-input {
+    margin-top: 0;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.multi-select-option .form-check-label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: nowrap;
+    width: 100%;
+    margin-bottom: 0;
+    font-size: 0.8rem;
+    line-height: 1.3;
+}
+
+.year-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 5px;
+    background: #0d6efd;
+    color: white;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 0.7rem;
+    min-width: 40px;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.turnus-name {
+    flex: 1;
+    font-weight: 500;
+    color: #212529;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.favorite-count {
+    color: #6c757d;
+    font-size: 0.65rem;
+    padding: 2px 4px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Preview Section Styling */
+.preview-section {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.preview-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.match-info-badge {
+    background: #0d6efd;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Match Cards */
+.match-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+    background: white;
+}
+
+.match-card:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.match-card-header {
+    background: #f8f9fa;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.match-card-header strong {
+    font-size: 0.85rem;
+    color: #212529;
+    font-weight: 600;
+}
+
 .match-card-body {
-    padding: 1rem;
+    padding: 8px;
+    background-color: #ffffff;
 }
+
 .match-option {
     display: flex;
     align-items: center;
-    padding: 0.5rem;
+    padding: 6px;
     border-radius: 4px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 4px;
     cursor: pointer;
-    transition: background-color 0.2s;
-}
-.match-option:hover {
+    transition: all 0.15s;
+    border: 1px solid transparent;
     background-color: #f8f9fa;
 }
+
+.match-option:hover {
+    background-color: #e9ecef;
+}
+
 .match-option.selected {
-    background-color: #e7f1ff;
-    border: 1px solid #86b7fe;
+    background: #e7f1ff;
+    border: 1px solid #0d6efd;
 }
+
 .match-option input[type="checkbox"] {
-    margin-right: 0.75rem;
+    margin-right: 6px;
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
 }
+
+.match-option strong {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
 .similarity-badge {
-    font-size: 0.875rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    font-size: 0.65rem;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-weight: 600;
 }
+
 .similarity-high {
-    background-color: #d1e7dd;
+    background: #d1e7dd;
     color: #0f5132;
 }
+
 .similarity-medium {
-    background-color: #fff3cd;
+    background: #fff3cd;
     color: #664d03;
 }
+
 .similarity-low {
-    background-color: #f8d7da;
+    background: #f8d7da;
     color: #842029;
 }
+
 .stat-pill {
     display: inline-block;
-    padding: 0.15rem 0.4rem;
-    margin: 0.1rem;
-    font-size: 0.75rem;
+    padding: 1px 4px;
+    margin: 1px;
+    font-size: 0.65rem;
     background-color: #e9ecef;
-    border-radius: 4px;
+    border-radius: 2px;
+    border: 1px solid #dee2e6;
+    font-weight: 500;
 }
+
 .source-stats {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     color: #6c757d;
+    margin-top: 4px;
+}
+
+/* Import Actions Styling */
+#importActions {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+}
+
+#selectedCount {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+/* Form controls modernization */
+.form-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.form-select {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+}
+
+.form-text {
+    font-size: 0.7rem;
+}
+
+.btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.btn-lg {
+    font-size: 0.85rem;
+    padding: 8px 16px;
+}
+
+.card {
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px 12px;
+}
+
+.card-header h6 {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 12px;
+}
+
+.card-body > p {
+    font-size: 0.8rem;
+}
+
+.alert {
+    font-size: 0.8rem;
+    padding: 10px 12px;
+    border-radius: 5px;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .step-number {
+        width: 18px;
+        height: 18px;
+        font-size: 0.6rem;
+    }
+
+    .match-card-header {
+        padding: 6px 8px;
+    }
+
+    .match-option {
+        padding: 5px;
+    }
+
+    .card-header h6 {
+        font-size: 0.85rem;
+    }
 }
 </style>
 
 <script>
+// Toggle between single and multi-select mode
+document.getElementById('multiSelectMode').addEventListener('change', function() {
+    const isMulti = this.checked;
+    document.getElementById('sourceTurnusSet').style.display = isMulti ? 'none' : 'block';
+    document.getElementById('multiSelectContainer').style.display = isMulti ? 'block' : 'none';
+    document.getElementById('previewSection').style.display = 'none';
+
+    // Clear selections
+    if (isMulti) {
+        document.getElementById('sourceTurnusSet').value = '';
+    } else {
+        document.querySelectorAll('.source-checkbox').forEach(cb => cb.checked = false);
+    }
+});
+
+// Single select mode
 document.getElementById('sourceTurnusSet').addEventListener('change', function() {
     const sourceId = this.value;
     if (sourceId) {
-        loadPreview(sourceId);
+        loadPreview([sourceId]);
     } else {
         document.getElementById('previewSection').style.display = 'none';
     }
 });
 
+// Multi select mode
+document.querySelectorAll('.source-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const selectedIds = Array.from(document.querySelectorAll('.source-checkbox:checked'))
+            .map(cb => cb.value);
+
+        if (selectedIds.length > 0) {
+            loadPreview(selectedIds);
+        } else {
+            document.getElementById('previewSection').style.display = 'none';
+        }
+    });
+});
+
 // Reload when match count changes
 document.getElementById('matchCount').addEventListener('change', function() {
-    const sourceId = document.getElementById('sourceTurnusSet').value;
-    if (sourceId) {
-        loadPreview(sourceId);
+    const isMulti = document.getElementById('multiSelectMode').checked;
+
+    if (isMulti) {
+        const selectedIds = Array.from(document.querySelectorAll('.source-checkbox:checked'))
+            .map(cb => cb.value);
+        if (selectedIds.length > 0) {
+            loadPreview(selectedIds);
+        }
+    } else {
+        const sourceId = document.getElementById('sourceTurnusSet').value;
+        if (sourceId) {
+            loadPreview([sourceId]);
+        }
     }
 });
 
-function loadPreview(sourceId) {
+function loadPreview(sourceIds) {
     const previewSection = document.getElementById('previewSection');
     const loadingSpinner = document.getElementById('loadingSpinner');
     const matchesContainer = document.getElementById('matchesContainer');
@@ -205,12 +593,23 @@ function loadPreview(sourceId) {
     matchesContainer.innerHTML = '';
     importActions.style.display = 'none';
 
+    // Build request body based on number of sources
+    const requestBody = {
+        top_n: topN
+    };
+
+    if (sourceIds.length === 1) {
+        requestBody.source_turnus_set_id = sourceIds[0];
+    } else {
+        requestBody.source_turnus_set_ids = sourceIds;
+    }
+
     fetch('/api/import-favorites-preview', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ source_turnus_set_id: sourceId, top_n: topN })
+        body: JSON.stringify(requestBody)
     })
     .then(response => response.json())
     .then(data => {
@@ -225,10 +624,19 @@ function loadPreview(sourceId) {
             return;
         }
 
-        document.getElementById('matchInfo').textContent =
-            `Fra ${data.source_set.year_identifier} til ${data.target_set.year_identifier}`;
+        // Update info text based on mode
+        if (data.mode === 'multi_source') {
+            const sourceYears = Object.values(data.by_source)
+                .map(s => s.turnus_set.year_identifier)
+                .join(', ');
+            document.getElementById('matchInfo').textContent =
+                `Fra ${sourceYears} til ${data.target_set.year_identifier}`;
+        } else {
+            document.getElementById('matchInfo').textContent =
+                `Fra ${data.source_set.year_identifier} til ${data.target_set.year_identifier}`;
+        }
 
-        renderMatches(data.matches);
+        renderMatches(data.matches, data.mode);
         importActions.style.display = 'block';
         updateSelectedCount();
     })
@@ -242,7 +650,7 @@ function loadPreview(sourceId) {
     });
 }
 
-function renderMatches(matches) {
+function renderMatches(matches, mode) {
     const container = document.getElementById('matchesContainer');
     container.innerHTML = '';
 
@@ -271,13 +679,21 @@ function renderMatches(matches) {
             `;
         });
 
+        // Build source info - include year if multi-source mode
+        let sourceInfo = match.source_shift;
+        let sourceLabel = '(din favoritt)';
+
+        if (mode === 'multi_source' && match.from_source) {
+            sourceLabel = `(favoritt fra ${match.from_source.year_identifier})`;
+        }
+
         const cardHtml = `
             <div class="match-card">
                 <div class="match-card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>${match.source_shift}</strong>
-                            <span class="text-muted ms-2">(din favoritt)</span>
+                            <strong>${sourceInfo}</strong>
+                            <span class="text-muted ms-2">${sourceLabel}</span>
                         </div>
                     </div>
                     <div class="source-stats mt-1">Statistikk: ${statsHtml}</div>

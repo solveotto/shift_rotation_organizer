@@ -10,9 +10,9 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     # from app.routes.main import current_user  # Import here to avoid circular imports
-    
+
     if current_user.is_authenticated:
-        return redirect(url_for('shifts.turnusliste'))
+        return redirect(url_for('shifts.index'))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -25,7 +25,7 @@ def login():
                 # Clear any previous turnus set choice for fresh start
                 session.pop('user_selected_turnus_set', None)
 
-                return redirect(url_for('shifts.turnusliste'))
+                return redirect(url_for('shifts.index'))
             else:
                 flash('Login unsuccessful. Please check username and password', 'danger')
         except Error as e:

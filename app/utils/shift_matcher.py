@@ -15,16 +15,16 @@ from config import conf
 from app.utils import db_utils
 
 
-# Stats to use for similarity comparison with their weights
-# Higher weight = more important in matching
+# Stats to use for similarity comparison
+# All stats are weighted equally for objective comparison
 STAT_WEIGHTS = {
     'tidlig': 1.0,           # Early shifts
     'ettermiddag': 1.0,      # Afternoon shifts
-    'natt': 1.5,             # Night shifts (weighted higher)
-    'helgetimer': 1.5,       # Weekend hours (weighted higher)
+    'natt': 1.0,             # Night shifts
+    'helgetimer': 1.0,       # Weekend hours
     'helgedager': 1.0,       # Weekend days
-    'before_6': 0.8,         # Very early starts
-    'natt_helg': 1.2,        # Night shifts on weekends
+    'before_6': 1.0,         # Very early starts
+    'natt_helg': 1.0,        # Night shifts on weekends
 }
 
 
@@ -155,7 +155,8 @@ def calculate_similarity(stats1: Dict, stats2: Dict,
 def find_similar_shifts(source_turnus_set_id: int,
                         target_turnus_set_id: int,
                         shift_title: str,
-                        top_n: int = 5) -> List[Dict]:
+                        top_n: int = 5,
+                        user_id: Optional[int] = None) -> List[Dict]:
     """
     Find shifts in target turnus set that are most similar to a shift in source set.
 
@@ -164,6 +165,7 @@ def find_similar_shifts(source_turnus_set_id: int,
         target_turnus_set_id: ID of the turnus set to search for similar shifts
         shift_title: Name of the source shift
         top_n: Number of top matches to return
+        user_id: Optional user ID to exclude shifts already in their favorites
 
     Returns:
         List of dicts with 'shift', 'similarity', and 'stats' keys, sorted by similarity
@@ -178,10 +180,20 @@ def find_similar_shifts(source_turnus_set_id: int,
     if source_stats is None:
         return []
 
+    # Get user's existing favorites in target turnus set to exclude them
+    existing_favorites = set()
+    if user_id is not None:
+        existing_favorites = set(db_utils.get_favorite_lst(user_id, target_turnus_set_id))
+
     matches = []
 
     for _, row in target_df.iterrows():
         target_shift = row['turnus']
+
+        # Skip if this shift is already in the user's favorites
+        if target_shift in existing_favorites:
+            continue
+
         target_stats = row.to_dict()
 
         similarity = calculate_similarity(
@@ -244,7 +256,8 @@ def find_matches_for_favorites(user_id: int,
             source_turnus_set_id,
             target_turnus_set_id,
             shift_title,
-            top_n
+            top_n,
+            user_id
         )
 
         results.append({
@@ -254,6 +267,86 @@ def find_matches_for_favorites(user_id: int,
         })
 
     return results
+
+
+def find_matches_from_multiple_sources(user_id: int,
+                                        source_turnus_set_ids: List[int],
+                                        target_turnus_set_id: int,
+                                        top_n: int = 3) -> Dict:
+    """
+    Find similar shifts in target year for favorites from multiple source years.
+
+    Args:
+        user_id: The user's ID
+        source_turnus_set_ids: List of turnus set IDs to get favorites from
+        target_turnus_set_id: ID of the turnus set to find matches in
+        top_n: Number of matches per favorite
+
+    Returns:
+        Dictionary with:
+        - by_source: Dict mapping source_id to list of match results
+        - all_favorites: Combined list of all unique favorites with their best matches
+    """
+    if not source_turnus_set_ids:
+        return {'by_source': {}, 'all_favorites': []}
+
+    target_df = load_stats_for_turnus_set(target_turnus_set_id)
+    if target_df is None:
+        return {'by_source': {}, 'all_favorites': []}
+
+    by_source = {}
+    all_favorites_dict = {}  # Track best match for each unique favorite shift name
+
+    for source_id in source_turnus_set_ids:
+        # Get matches for this source
+        matches = find_matches_for_favorites(
+            user_id=user_id,
+            source_turnus_set_id=source_id,
+            target_turnus_set_id=target_turnus_set_id,
+            top_n=top_n
+        )
+
+        if matches:
+            source_set = db_utils.get_turnus_set_by_id(source_id)
+            if not source_set:
+                continue
+
+            by_source[source_id] = {
+                'turnus_set': {
+                    'id': source_set['id'],
+                    'name': source_set['name'],
+                    'year_identifier': source_set['year_identifier']
+                },
+                'matches': matches
+            }
+
+            # Track best matches across all sources
+            for match in matches:
+                shift_name = match['source_shift']
+
+                # If we haven't seen this shift or this match is better, update it
+                if shift_name not in all_favorites_dict or \
+                   (match['matches'] and match['matches'][0]['similarity'] >
+                    all_favorites_dict[shift_name]['matches'][0]['similarity']):
+                    all_favorites_dict[shift_name] = {
+                        **match,
+                        'from_source': {
+                            'id': source_set['id'],
+                            'year_identifier': source_set['year_identifier']
+                        }
+                    }
+
+    # Convert to list and sort by best similarity
+    all_favorites = list(all_favorites_dict.values())
+    all_favorites.sort(
+        key=lambda x: x['matches'][0]['similarity'] if x['matches'] else 0,
+        reverse=True
+    )
+
+    return {
+        'by_source': by_source,
+        'all_favorites': all_favorites
+    }
 
 
 def get_all_turnus_sets_with_stats() -> List[Dict]:

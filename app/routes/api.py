@@ -296,21 +296,34 @@ def generate_turnusnokkel():
 @login_required
 def import_favorites_preview():
     """
-    Preview what favorites would be imported from another turnus set.
+    Preview what favorites would be imported from one or more turnus sets.
     Finds shifts in the current turnus set that are statistically similar
-    to the user's favorites from the source turnus set.
+    to the user's favorites from the source turnus set(s).
+
+    Supports both single source (legacy) and multiple sources (new):
+    - source_turnus_set_id: Single source ID (for backwards compatibility)
+    - source_turnus_set_ids: List of source IDs (new multi-year feature)
     """
     data = request.get_json()
     source_turnus_set_id = data.get('source_turnus_set_id')
+    source_turnus_set_ids = data.get('source_turnus_set_ids')
     top_n = data.get('top_n', 5)
 
-    if not source_turnus_set_id:
+    # Handle both single and multiple sources
+    if source_turnus_set_ids:
+        # New multi-source mode
+        try:
+            source_ids = [int(sid) for sid in source_turnus_set_ids]
+        except (ValueError, TypeError):
+            return jsonify({'status': 'error', 'message': 'Invalid source turnus set IDs'})
+    elif source_turnus_set_id:
+        # Legacy single-source mode
+        try:
+            source_ids = [int(source_turnus_set_id)]
+        except (ValueError, TypeError):
+            return jsonify({'status': 'error', 'message': 'Invalid source turnus set ID'})
+    else:
         return jsonify({'status': 'error', 'message': 'No source turnus set provided'})
-
-    try:
-        source_turnus_set_id = int(source_turnus_set_id)
-    except (ValueError, TypeError):
-        return jsonify({'status': 'error', 'message': 'Invalid source turnus set ID'})
 
     # Handle top_n: 0 means all matches
     try:
@@ -330,43 +343,76 @@ def import_favorites_preview():
     if not target_turnus_set_id:
         return jsonify({'status': 'error', 'message': 'No active turnus set selected'})
 
-    if source_turnus_set_id == target_turnus_set_id:
+    # Remove target from sources if present
+    source_ids = [sid for sid in source_ids if sid != target_turnus_set_id]
+
+    if not source_ids:
         return jsonify({'status': 'error', 'message': 'Source and target turnus sets are the same'})
 
     user_id = current_user.get_id()
 
-    # Get matches for user's favorites
-    matches = shift_matcher.find_matches_for_favorites(
-        user_id=user_id,
-        source_turnus_set_id=source_turnus_set_id,
-        target_turnus_set_id=target_turnus_set_id,
-        top_n=top_n
-    )
+    # Use multi-source function if multiple sources, otherwise use original
+    if len(source_ids) > 1:
+        result = shift_matcher.find_matches_from_multiple_sources(
+            user_id=user_id,
+            source_turnus_set_ids=source_ids,
+            target_turnus_set_id=target_turnus_set_id,
+            top_n=top_n
+        )
 
-    if not matches:
+        if not result['all_favorites']:
+            return jsonify({
+                'status': 'error',
+                'message': 'No favorites found in source turnus sets or stats unavailable'
+            })
+
+        target_set = db_utils.get_turnus_set_by_id(target_turnus_set_id)
+
         return jsonify({
-            'status': 'error',
-            'message': 'No favorites found in source turnus set or stats unavailable'
+            'status': 'success',
+            'mode': 'multi_source',
+            'target_set': {
+                'id': target_set['id'],
+                'name': target_set['name'],
+                'year_identifier': target_set['year_identifier']
+            },
+            'by_source': result['by_source'],
+            'matches': result['all_favorites']  # Combined best matches
         })
+    else:
+        # Single source - use original function
+        matches = shift_matcher.find_matches_for_favorites(
+            user_id=user_id,
+            source_turnus_set_id=source_ids[0],
+            target_turnus_set_id=target_turnus_set_id,
+            top_n=top_n
+        )
 
-    # Get info about the turnus sets
-    source_set = db_utils.get_turnus_set_by_id(source_turnus_set_id)
-    target_set = db_utils.get_turnus_set_by_id(target_turnus_set_id)
+        if not matches:
+            return jsonify({
+                'status': 'error',
+                'message': 'No favorites found in source turnus set or stats unavailable'
+            })
 
-    return jsonify({
-        'status': 'success',
-        'source_set': {
-            'id': source_set['id'],
-            'name': source_set['name'],
-            'year_identifier': source_set['year_identifier']
-        },
-        'target_set': {
-            'id': target_set['id'],
-            'name': target_set['name'],
-            'year_identifier': target_set['year_identifier']
-        },
-        'matches': matches
-    })
+        # Get info about the turnus sets
+        source_set = db_utils.get_turnus_set_by_id(source_ids[0])
+        target_set = db_utils.get_turnus_set_by_id(target_turnus_set_id)
+
+        return jsonify({
+            'status': 'success',
+            'mode': 'single_source',
+            'source_set': {
+                'id': source_set['id'],
+                'name': source_set['name'],
+                'year_identifier': source_set['year_identifier']
+            },
+            'target_set': {
+                'id': target_set['id'],
+                'name': target_set['name'],
+                'year_identifier': target_set['year_identifier']
+            },
+            'matches': matches
+        })
 
 
 @api.route('/import-favorites-confirm', methods=['POST'])

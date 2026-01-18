@@ -9,15 +9,31 @@ shifts = Blueprint('shifts', __name__)
 
 @shifts.route('/')
 @login_required
+def index():
+    """Landing page - redirects based on whether user has favorites"""
+    user_turnus_set = get_user_turnus_set()
+    turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
+
+    # Get favorites for current user
+    favoritt = db_utils.get_favorite_lst(current_user.get_id(), turnus_set_id) if current_user.is_authenticated else []
+
+    # If no favorites selected, go to favorites page, otherwise go to turnusliste
+    if not favoritt:
+        return redirect(url_for('shifts.favorites'))
+    else:
+        return redirect(url_for('shifts.turnusliste'))
+
+@shifts.route('/turnusliste')
+@login_required
 def turnusliste():
     # Get the turnus set for this user (their choice or system default)
     user_turnus_set = get_user_turnus_set()
     turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
     active_set = db_utils.get_active_turnus_set()
-    
+
     # Get favorites for current user and active turnus set
     favoritt = db_utils.get_favorite_lst(current_user.get_id(), turnus_set_id) if current_user.is_authenticated else []
-    
+
     # Create a position lookup dictionary for robust favorite numbering
     favorite_positions = {name: idx + 1 for idx, name in enumerate(favoritt)}
     
