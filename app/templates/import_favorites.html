@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Importer Favoritter{% endblock %}
+{% block title %}Finn lignende turnuser{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -10,13 +10,13 @@
                 <div class="card-header">
                     <h6 class="mb-0">
                         <i class="bi bi-box-arrow-in-down"></i>
-                        Importer favoritter fra tidligere turnuser
+                            Finn lignende turnuser
                     </h6>
                 </div>
                 <div class="card-body">
                     <p class="text-muted small">
-                        Finn turnuser i {{ current_turnus_set.year_identifier if current_turnus_set else 'gjeldende turnus' }}
-                        som har lignende statistikk som dine favoritter fra tidligere turnuser.
+                        Lag en liste med favoirtter i {{ current_turnus_set.year_identifier if current_turnus_set else 'gjeldende turnus' }}
+                        som har lignende innhold som dine favoritter fra tidligere turnuser.
                     </p>
 
                     {% if not available_sources %}
