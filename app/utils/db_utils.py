@@ -1,10 +1,12 @@
 import sys
 import os
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, UniqueConstraint, func, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, UniqueConstraint, func, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker, declarative_base, Mapped, mapped_column
 import json
 import bcrypt
 from flask import flash
+from datetime import datetime, timedelta
+import secrets
 
 # Add project root to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -19,9 +21,34 @@ Base = declarative_base()
 class DBUser(Base):
     __tablename__ = 'users'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    rullenummer: Mapped[int] = mapped_column(String(10), nullable=True)
+    name = Column(String(255), nullable=True)
     username: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     is_auth: Mapped[int] = mapped_column(Integer, default=0)
+    email = Column(String(255), nullable=True)
+    email_verified: Mapped[int] = mapped_column(Integer, default=0)
+    created_at = Column(DateTime, default=func.now())
+    verification_sent_at = Column(DateTime, nullable=True)
+
+class AuthorizedEmails(Base):
+    __tablename__ = 'authorized_emails'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(255), nullable=False)
+    rullenummer = Column(String(50), nullable=True)
+    added_by = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'))
+    added_at = Column(DateTime, default=func.now())
+    notes = Column(String(500))
+    __table_args__ = (UniqueConstraint('email', 'rullenummer', name='unique_email_rullenummer'),)
+
+class EmailVerificationToken(Base):
+    __tablename__ = 'email_verification_tokens'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    token = Column(String(255), unique=True, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+    expires_at = Column(DateTime, nullable=False)
+    used: Mapped[int] = mapped_column(Integer, default=0)
 
 class TurnusSet(Base):
     __tablename__ = 'turnus_sets'
@@ -345,16 +372,25 @@ def create_new_user(username, password, is_auth):
         session.close()
 
             
-def get_user_data(username):
+def get_user_data(username_or_email):
+    """Get user data by username or email"""
     session = get_db_session()
     try:
-        result = session.query(DBUser).filter_by(username=username).first()
+        # Try to find by username first
+        result = session.query(DBUser).filter_by(username=username_or_email).first()
+
+        # If not found, try by email
+        if not result:
+            result = session.query(DBUser).filter_by(email=username_or_email.lower()).first()
+
         if result:
             data = {
-                'id': result.id, 
-                'username': result.username, 
-                'password': result.password, 
-                'is_auth': result.is_auth
+                'id': result.id,
+                'username': result.username,
+                'password': result.password,
+                'is_auth': result.is_auth,
+                'email': result.email,
+                'email_verified': result.email_verified
             }
             return data
         else:
@@ -573,7 +609,11 @@ def get_all_users():
             {
                 'id': user.id,
                 'username': user.username,
-                'is_auth': user.is_auth
+                'email': user.email,
+                'rullenummer': user.rullenummer,
+                'is_auth': user.is_auth,
+                'email_verified': user.email_verified,
+                'created_at': user.created_at
             }
             for user in users
         ]
@@ -589,6 +629,8 @@ def get_user_by_id(user_id):
             return {
                 'id': user.id,
                 'username': user.username,
+                'email': user.email,
+                'rullenummer': user.rullenummer,
                 'is_auth': user.is_auth
             }
         return None
@@ -596,18 +638,21 @@ def get_user_by_id(user_id):
         session.close()
 
 def create_user(username, password, is_auth=0):
-    """Create a new user"""
+    """Create a new user (admin-created users are auto-verified)"""
     session = get_db_session()
     try:
         # Check if username already exists
         existing_user = session.query(DBUser).filter_by(username=username).first()
         if existing_user:
             return False, "Username already exists"
-        
+
         new_user = DBUser(
             username=username,
+            email=username,  # Set email same as username
             password=hash_password(password),
-            is_auth=is_auth
+            is_auth=is_auth,
+            email_verified=1,  # Admin-created users are auto-verified
+            created_at=func.now()
         )
         session.add(new_user)
         session.commit()
@@ -618,26 +663,36 @@ def create_user(username, password, is_auth=0):
     finally:
         session.close()
 
-def update_user(user_id, username, password=None, is_auth=None):
+def update_user(user_id, username, email=None, rullenummer=None, password=None, is_auth=None):
     """Update an existing user"""
     session = get_db_session()
     try:
         user = session.query(DBUser).filter_by(id=user_id).first()
         if not user:
             return False, "User not found"
-        
+
         # Check if new username conflicts with existing user
         if username != user.username:
             existing_user = session.query(DBUser).filter_by(username=username).first()
             if existing_user:
                 return False, "Username already exists"
-        
+
+        # Check if new email conflicts with existing user
+        if email and email != user.email:
+            existing_email = session.query(DBUser).filter_by(email=email.lower()).first()
+            if existing_email:
+                return False, "Email already exists"
+
         user.username = username
+        if email is not None:
+            user.email = email.lower()
+        if rullenummer is not None:
+            user.rullenummer = rullenummer
         if password:
             user.password = hash_password(password)
         if is_auth is not None:
             user.is_auth = is_auth
-        
+
         session.commit()
         return True, "User updated successfully"
     except Exception as e:
@@ -691,11 +746,11 @@ def update_user_password(user_id, current_password, new_password):
         user = session.query(DBUser).filter_by(id=user_id).first()
         if not user:
             return False, "User not found"
-        
+
         # Verify current password
         if not bcrypt.checkpw(current_password.encode('utf-8'), user.password.encode('utf-8')):
             return False, "Current password is incorrect"
-        
+
         # Update password
         user.password = hash_password(new_password)
         session.commit()
@@ -703,6 +758,280 @@ def update_user_password(user_id, current_password, new_password):
     except Exception as e:
         session.rollback()
         return False, f"Error updating password: {e}"
+    finally:
+        session.close()
+
+#### EMAIL VERIFICATION FUNCTIONS ####
+
+def is_email_authorized(email, rullenummer=None):
+    """Check if email and rullenummer combination is in authorized list"""
+    session = get_db_session()
+    try:
+        if rullenummer:
+            result = session.query(AuthorizedEmails).filter_by(
+                email=email.lower(),
+                rullenummer=rullenummer
+            ).first()
+        else:
+            # For backwards compatibility if rullenummer not provided
+            result = session.query(AuthorizedEmails).filter_by(email=email.lower()).first()
+        return result is not None
+    finally:
+        session.close()
+
+def add_authorized_email(email, added_by, notes='', rullenummer=None):
+    """Add email and rullenummer to authorized list"""
+    session = get_db_session()
+    try:
+        # Check if already exists (email + rullenummer combination)
+        if rullenummer:
+            existing = session.query(AuthorizedEmails).filter_by(
+                email=email.lower(),
+                rullenummer=rullenummer
+            ).first()
+        else:
+            existing = session.query(AuthorizedEmails).filter_by(email=email.lower()).first()
+
+        if existing:
+            return False, "Email and rullenummer combination already in authorized list"
+
+        new_email = AuthorizedEmails(
+            email=email.lower(),
+            rullenummer=rullenummer,
+            added_by=added_by,
+            notes=notes
+        )
+        session.add(new_email)
+        session.commit()
+        return True, "Email added to authorized list"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error adding email: {e}"
+    finally:
+        session.close()
+
+def get_all_authorized_emails():
+    """Get all authorized emails with additional info"""
+    session = get_db_session()
+    try:
+        emails = session.query(AuthorizedEmails).order_by(AuthorizedEmails.added_at.desc()).all()
+        result = []
+        for email in emails:
+            # Check if this email has registered
+            user = session.query(DBUser).filter_by(email=email.email).first()
+
+            # Get admin username who added this
+            admin = session.query(DBUser).filter_by(id=email.added_by).first()
+
+            result.append({
+                'id': email.id,
+                'email': email.email,
+                'rullenummer': email.rullenummer,
+                'added_by': email.added_by,
+                'added_by_username': admin.username if admin else None,
+                'added_at': email.added_at,
+                'notes': email.notes,
+                'is_registered': user is not None
+            })
+        return result
+    finally:
+        session.close()
+
+def delete_authorized_email(email_id):
+    """Remove email from authorized list"""
+    session = get_db_session()
+    try:
+        email = session.query(AuthorizedEmails).filter_by(id=email_id).first()
+        if not email:
+            return False, "Email not found"
+
+        session.delete(email)
+        session.commit()
+        return True, "Email removed from authorized list"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error removing email: {e}"
+    finally:
+        session.close()
+
+def create_user_with_email(email, username, password, verified=False, rullenummer=None):
+    """Create user account with email (for self-registration)
+
+    Args:
+        email: User's email address (used for login)
+        username: User's chosen display name
+        password: User's password
+        verified: Whether email is pre-verified
+        rullenummer: User's work ID
+    """
+    session = get_db_session()
+    try:
+        # Check if email already exists
+        existing_email = session.query(DBUser).filter_by(email=email.lower()).first()
+        if existing_email:
+            return False, "Email already registered", None
+
+        # Check if username already taken
+        existing_username = session.query(DBUser).filter_by(username=username).first()
+        if existing_username:
+            return False, "Username already taken", None
+
+        new_user = DBUser(
+            username=username,
+            email=email.lower(),
+            password=hash_password(password),
+            rullenummer=rullenummer,
+            is_auth=0,
+            email_verified=1 if verified else 0,
+            created_at=func.now()
+        )
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+        return True, "User created successfully", new_user.id
+    except Exception as e:
+        session.rollback()
+        return False, f"Error creating user: {e}", None
+    finally:
+        session.close()
+
+def get_user_by_email(email):
+    """Get user by email address"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(email=email.lower()).first()
+        if user:
+            return {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'email_verified': user.email_verified,
+                'is_auth': user.is_auth,
+                'created_at': user.created_at,
+                'password': user.password
+            }
+        return None
+    finally:
+        session.close()
+
+def get_user_by_username(username):
+    """Get user by username"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(username=username).first()
+        if user:
+            return {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'email_verified': user.email_verified,
+                'is_auth': user.is_auth
+            }
+        return None
+    finally:
+        session.close()
+
+def create_verification_token(user_id, token):
+    """Create email verification token"""
+    session = get_db_session()
+    try:
+        expiry_hours = conf.CONFIG.getint('verification', 'token_expiry_hours', fallback=48)
+        expires_at = datetime.now() + timedelta(hours=expiry_hours)
+
+        # Invalidate old tokens
+        session.query(EmailVerificationToken).filter_by(
+            user_id=user_id,
+            used=0
+        ).update({'used': 1})
+
+        new_token = EmailVerificationToken(
+            user_id=user_id,
+            token=token,
+            expires_at=expires_at
+        )
+        session.add(new_token)
+        session.commit()
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Error creating token: {e}")
+        return False
+    finally:
+        session.close()
+
+def verify_token(token):
+    """Verify email verification token and mark user as verified"""
+    session = get_db_session()
+    try:
+        token_record = session.query(EmailVerificationToken).filter_by(
+            token=token,
+            used=0
+        ).first()
+
+        if not token_record:
+            return {'success': False, 'message': 'Invalid or already used verification link'}
+
+        # Check expiration
+        if token_record.expires_at < datetime.now():
+            return {'success': False, 'message': 'Verification link has expired. Please request a new one.'}
+
+        # Mark token as used
+        token_record.used = 1
+
+        # Mark user as verified
+        user = session.query(DBUser).filter_by(id=token_record.user_id).first()
+        if user:
+            user.email_verified = 1
+            session.commit()
+
+            return {'success': True, 'message': 'Email verified successfully', 'email': user.email}
+        else:
+            return {'success': False, 'message': 'User not found'}
+
+    except Exception as e:
+        session.rollback()
+        print(f"Error verifying token: {e}")
+        return {'success': False, 'message': 'An error occurred during verification'}
+    finally:
+        session.close()
+
+def can_send_verification_email(user_id):
+    """Check rate limiting for verification emails"""
+    session = get_db_session()
+    try:
+        max_per_day = conf.CONFIG.getint('verification', 'max_verification_emails_per_day', fallback=3)
+
+        user = session.query(DBUser).filter_by(id=user_id).first()
+        if not user:
+            return False
+
+        # Check last sent time (minimum 1 hour between sends)
+        if user.verification_sent_at:
+            time_since_last = datetime.now() - user.verification_sent_at
+            if time_since_last < timedelta(hours=1):
+                return False
+
+        # Check count in last 24 hours
+        count = session.query(EmailVerificationToken).filter(
+            EmailVerificationToken.user_id == user_id,
+            EmailVerificationToken.created_at >= datetime.now() - timedelta(days=1)
+        ).count()
+
+        return count < max_per_day
+    finally:
+        session.close()
+
+def update_verification_sent_time(email):
+    """Update timestamp when verification email was sent"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(email=email.lower()).first()
+        if user:
+            user.verification_sent_at = datetime.now()
+            session.commit()
+    except Exception as e:
+        session.rollback()
+        print(f"Error updating verification sent time: {e}")
     finally:
         session.close()
 

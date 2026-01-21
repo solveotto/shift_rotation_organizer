@@ -36,6 +36,7 @@ from app.routes.admin import admin
 from app.routes.api import api
 from app.routes.downloads import downloads
 from app.routes.minside import minside
+from app.routes.registration import registration
 
 # List of all Blueprints to register
-blueprints = [auth, shifts, admin, api, downloads, minside] 
+blueprints = [auth, shifts, admin, api, downloads, minside, registration] 

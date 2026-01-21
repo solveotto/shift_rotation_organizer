@@ -1,10 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, StringField, PasswordField, SubmitField, FloatField, IntegerField, BooleanField, FileField
-from wtforms.validators import DataRequired, Length, NumberRange, EqualTo, ValidationError
+from wtforms import SelectField, StringField, PasswordField, SubmitField, FloatField, IntegerField, BooleanField, FileField, TextAreaField
+from wtforms.validators import DataRequired, Length, NumberRange, EqualTo, ValidationError, Email
 from flask_wtf.file import FileAllowed
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=255)])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 # Admin Forms
@@ -17,6 +17,8 @@ class CreateUserForm(FlaskForm):
 
 class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
+    email = StringField('Email Address', validators=[Email(message='Please enter a valid email address'), Length(max=255)])
+    rullenummer = StringField('Rullenummer (Work ID)', validators=[Length(max=50)])
     password = PasswordField('New Password (leave blank to keep current)')
     confirm_password = PasswordField('Confirm New Password')
     is_auth = BooleanField('Admin rights')
@@ -59,3 +61,46 @@ class ChangePasswordForm(FlaskForm):
     new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
     submit = SubmitField('Change Password')
+
+# Registration Forms
+class RegisterForm(FlaskForm):
+    """User self-registration form"""
+    username = StringField('Username (Display Name)', validators=[
+        DataRequired(),
+        Length(min=2, max=255, message='Username must be between 2 and 255 characters')
+    ])
+
+    rullenummer = StringField('Rullenummer (Work ID)', validators=[
+        DataRequired(),
+        Length(min=1, max=50, message='Rullenummer is required')
+    ])
+
+    email = StringField('Email Address', validators=[
+        DataRequired(),
+        Email(message='Please enter a valid email address'),
+        Length(max=255)
+    ])
+    password = PasswordField('Password', validators=[
+        DataRequired(),
+        Length(min=8, message='Password must be at least 8 characters')
+    ])
+    confirm_password = PasswordField('Confirm Password', validators=[
+        DataRequired(),
+        EqualTo('password', message='Passwords must match')
+    ])
+    submit = SubmitField('Register')
+
+    def validate_email(self, field):
+        """Custom email validation"""
+        email = field.data.lower()
+        # Prevent obviously fake emails
+        if email.endswith('.test') or email.endswith('.invalid'):
+            raise ValidationError('Please use a valid email address.')
+
+class ResendVerificationForm(FlaskForm):
+    """Form to resend verification email"""
+    email = StringField('Email Address', validators=[
+        DataRequired(),
+        Email()
+    ])
+    submit = SubmitField('Resend Verification Email')

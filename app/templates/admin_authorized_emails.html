@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Manage Authorized Emails</h1>
+                <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Admin
+                </a>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Add Single Email Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Add Authorized Email</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.add_authorized_email') }}">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                           required placeholder="user@example.com">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="rullenummer" class="form-label">Rullenummer (Work ID)</label>
+                                    <input type="text" class="form-control" id="rullenummer" name="rullenummer"
+                                           required placeholder="12345">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="notes" class="form-label">Notes (optional)</label>
+                                    <input type="text" class="form-control" id="notes" name="notes"
+                                           placeholder="e.g., Department, Name">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add Email
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bulk Add Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Bulk Add Emails</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.bulk_add_authorized_emails') }}">
+                        <div class="mb-3">
+                            <label for="emails_bulk" class="form-label">
+                                Email Addresses (one per line)
+                            </label>
+                            <textarea class="form-control" id="emails_bulk" name="emails_bulk"
+                                      rows="5" placeholder="user1@example.com
+user2@example.com
+user3@example.com"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-upload"></i> Bulk Add
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Authorized Emails List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Authorized Emails ({{ emails|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if emails %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Rullenummer</th>
+                                        <th>Added By</th>
+                                        <th>Added Date</th>
+                                        <th>Notes</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for email in emails %}
+                                    <tr>
+                                        <td>{{ email.email }}</td>
+                                        <td>{{ email.rullenummer or '-' }}</td>
+                                        <td>{{ email.added_by_username or 'Unknown' }}</td>
+                                        <td>{{ email.added_at.strftime('%Y-%m-%d') if email.added_at else 'N/A' }}</td>
+                                        <td>{{ email.notes or '-' }}</td>
+                                        <td>
+                                            {% if email.is_registered %}
+                                                <span class="badge bg-success">Registered</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Not Registered</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form method="POST"
+                                                  action="{{ url_for('admin.delete_authorized_email', email_id=email.id) }}"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Remove this email from authorized list?')">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash"></i> Remove
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted">No authorized emails yet. Add emails above to allow self-registration.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -36,6 +36,30 @@
                         </div>
 
                         <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.rullenummer.label(class="form-label") }}
+                            {{ form.rullenummer(class="form-control" + (" is-invalid" if form.rullenummer.errors else "")) }}
+                            {% if form.rullenummer.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.rullenummer.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
                             {{ form.password.label(class="form-label") }}
                             {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
                             {% if form.password.errors %}

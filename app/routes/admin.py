@@ -63,6 +63,8 @@ def edit_user(user_id):
         success, message = db_utils.update_user(
             user_id=user_id,
             username=form.username.data,
+            email=form.email.data,
+            rullenummer=form.rullenummer.data,
             password=form.password.data if form.password.data else None,
             is_auth=1 if form.is_auth.data else 0
         )
@@ -73,6 +75,8 @@ def edit_user(user_id):
             flash(message, 'danger')
     elif request.method == 'GET':
         form.username.data = user['username']
+        form.email.data = user.get('email')
+        form.rullenummer.data = user.get('rullenummer')
         form.is_auth.data = user['is_auth'] == 1
     
     return render_template('edit_user.html', 
@@ -293,5 +297,85 @@ def delete_turnus_set(turnus_set_id):
         flash(message, 'success')
     else:
         flash(message, 'danger')
-    
+
     return redirect(url_for('admin.manage_turnus_sets'))
+
+# Authorized Email Management Routes
+@admin.route('/authorized-emails')
+@login_required
+def manage_authorized_emails():
+    """Manage authorized emails for self-registration"""
+    if not current_user.is_admin:
+        flash('Access denied. Admin rights required.', 'danger')
+        return redirect(url_for('shifts.home'))
+
+    emails = db_utils.get_all_authorized_emails()
+    return render_template('admin_authorized_emails.html',
+                         page_name='Manage Authorized Emails',
+                         emails=emails)
+
+@admin.route('/add-authorized-email', methods=['POST'])
+@login_required
+def add_authorized_email():
+    """Add new authorized email"""
+    if not current_user.is_admin:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('shifts.home'))
+
+    email = request.form.get('email', '').lower().strip()
+    rullenummer = request.form.get('rullenummer', '').strip()
+    notes = request.form.get('notes', '').strip()
+
+    if not email:
+        flash('Email address is required.', 'danger')
+        return redirect(url_for('admin.manage_authorized_emails'))
+
+    if not rullenummer:
+        flash('Rullenummer is required.', 'danger')
+        return redirect(url_for('admin.manage_authorized_emails'))
+
+    success, message = db_utils.add_authorized_email(
+        email=email,
+        added_by=current_user.id,
+        notes=notes,
+        rullenummer=rullenummer
+    )
+
+    flash(message, 'success' if success else 'danger')
+    return redirect(url_for('admin.manage_authorized_emails'))
+
+@admin.route('/delete-authorized-email/<int:email_id>', methods=['POST'])
+@login_required
+def delete_authorized_email(email_id):
+    """Remove authorized email"""
+    if not current_user.is_admin:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('shifts.home'))
+
+    success, message = db_utils.delete_authorized_email(email_id)
+    flash(message, 'success' if success else 'danger')
+    return redirect(url_for('admin.manage_authorized_emails'))
+
+@admin.route('/bulk-add-emails', methods=['POST'])
+@login_required
+def bulk_add_authorized_emails():
+    """Bulk add emails from textarea (one per line)"""
+    if not current_user.is_admin:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('shifts.home'))
+
+    emails_text = request.form.get('emails_bulk', '')
+    emails = [e.strip().lower() for e in emails_text.split('\n') if e.strip()]
+
+    added_count = 0
+    for email in emails:
+        success, _ = db_utils.add_authorized_email(
+            email=email,
+            added_by=current_user.id,
+            notes='Bulk import'
+        )
+        if success:
+            added_count += 1
+
+    flash(f'Added {added_count} of {len(emails)} emails.', 'success')
+    return redirect(url_for('admin.manage_authorized_emails'))

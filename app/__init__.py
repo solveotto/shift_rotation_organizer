@@ -1,16 +1,33 @@
 from flask import Flask
 from flask_login import LoginManager
 from flask_caching import Cache
+from flask_mail import Mail
 from config import conf
 from app.models import User, cache
 from flask_session import Session
 from app.utils import db_utils
 
+# Create global mail instance
+mail = Mail()
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(conf)
-    
+
+    # Email configuration
+    app.config['MAIL_SERVER'] = conf.CONFIG.get('email', 'smtp_server')
+    app.config['MAIL_PORT'] = conf.CONFIG.getint('email', 'smtp_port')
+    app.config['MAIL_USE_TLS'] = conf.CONFIG.getboolean('email', 'smtp_use_tls')
+    app.config['MAIL_USERNAME'] = conf.CONFIG.get('email', 'smtp_username')
+    app.config['MAIL_PASSWORD'] = conf.CONFIG.get('email', 'smtp_password')
+    app.config['MAIL_DEFAULT_SENDER'] = (
+        conf.CONFIG.get('email', 'sender_name'),
+        conf.CONFIG.get('email', 'sender_email')
+    )
+
+    # Initialize Flask-Mail
+    mail.init_app(app)
+
     # Initialize cache (no db initialization needed - we use SQLAlchemy Core)
     cache.init_app(app)
 

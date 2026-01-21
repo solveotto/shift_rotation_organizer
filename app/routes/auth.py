@@ -19,6 +19,11 @@ def login():
         try:
             db_user_data = db_utils.get_user_data(form.username.data)
             if db_user_data and User.verify_password(db_user_data['password'], form.password.data):
+                # Check email verification status
+                if db_user_data.get('email_verified') == 0:
+                    flash('Please verify your email before logging in. Check your inbox for the verification link.', 'warning')
+                    return render_template('login.html', form=form)
+
                 user = User(form.username.data, db_user_data['id'], db_user_data['is_auth'])
                 flask_login_user(user)
 
