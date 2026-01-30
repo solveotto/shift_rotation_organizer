@@ -104,3 +104,12 @@ class ResendVerificationForm(FlaskForm):
         Email()
     ])
     submit = SubmitField('Resend Verification Email')
+
+
+class UploadStreklisteForm(FlaskForm):
+    """Form for uploading strekliste PDF"""
+    pdf_file = FileField('Strekliste PDF', validators=[
+        DataRequired(),
+        FileAllowed(['pdf'], 'PDF files only!')
+    ])
+    submit = SubmitField('Upload')

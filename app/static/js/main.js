@@ -6,6 +6,7 @@ import { ShiftColors } from './modules/shift-colors.js';
 import { SortingSystem } from './modules/sorting-system.js';
 import { Favorites } from './modules/favorites.js';
 import { PrintUtils } from './modules/print-utils.js';
+import { ShiftTimelineModal } from './modules/shift-timeline.js';
 
 // NOT USED
 // import { Utils, ScrollPosition } from './modules/utils.js';
@@ -46,6 +47,11 @@ class App {
         // Initialize sorting if we're on the turnusliste page
         if (document.querySelector('#helgetimer-slider')) {
             this.modules.sorting = new SortingSystem();
+        }
+
+        // Initialize shift timeline modal if present
+        if (document.querySelector('#shiftTimelineModal')) {
+            this.modules.shiftTimeline = new ShiftTimelineModal();
         }
     }
 

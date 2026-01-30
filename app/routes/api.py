@@ -1,8 +1,12 @@
-from flask import Blueprint, request, jsonify
+import os
+import re
+import glob
+from flask import Blueprint, request, jsonify, send_from_directory
 from flask_login import login_required, current_user
 from app.utils import db_utils
 from app.utils import shift_matcher
 from app.routes.main import favorite_lock
+from config import conf
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
@@ -193,7 +197,7 @@ def set_favorite_position():
 
         # Find the favorite to move
         favorite_to_move = None
-        current_index = None
+        current_index = 0
         for i, favorite in enumerate(current_favorites):
             if favorite.shift_title == shift_title:
                 favorite_to_move = favorite
@@ -511,4 +515,46 @@ def get_turnus_sets_for_import():
             'name': user_turnus_set['name'] if user_turnus_set else None,
             'year_identifier': user_turnus_set['year_identifier'] if user_turnus_set else None
         } if user_turnus_set else None
-    }) 
+    })
+
+
+@api.route('/shift-image/<int:turnus_set_id>/<shift_nr>')
+@login_required
+def get_shift_image(turnus_set_id, shift_nr):
+    """
+    Serve shift timeline PNG image from static files.
+    Converts turnus_set_id to the appropriate version identifier.
+    """
+    # Get turnus set to find year_identifier
+    turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
+    if not turnus_set:
+        return jsonify({'status': 'error', 'message': 'Turnus set not found'}), 404
+
+    # Convert year_identifier (e.g., "R26") to folder name (e.g., "r26")
+    version = turnus_set['year_identifier'].lower()
+
+    # Build path to PNG directory
+    png_dir = os.path.join(conf.turnusfiler_dir, version, 'streklister', 'png')
+
+    # Sanitize shift_nr to prevent path traversal and normalize whitespace
+    # Remove all whitespace to match filename convention (PDF names may have line breaks)
+    safe_shift_nr = re.sub(r'\s+', '', os.path.basename(shift_nr))
+
+    # Try exact match first
+    exact_path = os.path.join(png_dir, f'{safe_shift_nr}.png')
+    if os.path.isfile(exact_path):
+        return send_from_directory(png_dir, f'{safe_shift_nr}.png', mimetype='image/png')
+
+    # Try to find files that start with the shift number (handles suffixes like -Mod_1, -N05_1)
+    pattern = os.path.join(png_dir, f'{safe_shift_nr}*.png')
+    matches = glob.glob(pattern)
+    if matches:
+        # Return the first match (prefer shorter names)
+        matches.sort(key=len)
+        filename = os.path.basename(matches[0])
+        return send_from_directory(png_dir, filename, mimetype='image/png')
+
+    return jsonify({
+        'status': 'error',
+        'message': 'Ingen tidslinje tilgjengelig'
+    }), 404

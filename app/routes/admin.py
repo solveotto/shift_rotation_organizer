@@ -1,8 +1,9 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
-from app.forms import CreateUserForm, EditUserForm, CreateTurnusSetForm, SelectTurnusSetForm
+from app.forms import CreateUserForm, EditUserForm, CreateTurnusSetForm, SelectTurnusSetForm, UploadStreklisteForm
 from app.utils import db_utils
+from app.utils import strekliste_generator
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -139,14 +140,16 @@ def manage_turnus_sets():
     if not current_user.is_admin:
         flash('Access denied. Admin rights required.', 'danger')
         return redirect(url_for('shifts.turnusliste'))
-    
+
     turnus_sets = db_utils.get_all_turnus_sets()
     active_set = db_utils.get_active_turnus_set()
-    
+    upload_form = UploadStreklisteForm()
+
     return render_template('admin_turnus_sets.html',
                          page_name='Manage Turnus Sets',
                          turnus_sets=turnus_sets,
-                         active_set=active_set)
+                         active_set=active_set,
+                         upload_form=upload_form)
 
 @admin.route('/create-turnus-set', methods=['GET', 'POST'])
 @login_required
@@ -287,10 +290,20 @@ def delete_turnus_set(turnus_set_id):
     if not current_user.is_admin:
         flash('Access denied. Admin rights required.', 'danger')
         return redirect(url_for('shifts.turnusliste'))
-    
+
+    # Get the turnus set info before deleting (for cleanup)
+    turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
+    version = turnus_set['year_identifier'].lower() if turnus_set else None
+
     success, message = db_utils.delete_turnus_set(turnus_set_id)
-    
+
     if success:
+        # Also delete strekliste images if they exist
+        if version:
+            img_result = strekliste_generator.delete_all_images(version)
+            if img_result.get('deleted_count', 0) > 0:
+                message += f" ({img_result['deleted_count']} strekliste images also deleted)"
+
         # If we deleted the active set, reload the data manager
         from app.routes.main import df_manager
         df_manager.reload_active_set()
@@ -379,3 +392,130 @@ def bulk_add_authorized_emails():
 
     flash(f'Added {added_count} of {len(emails)} emails.', 'success')
     return redirect(url_for('admin.manage_authorized_emails'))
+
+
+# Strekliste Management Routes
+@admin.route('/strekliste-status/<int:turnus_set_id>')
+@login_required
+def strekliste_status(turnus_set_id):
+    """AJAX endpoint to get strekliste status for a turnus set"""
+    if not current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+
+    turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
+    if not turnus_set:
+        return jsonify({'status': 'error', 'message': 'Turnus set not found'}), 404
+
+    version = turnus_set['year_identifier'].lower()
+    status = strekliste_generator.get_strekliste_status(version)
+
+    return jsonify({
+        'status': 'success',
+        'data': status
+    })
+
+
+@admin.route('/upload-strekliste/<int:turnus_set_id>', methods=['POST'])
+@login_required
+def upload_strekliste(turnus_set_id):
+    """Upload a strekliste PDF for a turnus set"""
+    if not current_user.is_admin:
+        flash('Access denied. Admin rights required.', 'danger')
+        return redirect(url_for('admin.manage_turnus_sets'))
+
+    turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
+    if not turnus_set:
+        flash('Turnus set not found.', 'danger')
+        return redirect(url_for('admin.manage_turnus_sets'))
+
+    form = UploadStreklisteForm()
+    if form.validate_on_submit():
+        pdf_file = form.pdf_file.data
+        version = turnus_set['year_identifier'].lower()
+
+        result = strekliste_generator.save_uploaded_pdf(pdf_file, version)
+
+        if result['success']:
+            flash(f'Strekliste PDF uploaded successfully for {turnus_set["year_identifier"]}.', 'success')
+        else:
+            flash(f'Failed to upload PDF: {result["error"]}', 'danger')
+    else:
+        flash('Invalid file. Please upload a PDF file.', 'danger')
+
+    return redirect(url_for('admin.manage_turnus_sets'))
+
+
+@admin.route('/generate-strekliste/<int:turnus_set_id>', methods=['POST'])
+@login_required
+def generate_strekliste(turnus_set_id):
+    """Generate PNG images from strekliste PDF"""
+    if not current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+
+    turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
+    if not turnus_set:
+        return jsonify({'status': 'error', 'message': 'Turnus set not found'}), 404
+
+    version = turnus_set['year_identifier'].lower()
+
+    # Check if PDF exists
+    paths = strekliste_generator.get_paths(version)
+    if not paths['pdf_exists']:
+        return jsonify({
+            'status': 'error',
+            'message': 'No strekliste PDF found. Please upload one first.'
+        }), 400
+
+    # Check if force regenerate is requested
+    force = request.json.get('force', False) if request.is_json else False
+
+    # Generate images
+    result = strekliste_generator.generate_all_images(version, force=force)
+
+    if result['success']:
+        error_count = len(result.get('errors', []))
+        message = f'Generated {len(result["generated"])} images'
+        if error_count > 0:
+            message += f' ({error_count} errors)'
+
+        return jsonify({
+            'status': 'success',
+            'message': message,
+            'generated': len(result['generated']),
+            'skipped': len(result['skipped']),
+            'errors': error_count,
+            'error_details': result.get('errors', [])[:10],  # First 10 errors
+            'total': result['total']
+        })
+    else:
+        return jsonify({
+            'status': 'error',
+            'message': result.get('error', 'Unknown error')
+        }), 500
+
+
+@admin.route('/delete-strekliste-images/<int:turnus_set_id>', methods=['POST'])
+@login_required
+def delete_strekliste_images(turnus_set_id):
+    """Delete all generated strekliste images for a turnus set"""
+    if not current_user.is_admin:
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+
+    turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
+    if not turnus_set:
+        return jsonify({'status': 'error', 'message': 'Turnus set not found'}), 404
+
+    version = turnus_set['year_identifier'].lower()
+    result = strekliste_generator.delete_all_images(version)
+
+    if result['success']:
+        return jsonify({
+            'status': 'success',
+            'message': f'Deleted {result["deleted_count"]} images',
+            'deleted_count': result['deleted_count']
+        })
+    else:
+        return jsonify({
+            'status': 'error',
+            'message': result.get('error', 'Unknown error')
+        }), 500

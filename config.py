@@ -62,3 +62,4 @@ class conf:
     sessions_dir = os.path.abspath(os.path.join(base_dir, 'app', 'utils', 'sessions'))
     log_dir = os.path.abspath(os.path.join(base_dir, 'app', 'logs'))
     turnusfiler_dir = os.path.abspath(os.path.join(base_dir, 'app', 'static', 'turnusfiler'))
+

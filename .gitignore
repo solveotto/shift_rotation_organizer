@@ -2,7 +2,8 @@ env/
 venv/
 .venv/
 instance/
-
+app/static/turnusfiler
+nul
 
 
 *.pyc
