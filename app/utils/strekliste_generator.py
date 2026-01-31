@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Strekliste Generator Module
 Generates shift timeline PNG images from strekliste PDF files.
@@ -12,6 +14,8 @@ import os
 import re
 import io
 from config import conf
+from typing import Optional, Tuple, Dict, Any
+
 
 try:
     import fitz  # PyMuPDF
@@ -195,7 +199,7 @@ def get_full_shift_name(shift: dict) -> str:
     return name
 
 
-def find_row_bounds(page, shift_nr: str) -> tuple:
+def find_row_bounds(page, shift_nr: str) -> tuple | None:
     """
     Find the visual y-bounds (row) for a specific shift on a page.
     Returns (y_top, y_bottom, shift_info) or None if not found.
@@ -264,7 +268,7 @@ def find_separator_lines(img, min_thickness: int = 2) -> list:
     return lines
 
 
-def create_hour_ruler(width: int, height: int = 20) -> "Image.Image":
+def create_hour_ruler(width: int, height: int = 20) -> Image.Image | None:
     """Create a horizontal ruler showing hours 0-23."""
     if not PIL_AVAILABLE:
         return None
@@ -286,7 +290,7 @@ def create_hour_ruler(width: int, height: int = 20) -> "Image.Image":
     return ruler
 
 
-def render_shift_image(shift_nr: str, version: str) -> bytes:
+def render_shift_image(shift_nr: str, version: str) -> bytes | None:
     """Render a shift row as PNG image bytes."""
     if not FITZ_AVAILABLE or not PIL_AVAILABLE:
         return None
@@ -346,9 +350,12 @@ def render_shift_image(shift_nr: str, version: str) -> bytes:
 
             # Create and attach hour ruler
             ruler = create_hour_ruler(cropped.width)
-            combined = Image.new('RGB', (cropped.width, cropped.height + ruler.height), 'white')
-            combined.paste(ruler, (0, 0))
-            combined.paste(cropped, (0, ruler.height))
+            if ruler is not None:
+                combined = Image.new('RGB', (cropped.width, cropped.height + ruler.height), 'white')
+                combined.paste(ruler, (0, 0))
+                combined.paste(cropped, (0, ruler.height))
+            else:
+                combined = cropped
 
             # Convert back to bytes
             output = io.BytesIO()
@@ -486,6 +493,10 @@ def generate_all_images(version: str, force: bool = False, progress_callback=Non
                 # Detect separator lines once per page
                 separator_lines = find_separator_lines(page_img)
 
+            # Safety check: ensure page was rendered
+            if page_img is None or separator_lines is None:
+                continue
+
             # Find crop bounds for this shift using cached separator lines
             shift_y = int(shift["visual_y"] * zoom)
 
@@ -508,9 +519,12 @@ def generate_all_images(version: str, force: bool = False, progress_callback=Non
 
             # Create and attach hour ruler
             ruler = create_hour_ruler(cropped.width)
-            combined = Image.new('RGB', (cropped.width, cropped.height + ruler.height), 'white')
-            combined.paste(ruler, (0, 0))
-            combined.paste(cropped, (0, ruler.height))
+            if ruler is not None:
+                combined = Image.new('RGB', (cropped.width, cropped.height + ruler.height), 'white')
+                combined.paste(ruler, (0, 0))
+                combined.paste(cropped, (0, ruler.height))
+            else:
+                combined = cropped
 
             # Save to file
             combined.save(img_path, format="PNG")
