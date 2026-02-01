@@ -14,18 +14,19 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(conf)
 
-    # Email configuration
-    app.config['MAIL_SERVER'] = conf.CONFIG.get('email', 'smtp_server')
-    app.config['MAIL_PORT'] = conf.CONFIG.getint('email', 'smtp_port')
-    app.config['MAIL_USE_TLS'] = conf.CONFIG.getboolean('email', 'smtp_use_tls')
-    app.config['MAIL_USERNAME'] = conf.CONFIG.get('email', 'smtp_username')
-    app.config['MAIL_PASSWORD'] = conf.CONFIG.get('email', 'smtp_password')
+    # Email configuration (optional - using Mailgun API by default)
+    app.config['MAIL_SERVER'] = conf.CONFIG.get('email', 'smtp_server', fallback='smtp.gmail.com')
+    app.config['MAIL_PORT'] = conf.CONFIG.getint('email', 'smtp_port', fallback=587)
+    app.config['MAIL_USE_TLS'] = conf.CONFIG.getboolean('email', 'smtp_use_tls', fallback=True)
+    app.config['MAIL_USE_SSL'] = conf.CONFIG.getboolean('email', 'smtp_use_ssl', fallback=False)
+    app.config['MAIL_USERNAME'] = conf.CONFIG.get('email', 'smtp_username', fallback='')
+    app.config['MAIL_PASSWORD'] = conf.CONFIG.get('email', 'smtp_password', fallback='')
     app.config['MAIL_DEFAULT_SENDER'] = (
-        conf.CONFIG.get('email', 'sender_name'),
-        conf.CONFIG.get('email', 'sender_email')
+        conf.CONFIG.get('email', 'sender_name', fallback='Turnushjelper'),
+        conf.CONFIG.get('email', 'sender_email', fallback='noreply@mail.turnushjelper.no')
     )
 
-    # Initialize Flask-Mail
+    # Initialize Flask-Mail (not actively used - using Mailgun API instead)
     mail.init_app(app)
 
     # Initialize cache (no db initialization needed - we use SQLAlchemy Core)

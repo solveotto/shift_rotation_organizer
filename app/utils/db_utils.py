@@ -49,6 +49,7 @@ class EmailVerificationToken(Base):
     created_at = Column(DateTime, default=func.now())
     expires_at = Column(DateTime, nullable=False)
     used: Mapped[int] = mapped_column(Integer, default=0)
+    token_type = Column(String(50), default='verification')  # 'verification' or 'password_reset'
 
 class TurnusSet(Base):
     __tablename__ = 'turnus_sets'
@@ -1034,6 +1035,125 @@ def update_verification_sent_time(email):
         print(f"Error updating verification sent time: {e}")
     finally:
         session.close()
+
+
+#### PASSWORD RESET FUNCTIONS ####
+
+def create_password_reset_token(user_id, token):
+    """Create password reset token with 1 hour expiry"""
+    session = get_db_session()
+    try:
+        expires_at = datetime.now() + timedelta(hours=1)
+
+        # Invalidate old password reset tokens for this user
+        session.query(EmailVerificationToken).filter_by(
+            user_id=user_id,
+            token_type='password_reset',
+            used=0
+        ).update({'used': 1})
+
+        new_token = EmailVerificationToken(
+            user_id=user_id,
+            token=token,
+            expires_at=expires_at,
+            token_type='password_reset'
+        )
+        session.add(new_token)
+        session.commit()
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Error creating password reset token: {e}")
+        return False
+    finally:
+        session.close()
+
+
+def verify_password_reset_token(token):
+    """Verify password reset token and return user info if valid"""
+    session = get_db_session()
+    try:
+        token_record = session.query(EmailVerificationToken).filter_by(
+            token=token,
+            token_type='password_reset',
+            used=0
+        ).first()
+
+        if not token_record:
+            return {'success': False, 'message': 'Invalid or already used reset link'}
+
+        # Check expiration
+        if token_record.expires_at < datetime.now():
+            return {'success': False, 'message': 'Reset link has expired. Please request a new one.'}
+
+        # Get user info
+        user = session.query(DBUser).filter_by(id=token_record.user_id).first()
+        if user:
+            return {
+                'success': True,
+                'user_id': user.id,
+                'email': user.email,
+                'username': user.username
+            }
+        else:
+            return {'success': False, 'message': 'User not found'}
+
+    except Exception as e:
+        print(f"Error verifying password reset token: {e}")
+        return {'success': False, 'message': 'An error occurred during verification'}
+    finally:
+        session.close()
+
+
+def reset_user_password(user_id, new_password):
+    """Update user password and mark reset token as used"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(id=user_id).first()
+        if not user:
+            return False, "User not found"
+
+        # Update password
+        user.password = hash_password(new_password)
+
+        # Mark all password reset tokens for this user as used
+        session.query(EmailVerificationToken).filter_by(
+            user_id=user_id,
+            token_type='password_reset',
+            used=0
+        ).update({'used': 1})
+
+        session.commit()
+        return True, "Password updated successfully"
+    except Exception as e:
+        session.rollback()
+        return False, f"Error updating password: {e}"
+    finally:
+        session.close()
+
+
+def can_send_password_reset_email(email):
+    """Check rate limiting for password reset emails (1 per hour per email)"""
+    session = get_db_session()
+    try:
+        user = session.query(DBUser).filter_by(email=email.lower()).first()
+        if not user:
+            # Return True to avoid email enumeration
+            # (caller will show generic success message)
+            return True
+
+        # Check if a password reset token was created in the last hour
+        one_hour_ago = datetime.now() - timedelta(hours=1)
+        recent_token = session.query(EmailVerificationToken).filter(
+            EmailVerificationToken.user_id == user.id,
+            EmailVerificationToken.token_type == 'password_reset',
+            EmailVerificationToken.created_at >= one_hour_ago
+        ).first()
+
+        return recent_token is None
+    finally:
+        session.close()
+
 
 if __name__ == '__main__':
     create_new_user('testuser', 'testuser', 0)

@@ -41,7 +41,7 @@
 
             <div class="form-group mb-3">
                 <label for="username" class="form-label form-label-sm">Username or Email</label>
-                {{ form.username(class="form-control", placeholder="Enter username or email") }}
+                {{ form.username(class="form-control", placeholder="Enter username or email", value=request.args.get('email', '')) }}
                 {% for error in form.username.errors %}
                     <span class="text-danger">{{ error }}</span>
                 {% endfor %}
@@ -57,6 +57,11 @@
             
             <div class="form-group offset-md-5 py-1">
                 {{ form.submit(class="btn btn-primary") }}
+            </div>
+
+            <!-- Forgot password link -->
+            <div class="form-text text-center mb-2 text-dark">
+              <a href="{{ url_for('auth.forgot_password') }}" class="text-dark">Forgot password?</a>
             </div>
 
             <!-- Registration link -->

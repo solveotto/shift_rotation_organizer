@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import logout_user, login_required, login_user as flask_login_user, current_user
 from mysql.connector import Error
-from app.forms import LoginForm
+import secrets
+from app.forms import LoginForm, ForgotPasswordForm, ResetPasswordForm
 from app.models import User
 from app.utils import db_utils
+from app.utils.email_utils import send_password_reset_email
 
 auth = Blueprint('auth', __name__)
 
@@ -46,4 +48,69 @@ def logout():
     # Clear turnus set choice on logout
     session.pop('user_selected_turnus_set', None)
     logout_user()
-    return render_template('logout.html') 
+    return render_template('logout.html')
+
+
+@auth.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('shifts.index'))
+
+    form = ForgotPasswordForm()
+    show_success_modal = False
+
+    if form.validate_on_submit():
+        email = form.email.data.lower()
+
+        # Check rate limiting
+        if not db_utils.can_send_password_reset_email(email):
+            flash('A reset email was recently sent. Please check your inbox or try again later.', 'warning')
+            return render_template('forgot_password.html', form=form, show_success_modal=False)
+
+        # Get user by email
+        user = db_utils.get_user_by_email(email)
+
+        if user:
+            # Generate token and create reset record
+            token = secrets.token_urlsafe(32)
+            if db_utils.create_password_reset_token(user['id'], token):
+                # Send reset email
+                if send_password_reset_email(email, token):
+                    pass  # Email sent successfully
+                else:
+                    # Log error but show generic message
+                    print(f"Failed to send password reset email to {email}")
+
+        # Always show success modal to prevent email enumeration
+        show_success_modal = True
+
+    return render_template('forgot_password.html', form=form, show_success_modal=show_success_modal)
+
+
+@auth.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('shifts.index'))
+
+    # Verify token is valid
+    token_result = db_utils.verify_password_reset_token(token)
+
+    if not token_result['success']:
+        flash(token_result['message'], 'danger')
+        return redirect(url_for('auth.forgot_password'))
+
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        # Update password
+        success, message = db_utils.reset_user_password(
+            token_result['user_id'],
+            form.password.data
+        )
+
+        if success:
+            flash('Your password has been reset successfully. You can now log in.', 'success')
+            return redirect(url_for('auth.login', email=token_result.get('email', '')))
+        else:
+            flash(f'Error resetting password: {message}', 'danger')
+
+    return render_template('reset_password.html', form=form, token=token)

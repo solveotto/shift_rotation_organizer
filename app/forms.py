@@ -113,3 +113,25 @@ class UploadStreklisteForm(FlaskForm):
         FileAllowed(['pdf'], 'PDF files only!')
     ])
     submit = SubmitField('Upload')
+
+
+class ForgotPasswordForm(FlaskForm):
+    """Form to request password reset email"""
+    email = StringField('Email Address', validators=[
+        DataRequired(),
+        Email(message='Please enter a valid email address')
+    ])
+    submit = SubmitField('Send Reset Link')
+
+
+class ResetPasswordForm(FlaskForm):
+    """Form to set a new password"""
+    password = PasswordField('New Password', validators=[
+        DataRequired(),
+        Length(min=8, message='Password must be at least 8 characters')
+    ])
+    confirm_password = PasswordField('Confirm New Password', validators=[
+        DataRequired(),
+        EqualTo('password', message='Passwords must match')
+    ])
+    submit = SubmitField('Reset Password')
