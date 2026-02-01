@@ -1,99 +1,141 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="mb-0">Edit User: {{ user.username }}</h3>
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <div class="header-content">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-person-gear"></i>
+                        </div>
+                        <h2 class="card-title-modern">Rediger bruker</h2>
+                        <p class="card-subtitle">{{ user.username }}</p>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body-modern">
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                <div class="alert-modern alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    <div class="alert-content">
+                                        <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' if category == 'warning' else 'x-circle-fill' if category == 'danger' else 'info-circle-fill' }}"></i>
+                                        <span>{{ message }}</span>
+                                    </div>
+                                    <button type="button" class="btn-close-modern" data-bs-dismiss="alert">
+                                        <i class="bi bi-x"></i>
+                                    </button>
                                 </div>
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
 
-                    <form method="POST">
+                    <form method="POST" class="modern-form">
                         {{ form.hidden_tag() }}
-                        
-                        <div class="mb-3">
-                            {{ form.username.label(class="form-label") }}
-                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+
+                        <div class="form-group-modern">
+                            <div class="input-wrapper">
+                                <i class="bi bi-person input-icon"></i>
+                                {{ form.username(class="form-control-modern" + (" is-invalid" if form.username.errors else ""), placeholder=" ") }}
+                                <label class="floating-label">{{ form.username.label.text }}</label>
+                            </div>
                             {% if form.username.errors %}
-                                <div class="invalid-feedback">
+                                <div class="error-message">
                                     {% for error in form.username.errors %}
+                                        <i class="bi bi-exclamation-circle"></i>
                                         {{ error }}
                                     {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.email.label(class="form-label") }}
-                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                        <div class="form-group-modern">
+                            <div class="input-wrapper">
+                                <i class="bi bi-envelope input-icon"></i>
+                                {{ form.email(class="form-control-modern" + (" is-invalid" if form.email.errors else ""), placeholder=" ") }}
+                                <label class="floating-label">{{ form.email.label.text }}</label>
+                            </div>
                             {% if form.email.errors %}
-                                <div class="invalid-feedback">
+                                <div class="error-message">
                                     {% for error in form.email.errors %}
+                                        <i class="bi bi-exclamation-circle"></i>
                                         {{ error }}
                                     {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.rullenummer.label(class="form-label") }}
-                            {{ form.rullenummer(class="form-control" + (" is-invalid" if form.rullenummer.errors else "")) }}
+                        <div class="form-group-modern">
+                            <div class="input-wrapper">
+                                <i class="bi bi-hash input-icon"></i>
+                                {{ form.rullenummer(class="form-control-modern" + (" is-invalid" if form.rullenummer.errors else ""), placeholder=" ") }}
+                                <label class="floating-label">{{ form.rullenummer.label.text }}</label>
+                            </div>
                             {% if form.rullenummer.errors %}
-                                <div class="invalid-feedback">
+                                <div class="error-message">
                                     {% for error in form.rullenummer.errors %}
+                                        <i class="bi bi-exclamation-circle"></i>
                                         {{ error }}
                                     {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.password.label(class="form-label") }}
-                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                        <div class="form-group-modern">
+                            <div class="input-wrapper">
+                                <i class="bi bi-lock input-icon"></i>
+                                {{ form.password(class="form-control-modern" + (" is-invalid" if form.password.errors else ""), placeholder=" ") }}
+                                <label class="floating-label">{{ form.password.label.text }}</label>
+                            </div>
+                            <small class="form-hint">La stå tomt for å beholde nåværende passord</small>
                             {% if form.password.errors %}
-                                <div class="invalid-feedback">
+                                <div class="error-message">
                                     {% for error in form.password.errors %}
+                                        <i class="bi bi-exclamation-circle"></i>
                                         {{ error }}
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <div class="form-text">Leave blank to keep the current password</div>
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.confirm_password.label(class="form-label") }}
-                            {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else "")) }}
+                        <div class="form-group-modern">
+                            <div class="input-wrapper">
+                                <i class="bi bi-shield-lock input-icon"></i>
+                                {{ form.confirm_password(class="form-control-modern" + (" is-invalid" if form.confirm_password.errors else ""), placeholder=" ") }}
+                                <label class="floating-label">{{ form.confirm_password.label.text }}</label>
+                            </div>
                             {% if form.confirm_password.errors %}
-                                <div class="invalid-feedback">
+                                <div class="error-message">
                                     {% for error in form.confirm_password.errors %}
+                                        <i class="bi bi-exclamation-circle"></i>
                                         {{ error }}
                                     {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            <div class="form-check">
-                                {{ form.is_auth(class="form-check-input") }}
-                                {{ form.is_auth.label(class="form-check-label") }}
+                        <div class="form-group-modern checkbox-group">
+                            <div class="custom-checkbox-modern">
+                                {{ form.is_auth(class="form-check-input-modern") }}
+                                <label class="form-check-label-modern" for="{{ form.is_auth.id }}">
+                                    <span class="checkmark"></span>
+                                    <i class="bi bi-shield-check"></i>
+                                    {{ form.is_auth.label.text }}
+                                </label>
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary me-md-2">Cancel</a>
-                            {{ form.submit(class="btn btn-primary") }}
+                        <div class="button-group">
+                            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn-modern btn-secondary-modern">
+                                <i class="bi bi-arrow-left"></i>
+                                Avbryt
+                            </a>
+                            {{ form.submit(class="btn-modern btn-primary-modern") }}
                         </div>
                     </form>
                 </div>
@@ -101,4 +143,4 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

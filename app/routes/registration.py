@@ -20,17 +20,17 @@ def register():
 
         # Check if email and rullenummer combination is authorized
         if not db_utils.is_email_authorized(email, rullenummer):
-            flash('This email and work ID combination is not authorized. Contact an administrator.', 'danger')
+            flash('Denne kombinasjonen av e-post og rullenummer er ikke autorisert. Kontakt en administrator.', 'danger')
             return render_template('register.html', form=form)
 
         # Check if email already registered
         if db_utils.get_user_by_email(email):
-            flash('An account with this email already exists.', 'warning')
+            flash('En konto med denne e-postadressen finnes allerede.', 'warning')
             return redirect(url_for('auth.login'))
 
         # Check if username already taken
         if db_utils.get_user_by_username(username):
-            flash('This username is already taken. Please choose another.', 'warning')
+            flash('Dette brukernavnet er allerede tatt. Vennligst velg et annet.', 'warning')
             return render_template('register.html', form=form)
 
         # Create user account (unverified)
@@ -48,7 +48,7 @@ def register():
             db_utils.create_verification_token(user_id, token)
             email_utils.send_verification_email(email, token)
 
-            flash('Registration successful! Check your email to verify your account.', 'success')
+            flash('Registrering vellykket! Sjekk e-posten din for å verifisere kontoen.', 'success')
             return redirect(url_for('auth.login'))
         else:
             flash(message, 'danger')
@@ -65,7 +65,7 @@ def verify_email(token):
         if 'email' in result:
             email_utils.send_welcome_email(result['email'])
 
-        flash('Email verified successfully! You can now log in.', 'success')
+        flash('E-post verifisert! Du kan nå logge inn.', 'success')
         return redirect(url_for('auth.login'))
     else:
         flash(result['message'], 'danger')
@@ -85,11 +85,11 @@ def resend_verification():
                 token = secrets.token_urlsafe(32)
                 db_utils.create_verification_token(user['id'], token)
                 email_utils.send_verification_email(email, token)
-                flash('Verification email resent. Check your inbox.', 'success')
+                flash('Verifiserings-e-post sendt på nytt. Sjekk innboksen din.', 'success')
             else:
-                flash('Too many verification emails sent. Please try again later.', 'warning')
+                flash('For mange verifiserings-e-poster sendt. Vennligst prøv igjen senere.', 'warning')
         else:
-            flash('Email not found or already verified.', 'info')
+            flash('E-post ikke funnet eller allerede verifisert.', 'info')
 
         return redirect(url_for('auth.login'))
 

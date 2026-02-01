@@ -211,11 +211,11 @@ def set_active_turnus_set(turnus_set_id):
         # Then activate the specified set
         turnus_set = session.query(TurnusSet).filter_by(id=turnus_set_id).first()
         if not turnus_set:
-            return False, "Turnus set not found"
-        
+            return False, "Turnussett ikke funnet"
+
         turnus_set.is_active = 1
         session.commit()
-        return True, f"Turnus set {turnus_set.year_identifier} is now active"
+        return True, f"Turnussett {turnus_set.year_identifier} er nå aktivt"
     except Exception as e:
         session.rollback()
         return False, f"Error setting active turnus set: {e}"
@@ -285,18 +285,18 @@ def delete_turnus_set(turnus_set_id):
     try:
         turnus_set = session.query(TurnusSet).filter_by(id=turnus_set_id).first()
         if not turnus_set:
-            return False, "Turnus set not found"
-        
+            return False, "Turnussett ikke funnet"
+
         # Delete all shifts belonging to this turnus set
         session.query(Shifts).filter_by(turnus_set_id=turnus_set_id).delete()
-        
+
         # Delete all favorites belonging to this turnus set
         session.query(Favorites).filter_by(turnus_set_id=turnus_set_id).delete()
-        
+
         # Delete the turnus set itself
         session.delete(turnus_set)
         session.commit()
-        return True, f"Turnus set {turnus_set.year_identifier} deleted successfully"
+        return True, f"Turnussett {turnus_set.year_identifier} slettet"
     except Exception as e:
         session.rollback()
         return False, f"Error deleting turnus set: {e}"
@@ -310,12 +310,12 @@ def update_turnus_set_paths(turnus_set_id, turnus_file_path, df_file_path):
     try:
         turnus_set = session.query(TurnusSet).filter_by(id=turnus_set_id).first()
         if not turnus_set:
-            return False, "Turnus set not found"
-        
+            return False, "Turnussett ikke funnet"
+
         turnus_set.turnus_file_path = turnus_file_path
         turnus_set.df_file_path = df_file_path
         session.commit()
-        return True, "File paths updated successfully"
+        return True, "Filstier oppdatert"
     except Exception as e:
         session.rollback()
         return False, f"Error updating file paths: {e}"
@@ -645,7 +645,7 @@ def create_user(username, password, is_auth=0):
         # Check if username already exists
         existing_user = session.query(DBUser).filter_by(username=username).first()
         if existing_user:
-            return False, "Username already exists"
+            return False, "Brukernavnet finnes allerede"
 
         new_user = DBUser(
             username=username,
@@ -657,7 +657,7 @@ def create_user(username, password, is_auth=0):
         )
         session.add(new_user)
         session.commit()
-        return True, "User created successfully"
+        return True, "Bruker opprettet"
     except Exception as e:
         session.rollback()
         return False, f"Error creating user: {e}"
@@ -670,19 +670,19 @@ def update_user(user_id, username, email=None, rullenummer=None, password=None, 
     try:
         user = session.query(DBUser).filter_by(id=user_id).first()
         if not user:
-            return False, "User not found"
+            return False, "Bruker ikke funnet"
 
         # Check if new username conflicts with existing user
         if username != user.username:
             existing_user = session.query(DBUser).filter_by(username=username).first()
             if existing_user:
-                return False, "Username already exists"
+                return False, "Brukernavnet finnes allerede"
 
         # Check if new email conflicts with existing user
         if email and email != user.email:
             existing_email = session.query(DBUser).filter_by(email=email.lower()).first()
             if existing_email:
-                return False, "Email already exists"
+                return False, "E-postadressen finnes allerede"
 
         user.username = username
         if email is not None:
@@ -695,7 +695,7 @@ def update_user(user_id, username, email=None, rullenummer=None, password=None, 
             user.is_auth = is_auth
 
         session.commit()
-        return True, "User updated successfully"
+        return True, "Bruker oppdatert"
     except Exception as e:
         session.rollback()
         return False, f"Error updating user: {e}"
@@ -708,15 +708,15 @@ def delete_user(user_id):
     try:
         user = session.query(DBUser).filter_by(id=user_id).first()
         if not user:
-            return False, "User not found"
-        
+            return False, "Bruker ikke funnet"
+
         # Delete associated favorites
         session.query(Favorites).filter_by(user_id=user_id).delete()
-        
+
         # Delete the user
         session.delete(user)
         session.commit()
-        return True, "User deleted successfully"
+        return True, "Bruker slettet"
     except Exception as e:
         session.rollback()
         return False, f"Error deleting user: {e}"
@@ -729,11 +729,11 @@ def toggle_user_auth(user_id):
     try:
         user = session.query(DBUser).filter_by(id=user_id).first()
         if not user:
-            return False, "User not found"
-        
+            return False, "Bruker ikke funnet"
+
         user.is_auth = 1 if user.is_auth == 0 else 0
         session.commit()
-        return True, f"User authentication {'enabled' if user.is_auth == 1 else 'disabled'}"
+        return True, f"Administratorrettigheter {'aktivert' if user.is_auth == 1 else 'deaktivert'}"
     except Exception as e:
         session.rollback()
         return False, f"Error toggling user auth: {e}"
@@ -746,16 +746,16 @@ def update_user_password(user_id, current_password, new_password):
     try:
         user = session.query(DBUser).filter_by(id=user_id).first()
         if not user:
-            return False, "User not found"
+            return False, "Bruker ikke funnet"
 
         # Verify current password
         if not bcrypt.checkpw(current_password.encode('utf-8'), user.password.encode('utf-8')):
-            return False, "Current password is incorrect"
+            return False, "Nåværende passord er feil"
 
         # Update password
         user.password = hash_password(new_password)
         session.commit()
-        return True, "Password updated successfully"
+        return True, "Passord oppdatert"
     except Exception as e:
         session.rollback()
         return False, f"Error updating password: {e}"
@@ -794,7 +794,7 @@ def add_authorized_email(email, added_by, notes='', rullenummer=None):
             existing = session.query(AuthorizedEmails).filter_by(email=email.lower()).first()
 
         if existing:
-            return False, "Email and rullenummer combination already in authorized list"
+            return False, "E-post og rullenummer-kombinasjonen finnes allerede i autorisert liste"
 
         new_email = AuthorizedEmails(
             email=email.lower(),
@@ -804,7 +804,7 @@ def add_authorized_email(email, added_by, notes='', rullenummer=None):
         )
         session.add(new_email)
         session.commit()
-        return True, "Email added to authorized list"
+        return True, "E-post lagt til i autorisert liste"
     except Exception as e:
         session.rollback()
         return False, f"Error adding email: {e}"
@@ -844,11 +844,11 @@ def delete_authorized_email(email_id):
     try:
         email = session.query(AuthorizedEmails).filter_by(id=email_id).first()
         if not email:
-            return False, "Email not found"
+            return False, "E-post ikke funnet"
 
         session.delete(email)
         session.commit()
-        return True, "Email removed from authorized list"
+        return True, "E-post fjernet fra autorisert liste"
     except Exception as e:
         session.rollback()
         return False, f"Error removing email: {e}"
@@ -870,12 +870,12 @@ def create_user_with_email(email, username, password, verified=False, rullenumme
         # Check if email already exists
         existing_email = session.query(DBUser).filter_by(email=email.lower()).first()
         if existing_email:
-            return False, "Email already registered", None
+            return False, "E-postadressen er allerede registrert", None
 
         # Check if username already taken
         existing_username = session.query(DBUser).filter_by(username=username).first()
         if existing_username:
-            return False, "Username already taken", None
+            return False, "Brukernavnet er allerede tatt", None
 
         new_user = DBUser(
             username=username,
@@ -889,7 +889,7 @@ def create_user_with_email(email, username, password, verified=False, rullenumme
         session.add(new_user)
         session.commit()
         session.refresh(new_user)
-        return True, "User created successfully", new_user.id
+        return True, "Bruker opprettet", new_user.id
     except Exception as e:
         session.rollback()
         return False, f"Error creating user: {e}", None
@@ -970,11 +970,11 @@ def verify_token(token):
         ).first()
 
         if not token_record:
-            return {'success': False, 'message': 'Invalid or already used verification link'}
+            return {'success': False, 'message': 'Ugyldig eller allerede brukt verifiseringslenke'}
 
         # Check expiration
         if token_record.expires_at < datetime.now():
-            return {'success': False, 'message': 'Verification link has expired. Please request a new one.'}
+            return {'success': False, 'message': 'Verifiseringslenken har utløpt. Vennligst be om en ny.'}
 
         # Mark token as used
         token_record.used = 1
@@ -985,14 +985,14 @@ def verify_token(token):
             user.email_verified = 1
             session.commit()
 
-            return {'success': True, 'message': 'Email verified successfully', 'email': user.email}
+            return {'success': True, 'message': 'E-post verifisert', 'email': user.email}
         else:
-            return {'success': False, 'message': 'User not found'}
+            return {'success': False, 'message': 'Bruker ikke funnet'}
 
     except Exception as e:
         session.rollback()
         print(f"Error verifying token: {e}")
-        return {'success': False, 'message': 'An error occurred during verification'}
+        return {'success': False, 'message': 'En feil oppstod under verifisering'}
     finally:
         session.close()
 
@@ -1080,11 +1080,11 @@ def verify_password_reset_token(token):
         ).first()
 
         if not token_record:
-            return {'success': False, 'message': 'Invalid or already used reset link'}
+            return {'success': False, 'message': 'Ugyldig eller allerede brukt tilbakestillingslenke'}
 
         # Check expiration
         if token_record.expires_at < datetime.now():
-            return {'success': False, 'message': 'Reset link has expired. Please request a new one.'}
+            return {'success': False, 'message': 'Tilbakestillingslenken har utløpt. Vennligst be om en ny.'}
 
         # Get user info
         user = session.query(DBUser).filter_by(id=token_record.user_id).first()
@@ -1096,11 +1096,11 @@ def verify_password_reset_token(token):
                 'username': user.username
             }
         else:
-            return {'success': False, 'message': 'User not found'}
+            return {'success': False, 'message': 'Bruker ikke funnet'}
 
     except Exception as e:
         print(f"Error verifying password reset token: {e}")
-        return {'success': False, 'message': 'An error occurred during verification'}
+        return {'success': False, 'message': 'En feil oppstod under verifisering'}
     finally:
         session.close()
 
@@ -1111,7 +1111,7 @@ def reset_user_password(user_id, new_password):
     try:
         user = session.query(DBUser).filter_by(id=user_id).first()
         if not user:
-            return False, "User not found"
+            return False, "Bruker ikke funnet"
 
         # Update password
         user.password = hash_password(new_password)
@@ -1124,7 +1124,7 @@ def reset_user_password(user_id, new_password):
         ).update({'used': 1})
 
         session.commit()
-        return True, "Password updated successfully"
+        return True, "Passord oppdatert"
     except Exception as e:
         session.rollback()
         return False, f"Error updating password: {e}"

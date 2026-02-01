@@ -1,0 +1,61 @@
+# Project: Shift Rotation Organizer
+# Stack: Python/Flask, SQLAlchemy, Jinja2 templates, Bootstrap 5
+
+## Response Guidelines
+- Be concise. Skip preamble and summaries.
+- Show only changed code, not entire files.
+- Use minimal context in diffs (3 lines).
+- Don't repeat the question or explain what you're about to do.
+- Don't add docstrings/comments unless asked.
+- One-line answers for simple questions.
+- No "Here's the code" or "I'll help you with" phrases.
+- Omit obvious imports unless they're new.
+- Don't show unchanged functions.
+- Skip confirmation messages like "Done!" or "Let me know if...".
+
+## Code Style
+- Follow existing patterns in codebase.
+- No over-engineering or unsolicited refactoring.
+- Flask blueprints in app/routes/, utils in app/utils/.
+- Use existing decorators/helpers before creating new ones.
+- Match existing error handling patterns.
+- Norwegian UI text, English code/comments.
+
+## Project Structure
+- Models: app/models.py
+- Forms: app/forms.py
+- Templates: app/templates/
+- Email templates: app/templates/emails/
+- Database utils: app/utils/db_utils.py
+
+## Assumptions (don't ask, just do)
+- Use current_user from flask_login for auth.
+- Use flash() for user messages.
+- Use db.session for database operations.
+- Assume Bootstrap 5 classes in templates.
+
+## UI/Template Style
+- Use modern card-based design from app/static/css/auth.css for forms/pages.
+- Always use shared CSS files instead of inline <style> blocks.
+- CSS files go in app/static/css/.
+- Include Bootstrap Icons (bi-*) for form fields and buttons.
+- Use floating labels pattern for form inputs.
+- Standalone pages (login, register, etc.): link CSS directly in <head>.
+- Pages extending base.html: use {% block extra_css %} for additional CSS.
+- Follow existing color scheme: purple gradient (#667eea to #764ba2).
+- Use .modern-card, .card-header-modern, .form-control-modern classes.
+- Norwegian text for all UI labels and messages.
+
+## DRY Principles
+- Extract repeated CSS to shared files in app/static/css/.
+- Extract repeated HTML patterns to Jinja2 macros or includes.
+- Reuse existing form field patterns from auth templates.
+- Check for existing utilities before creating new ones.
+
+## Don't
+- Suggest tests unless asked.
+- Add logging unless asked.
+- Create new files when editing existing ones works.
+- Explain Flask/SQLAlchemy basics.
+- Add type hints unless codebase uses them.
+- Use inline CSS when a shared CSS file exists for that purpose.

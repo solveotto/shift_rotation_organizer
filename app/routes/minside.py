@@ -33,7 +33,7 @@ def change_password():
         )
         
         if success:
-            flash('Password updated successfully!', 'success')
+            flash('Passord oppdatert!', 'success')
         else:
             flash(message, 'danger')
     else:

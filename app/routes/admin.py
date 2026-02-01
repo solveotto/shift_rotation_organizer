@@ -12,7 +12,7 @@ admin = Blueprint('admin', __name__, url_prefix='/admin')
 def admin_dashboard():
     # Check if user is authorized (is_auth = 1)
     if not current_user.is_admin:
-        flash('Access denied. You need admin privileges to view this page.', 'danger')
+        flash('Ingen tilgang. Du trenger administratorrettigheter for å se denne siden.', 'danger')
         return redirect(url_for('shifts.home'))
     
     users = db_utils.get_all_users()
@@ -25,7 +25,7 @@ def admin_dashboard():
 def create_user():
     # Check if user is authorized (is_auth = 1)
     if not current_user.is_admin:
-        flash('Access denied. You need admin privileges to perform this action.', 'danger')
+        flash('Ingen tilgang. Du trenger administratorrettigheter for å utføre denne handlingen.', 'danger')
         return redirect(url_for('shifts.home'))
     
     form = CreateUserForm()
@@ -50,12 +50,12 @@ def create_user():
 def edit_user(user_id):
     # Check if user is authorized (is_auth = 1)
     if not current_user.is_admin:
-        flash('Access denied. You need admin privileges to perform this action.', 'danger')
+        flash('Ingen tilgang. Du trenger administratorrettigheter for å utføre denne handlingen.', 'danger')
         return redirect(url_for('shifts.home'))
-    
+
     user = db_utils.get_user_by_id(user_id)
     if not user:
-        flash('User not found.', 'danger')
+        flash('Bruker ikke funnet.', 'danger')
         return redirect(url_for('admin.admin_dashboard'))
     
     form = EditUserForm()
@@ -90,12 +90,12 @@ def edit_user(user_id):
 def delete_user(user_id):
     # Check if user is authorized (is_auth = 1)
     if not current_user.is_admin:
-        flash('Access denied. You need admin privileges to perform this action.', 'danger')
+        flash('Ingen tilgang. Du trenger administratorrettigheter for å utføre denne handlingen.', 'danger')
         return redirect(url_for('shifts.home'))
-    
+
     # Prevent admin from deleting themselves
     if user_id == current_user.id:
-        flash('You cannot delete your own account.', 'danger')
+        flash('Du kan ikke slette din egen konto.', 'danger')
         return redirect(url_for('admin.admin_dashboard'))
     
     success, message = db_utils.delete_user(user_id)
@@ -111,12 +111,12 @@ def delete_user(user_id):
 def toggle_auth(user_id):
     # Check if user is authorized (is_auth = 1)
     if not current_user.is_admin:
-        flash('Access denied. You need admin privileges to perform this action.', 'danger')
+        flash('Ingen tilgang. Du trenger administratorrettigheter for å utføre denne handlingen.', 'danger')
         return redirect(url_for('shifts.home'))
-    
+
     # Prevent admin from disabling their own auth
     if user_id == current_user.id:
-        flash('You cannot disable your own authentication.', 'danger')
+        flash('Du kan ikke deaktivere dine egne rettigheter.', 'danger')
         return redirect(url_for('admin.admin_dashboard'))
     
     success, message = db_utils.toggle_user_auth(user_id)
@@ -138,7 +138,7 @@ def toggle_auth(user_id):
 def manage_turnus_sets():
     """Manage turnus sets"""
     if not current_user.is_admin:
-        flash('Access denied. Admin rights required.', 'danger')
+        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
         return redirect(url_for('shifts.turnusliste'))
 
     turnus_sets = db_utils.get_all_turnus_sets()
@@ -156,7 +156,7 @@ def manage_turnus_sets():
 def create_turnus_set():
     """Create a new turnus set"""
     if not current_user.is_admin:
-        flash('Access denied. Admin rights required.', 'danger')
+        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
         return redirect(url_for('shifts.turnusliste'))
     
     form = CreateTurnusSetForm()
@@ -171,28 +171,28 @@ def create_turnus_set():
             turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
             turnus_json_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.json')
             df_json_path = os.path.join(turnusfiler_dir, f'turnus_df_{year_id}.json')
-            
+
             # Check if main turnus file exists
             if not os.path.exists(turnus_json_path):
-                flash(f'Turnus JSON file not found: {turnus_json_path}', 'danger')
+                flash(f'Turnus JSON-fil ikke funnet: {turnus_json_path}', 'danger')
                 return render_template('admin_create_turnus_set.html',
-                                     page_name='Create Turnus Set',
+                                     page_name='Opprett turnussett',
                                      form=form)
         else:
             # Handle PDF upload
             if not form.pdf_file.data:
-                flash('Please upload a PDF file or use existing files.', 'danger')
+                flash('Vennligst last opp en PDF-fil eller bruk eksisterende filer.', 'danger')
                 return render_template('admin_create_turnus_set.html',
-                                     page_name='Create Turnus Set',
+                                     page_name='Opprett turnussett',
                                      form=form)
             
             # PDF upload - scrape it
             turnus_json_path, df_json_path = handle_pdf_upload(form.pdf_file.data, year_id)
             if not turnus_json_path:
                 return render_template('admin_create_turnus_set.html',
-                                     page_name='Create Turnus Set',
+                                     page_name='Opprett turnussett',
                                      form=form)
-        
+
         # Generate statistics if missing
         if not df_json_path or not os.path.exists(df_json_path):
             try:
@@ -201,11 +201,11 @@ def create_turnus_set():
                 stats = Turnus(turnus_json_path)
                 df_json_path = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower(), f'turnus_df_{year_id}.json')
                 stats.stats_df.to_json(df_json_path)
-                flash('Statistics JSON generated automatically.', 'info')
+                flash('Statistikk-JSON generert automatisk.', 'info')
             except Exception as e:
-                flash(f'Error generating statistics: {e}', 'danger')
+                flash(f'Feil ved generering av statistikk: {e}', 'danger')
                 return render_template('admin_create_turnus_set.html',
-                                     page_name='Create Turnus Set',
+                                     page_name='Opprett turnussett',
                                      form=form)
         
         # Create turnus set in database
@@ -222,15 +222,15 @@ def create_turnus_set():
             turnus_set = db_utils.get_turnus_set_by_year(year_id)
             if turnus_set:
                 db_utils.add_shifts_to_turnus_set(turnus_json_path, turnus_set['id'])
-                flash(f'Turnus set {year_id} created successfully!', 'success')
+                flash(f'Turnussett {year_id} opprettet!', 'success')
             else:
-                flash('Turnus set created but shifts not added.', 'warning')
+                flash('Turnussett opprettet, men vakter ikke lagt til.', 'warning')
             return redirect(url_for('admin.manage_turnus_sets'))
         else:
             flash(message, 'danger')
-    
+
     return render_template('admin_create_turnus_set.html',
-                         page_name='Create Turnus Set',
+                         page_name='Opprett turnussett',
                          form=form)
 
 def handle_pdf_upload(pdf_file, year_id):
@@ -255,11 +255,11 @@ def handle_pdf_upload(pdf_file, year_id):
         turnus_json_path = scraper.create_json(year_id=year_id)
         excel_path = scraper.create_excel(year_id=year_id)
         
-        flash(f'PDF scraped successfully! Created JSON and Excel files.', 'success')
+        flash(f'PDF skrapet! JSON- og Excel-filer opprettet.', 'success')
         return turnus_json_path, None  # df_json_path will be generated later
-        
+
     except Exception as e:
-        flash(f'Error scraping PDF: {e}', 'danger')
+        flash(f'Feil ved skraping av PDF: {e}', 'danger')
         return None, None
 
 @admin.route('/switch-turnus-set', methods=['POST'])
@@ -267,7 +267,7 @@ def handle_pdf_upload(pdf_file, year_id):
 def switch_turnus_set():
     """Switch to a different turnus set"""
     if not current_user.is_admin:
-        flash('Access denied. Admin rights required.', 'danger')
+        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
         return redirect(url_for('shifts.turnusliste'))
     
     turnus_set_id = request.form.get('turnus_set_id', type=int)
@@ -288,7 +288,7 @@ def switch_turnus_set():
 def delete_turnus_set(turnus_set_id):
     """Delete a turnus set"""
     if not current_user.is_admin:
-        flash('Access denied. Admin rights required.', 'danger')
+        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
         return redirect(url_for('shifts.turnusliste'))
 
     # Get the turnus set info before deleting (for cleanup)
@@ -319,7 +319,7 @@ def delete_turnus_set(turnus_set_id):
 def manage_authorized_emails():
     """Manage authorized emails for self-registration"""
     if not current_user.is_admin:
-        flash('Access denied. Admin rights required.', 'danger')
+        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
         return redirect(url_for('shifts.home'))
 
     emails = db_utils.get_all_authorized_emails()
@@ -332,7 +332,7 @@ def manage_authorized_emails():
 def add_authorized_email():
     """Add new authorized email"""
     if not current_user.is_admin:
-        flash('Access denied.', 'danger')
+        flash('Ingen tilgang.', 'danger')
         return redirect(url_for('shifts.home'))
 
     email = request.form.get('email', '').lower().strip()
@@ -340,11 +340,11 @@ def add_authorized_email():
     notes = request.form.get('notes', '').strip()
 
     if not email:
-        flash('Email address is required.', 'danger')
+        flash('E-postadresse er påkrevd.', 'danger')
         return redirect(url_for('admin.manage_authorized_emails'))
 
     if not rullenummer:
-        flash('Rullenummer is required.', 'danger')
+        flash('Rullenummer er påkrevd.', 'danger')
         return redirect(url_for('admin.manage_authorized_emails'))
 
     success, message = db_utils.add_authorized_email(
@@ -362,7 +362,7 @@ def add_authorized_email():
 def delete_authorized_email(email_id):
     """Remove authorized email"""
     if not current_user.is_admin:
-        flash('Access denied.', 'danger')
+        flash('Ingen tilgang.', 'danger')
         return redirect(url_for('shifts.home'))
 
     success, message = db_utils.delete_authorized_email(email_id)
@@ -374,7 +374,7 @@ def delete_authorized_email(email_id):
 def bulk_add_authorized_emails():
     """Bulk add emails from textarea (one per line)"""
     if not current_user.is_admin:
-        flash('Access denied.', 'danger')
+        flash('Ingen tilgang.', 'danger')
         return redirect(url_for('shifts.home'))
 
     emails_text = request.form.get('emails_bulk', '')
@@ -385,12 +385,12 @@ def bulk_add_authorized_emails():
         success, _ = db_utils.add_authorized_email(
             email=email,
             added_by=current_user.id,
-            notes='Bulk import'
+            notes='Masseimport'
         )
         if success:
             added_count += 1
 
-    flash(f'Added {added_count} of {len(emails)} emails.', 'success')
+    flash(f'La til {added_count} av {len(emails)} e-poster.', 'success')
     return redirect(url_for('admin.manage_authorized_emails'))
 
 
@@ -425,7 +425,7 @@ def upload_strekliste(turnus_set_id):
 
     turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
     if not turnus_set:
-        flash('Turnus set not found.', 'danger')
+        flash('Turnussett ikke funnet.', 'danger')
         return redirect(url_for('admin.manage_turnus_sets'))
 
     form = UploadStreklisteForm()
@@ -436,11 +436,11 @@ def upload_strekliste(turnus_set_id):
         result = strekliste_generator.save_uploaded_pdf(pdf_file, version)
 
         if result['success']:
-            flash(f'Strekliste PDF uploaded successfully for {turnus_set["year_identifier"]}.', 'success')
+            flash(f'Strekliste PDF lastet opp for {turnus_set["year_identifier"]}.', 'success')
         else:
-            flash(f'Failed to upload PDF: {result["error"]}', 'danger')
+            flash(f'Kunne ikke laste opp PDF: {result["error"]}', 'danger')
     else:
-        flash('Invalid file. Please upload a PDF file.', 'danger')
+        flash('Ugyldig fil. Vennligst last opp en PDF-fil.', 'danger')
 
     return redirect(url_for('admin.manage_turnus_sets'))
 

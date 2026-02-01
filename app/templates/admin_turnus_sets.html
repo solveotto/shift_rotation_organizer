@@ -5,9 +5,9 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>Turnus Set Management</h1>
+                <h1>Administrer turnussett</h1>
                 <a href="{{ url_for('admin.create_turnus_set') }}" class="btn btn-success">
-                    <i class="bi bi-plus-circle"></i> Create New Turnus Set
+                    <i class="bi bi-plus-circle"></i> Opprett nytt turnussett
                 </a>
             </div>
 
@@ -25,21 +25,21 @@
             <!-- Active Turnus Set Info -->
             {% if active_set %}
             <div class="alert alert-info mb-4">
-                <h5><i class="bi bi-info-circle"></i> Currently Active Turnus Set</h5>
+                <h5><i class="bi bi-info-circle"></i> Nåværende aktivt turnussett</h5>
                 <strong>{{ active_set.name }}</strong> ({{ active_set.year_identifier }})
-                <br><small>Created: {{ active_set.created_at.strftime('%Y-%m-%d %H:%M') if active_set.created_at else 'Unknown' }}</small>
+                <br><small>Opprettet: {{ active_set.created_at.strftime('%Y-%m-%d %H:%M') if active_set.created_at else 'Ukjent' }}</small>
             </div>
             {% else %}
             <div class="alert alert-warning mb-4">
-                <h5><i class="bi bi-exclamation-triangle"></i> No Active Turnus Set</h5>
-                Please create and activate a turnus set to start using the system.
+                <h5><i class="bi bi-exclamation-triangle"></i> Ingen aktivt turnussett</h5>
+                Vennligst opprett og aktiver et turnussett for å begynne å bruke systemet.
             </div>
             {% endif %}
 
             <!-- Turnus Sets Table -->
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">All Turnus Sets</h5>
+                    <h5 class="mb-0">Alle turnussett</h5>
                 </div>
                 <div class="card-body">
                     {% if turnus_sets %}
@@ -47,12 +47,12 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Year ID</th>
-                                    <th>Name</th>
+                                    <th>År-ID</th>
+                                    <th>Navn</th>
                                     <th>Status</th>
                                     <th>Strekliste</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
+                                    <th>Opprettet</th>
+                                    <th>Handlinger</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -62,9 +62,9 @@
                                     <td>{{ turnus_set.name }}</td>
                                     <td>
                                         {% if turnus_set.is_active %}
-                                            <span class="badge bg-success">Active</span>
+                                            <span class="badge bg-success">Aktiv</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">Inactive</span>
+                                            <span class="badge bg-secondary">Inaktiv</span>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -106,22 +106,22 @@
                                             </button>
                                         </div>
                                     </td>
-                                    <td>{{ turnus_set.created_at.strftime('%Y-%m-%d') if turnus_set.created_at else 'Unknown' }}</td>
+                                    <td>{{ turnus_set.created_at.strftime('%Y-%m-%d') if turnus_set.created_at else 'Ukjent' }}</td>
                                     <td>
                                         {% if not turnus_set.is_active %}
                                         <form method="POST" action="{{ url_for('admin.switch_turnus_set') }}" style="display: inline;">
                                             <input type="hidden" name="turnus_set_id" value="{{ turnus_set.id }}">
-                                            <button type="submit" class="btn btn-sm btn-primary" 
-                                                    onclick="return confirm('Set {{ turnus_set.year_identifier }} as active turnus set?')">
-                                                <i class="bi bi-check-circle"></i> Activate
+                                            <button type="submit" class="btn btn-sm btn-primary"
+                                                    onclick="return confirm('Sett {{ turnus_set.year_identifier }} som aktivt turnussett?')">
+                                                <i class="bi bi-check-circle"></i> Aktiver
                                             </button>
                                         </form>
                                         {% endif %}
-                                        
-                                        <form method="POST" action="{{ url_for('admin.delete_turnus_set', turnus_set_id=turnus_set.id) }}" 
-                                              style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ turnus_set.year_identifier }}? This will also delete all associated shifts and favorites.')">
+
+                                        <form method="POST" action="{{ url_for('admin.delete_turnus_set', turnus_set_id=turnus_set.id) }}"
+                                              style="display: inline;" onsubmit="return confirm('Er du sikker på at du vil slette {{ turnus_set.year_identifier }}? Dette vil også slette alle tilknyttede vakter og favoritter.')">
                                             <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash"></i> Delete
+                                                <i class="bi bi-trash"></i> Slett
                                             </button>
                                         </form>
                                     </td>
@@ -132,9 +132,9 @@
                     </div>
                     {% else %}
                     <div class="text-center py-4">
-                        <p class="text-muted">No turnus sets found.</p>
+                        <p class="text-muted">Ingen turnussett funnet.</p>
                         <a href="{{ url_for('admin.create_turnus_set') }}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Create First Turnus Set
+                            <i class="bi bi-plus-circle"></i> Opprett første turnussett
                         </a>
                     </div>
                     {% endif %}

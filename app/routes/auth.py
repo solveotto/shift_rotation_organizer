@@ -23,7 +23,7 @@ def login():
             if db_user_data and User.verify_password(db_user_data['password'], form.password.data):
                 # Check email verification status
                 if db_user_data.get('email_verified') == 0:
-                    flash('Please verify your email before logging in. Check your inbox for the verification link.', 'warning')
+                    flash('Vennligst bekreft e-posten din før du logger inn. Sjekk innboksen din for verifiseringslenken.', 'warning')
                     return render_template('login.html', form=form)
 
                 user = User(form.username.data, db_user_data['id'], db_user_data['is_auth'])
@@ -34,7 +34,7 @@ def login():
 
                 return redirect(url_for('shifts.index'))
             else:
-                flash('Login unsuccessful. Please check username and password', 'danger')
+                flash('Innlogging mislyktes. Vennligst sjekk brukernavn og passord', 'danger')
         except Error as e:
             print(f'Error: {e}')
     else:
@@ -64,7 +64,7 @@ def forgot_password():
 
         # Check rate limiting
         if not db_utils.can_send_password_reset_email(email):
-            flash('A reset email was recently sent. Please check your inbox or try again later.', 'warning')
+            flash('En tilbakestillings-e-post ble nylig sendt. Vennligst sjekk innboksen din eller prøv igjen senere.', 'warning')
             return render_template('forgot_password.html', form=form, show_success_modal=False)
 
         # Get user by email
@@ -108,9 +108,9 @@ def reset_password(token):
         )
 
         if success:
-            flash('Your password has been reset successfully. You can now log in.', 'success')
+            flash('Passordet ditt er tilbakestilt. Du kan nå logge inn.', 'success')
             return redirect(url_for('auth.login', email=token_result.get('email', '')))
         else:
-            flash(f'Error resetting password: {message}', 'danger')
+            flash(f'Feil ved tilbakestilling av passord: {message}', 'danger')
 
     return render_template('reset_password.html', form=form, token=token)

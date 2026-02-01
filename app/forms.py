@@ -4,134 +4,134 @@ from wtforms.validators import DataRequired, Length, NumberRange, EqualTo, Valid
 from flask_wtf.file import FileAllowed
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=255)])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
+    username = StringField('Brukernavn', validators=[DataRequired(), Length(min=2, max=255)])
+    password = PasswordField('Passord', validators=[DataRequired()])
+    submit = SubmitField('Logg inn')
 # Admin Forms
 class CreateUserForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    is_auth = BooleanField('Admin rights')
-    submit = SubmitField('Create User')
+    username = StringField('Brukernavn', validators=[DataRequired(), Length(min=3, max=50)])
+    password = PasswordField('Passord', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Bekreft passord', validators=[DataRequired(), EqualTo('password')])
+    is_auth = BooleanField('Administratorrettigheter')
+    submit = SubmitField('Opprett bruker')
 
 class EditUserForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=50)])
-    email = StringField('Email Address', validators=[Email(message='Please enter a valid email address'), Length(max=255)])
-    rullenummer = StringField('Rullenummer (Work ID)', validators=[Length(max=50)])
-    password = PasswordField('New Password (leave blank to keep current)')
-    confirm_password = PasswordField('Confirm New Password')
-    is_auth = BooleanField('Admin rights')
-    submit = SubmitField('Update User')
+    username = StringField('Brukernavn', validators=[DataRequired(), Length(min=3, max=50)])
+    email = StringField('E-postadresse', validators=[Email(message='Vennligst oppgi en gyldig e-postadresse'), Length(max=255)])
+    rullenummer = StringField('Rullenummer', validators=[Length(max=50)])
+    password = PasswordField('Nytt passord (la stå tomt for å beholde nåværende)')
+    confirm_password = PasswordField('Bekreft nytt passord')
+    is_auth = BooleanField('Administratorrettigheter')
+    submit = SubmitField('Oppdater bruker')
 
     def validate_confirm_password(self, field):
         if self.password.data and not field.data:
-            raise ValidationError('Please confirm your new password.')
+            raise ValidationError('Vennligst bekreft ditt nye passord.')
         if self.password.data and field.data and self.password.data != field.data:
-            raise ValidationError('Passwords must match.')
+            raise ValidationError('Passordene må være like.')
 
 # Turnus Set Management Forms
 class CreateTurnusSetForm(FlaskForm):
-    name = StringField('Turnus Set Name', 
+    name = StringField('Turnussett-navn',
                       validators=[DataRequired(), Length(min=3, max=100)],
-                      render_kw={"placeholder": "e.g., OSL Train Shifts 2025"})
-    year_identifier = StringField('Year Identifier', 
+                      render_kw={"placeholder": "f.eks. OSL Togvakter 2025"})
+    year_identifier = StringField('Årsidentifikator',
                                  validators=[DataRequired(), Length(min=2, max=10)],
-                                 render_kw={"placeholder": "e.g., R25, R26"})
-    is_active = BooleanField('Set as active turnus set')
-    
+                                 render_kw={"placeholder": "f.eks. R25, R26"})
+    is_active = BooleanField('Sett som aktivt turnussett')
+
     # File handling options
-    use_existing_files = BooleanField('Use existing files from turnusfiler directory', 
+    use_existing_files = BooleanField('Bruk eksisterende filer fra turnusfiler-mappen',
                                     default=True,
                                     render_kw={"onchange": "toggleFileUploads()"})
-    
+
     # PDF upload option
-    pdf_file = FileField('Upload PDF File (to scrape and generate JSON)', 
-                        validators=[FileAllowed(['pdf'], 'PDF files only!')])
-    
-    submit = SubmitField('Create Turnus Set')
+    pdf_file = FileField('Last opp PDF-fil (for å skrape og generere JSON)',
+                        validators=[FileAllowed(['pdf'], 'Kun PDF-filer!')])
+
+    submit = SubmitField('Opprett turnussett')
 
 class SelectTurnusSetForm(FlaskForm):
-    turnus_set = SelectField('Select Turnus Set', coerce=int, validators=[DataRequired()])
-    submit = SubmitField('Switch to Selected Set')
+    turnus_set = SelectField('Velg turnussett', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Bytt til valgt sett')
 
 # User Profile Forms
 class ChangePasswordForm(FlaskForm):
-    current_password = PasswordField('Current Password', validators=[DataRequired()])
-    new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm New Password', validators=[DataRequired(), EqualTo('new_password')])
-    submit = SubmitField('Change Password')
+    current_password = PasswordField('Nåværende passord', validators=[DataRequired()])
+    new_password = PasswordField('Nytt passord', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Bekreft nytt passord', validators=[DataRequired(), EqualTo('new_password')])
+    submit = SubmitField('Endre passord')
 
 # Registration Forms
 class RegisterForm(FlaskForm):
     """User self-registration form"""
-    username = StringField('Username (Display Name)', validators=[
+    username = StringField('Brukernavn (visningsnavn)', validators=[
         DataRequired(),
-        Length(min=2, max=255, message='Username must be between 2 and 255 characters')
+        Length(min=2, max=255, message='Brukernavn må være mellom 2 og 255 tegn')
     ])
 
-    rullenummer = StringField('Rullenummer (Work ID)', validators=[
+    rullenummer = StringField('Rullenummer', validators=[
         DataRequired(),
-        Length(min=1, max=50, message='Rullenummer is required')
+        Length(min=1, max=50, message='Rullenummer er påkrevd')
     ])
 
-    email = StringField('Email Address', validators=[
+    email = StringField('E-postadresse', validators=[
         DataRequired(),
-        Email(message='Please enter a valid email address'),
+        Email(message='Vennligst oppgi en gyldig e-postadresse'),
         Length(max=255)
     ])
-    password = PasswordField('Password', validators=[
+    password = PasswordField('Passord', validators=[
         DataRequired(),
-        Length(min=8, message='Password must be at least 8 characters')
+        Length(min=8, message='Passord må være minst 8 tegn')
     ])
-    confirm_password = PasswordField('Confirm Password', validators=[
+    confirm_password = PasswordField('Bekreft passord', validators=[
         DataRequired(),
-        EqualTo('password', message='Passwords must match')
+        EqualTo('password', message='Passordene må være like')
     ])
-    submit = SubmitField('Register')
+    submit = SubmitField('Registrer')
 
     def validate_email(self, field):
         """Custom email validation"""
         email = field.data.lower()
         # Prevent obviously fake emails
         if email.endswith('.test') or email.endswith('.invalid'):
-            raise ValidationError('Please use a valid email address.')
+            raise ValidationError('Vennligst bruk en gyldig e-postadresse.')
 
 class ResendVerificationForm(FlaskForm):
     """Form to resend verification email"""
-    email = StringField('Email Address', validators=[
+    email = StringField('E-postadresse', validators=[
         DataRequired(),
         Email()
     ])
-    submit = SubmitField('Resend Verification Email')
+    submit = SubmitField('Send verifiserings-e-post på nytt')
 
 
 class UploadStreklisteForm(FlaskForm):
     """Form for uploading strekliste PDF"""
     pdf_file = FileField('Strekliste PDF', validators=[
         DataRequired(),
-        FileAllowed(['pdf'], 'PDF files only!')
+        FileAllowed(['pdf'], 'Kun PDF-filer!')
     ])
-    submit = SubmitField('Upload')
+    submit = SubmitField('Last opp')
 
 
 class ForgotPasswordForm(FlaskForm):
     """Form to request password reset email"""
-    email = StringField('Email Address', validators=[
+    email = StringField('E-postadresse', validators=[
         DataRequired(),
-        Email(message='Please enter a valid email address')
+        Email(message='Vennligst oppgi en gyldig e-postadresse')
     ])
-    submit = SubmitField('Send Reset Link')
+    submit = SubmitField('Send tilbakestillingslenke')
 
 
 class ResetPasswordForm(FlaskForm):
     """Form to set a new password"""
-    password = PasswordField('New Password', validators=[
+    password = PasswordField('Nytt passord', validators=[
         DataRequired(),
-        Length(min=8, message='Password must be at least 8 characters')
+        Length(min=8, message='Passord må være minst 8 tegn')
     ])
-    confirm_password = PasswordField('Confirm New Password', validators=[
+    confirm_password = PasswordField('Bekreft nytt passord', validators=[
         DataRequired(),
-        EqualTo('password', message='Passwords must match')
+        EqualTo('password', message='Passordene må være like')
     ])
-    submit = SubmitField('Reset Password')
+    submit = SubmitField('Tilbakestill passord')

@@ -6,7 +6,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="mb-0">Create New Turnus Set</h4>
+                    <h4 class="mb-0">Opprett nytt turnussett</h4>
                 </div>
                 <div class="card-body">
                     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -33,7 +33,7 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <small class="form-text text-muted">A descriptive name for this turnus set (e.g., "OSL Train Shifts 2025")</small>
+                            <small class="form-text text-muted">Et beskrivende navn for dette turnussettet (f.eks. «OSL Togvakter 2025»)</small>
                         </div>
 
                         <div class="mb-3">
@@ -46,30 +46,30 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
-                            <small class="form-text text-muted">Short identifier (e.g., "R25", "R26") - must be unique</small>
+                            <small class="form-text text-muted">Kort identifikator (f.eks. «R25», «R26») - må være unik</small>
                         </div>
 
                         <div class="mb-3 form-check">
                             {{ form.is_active(class="form-check-input") }}
                             {{ form.is_active.label(class="form-check-label") }}
-                            <small class="form-text text-muted d-block">If checked, this will become the active turnus set</small>
+                            <small class="form-text text-muted d-block">Hvis avkrysset, vil dette bli det aktive turnussettet</small>
                         </div>
 
                         <hr>
-                        <h6>File Handling Options</h6>
-                        
+                        <h6>Filhåndteringsalternativer</h6>
+
                         <div class="mb-3 form-check">
                             {{ form.use_existing_files(class="form-check-input", id="use_existing_files") }}
                             {{ form.use_existing_files.label(class="form-check-label") }}
                             <small class="form-text text-muted d-block">
-                                If checked, will look for existing files in <code>turnusfiler/{year_id}/</code> directory
+                                Hvis avkrysset, vil systemet lete etter eksisterende filer i <code>turnusfiler/{year_id}/</code>-mappen
                             </small>
                         </div>
 
                         <div class="file-upload-section">
-                            <h6>Upload PDF File</h6>
-                            <p class="text-muted small">Upload a PDF file to automatically scrape and generate JSON/Excel files.</p>
-                        
+                            <h6>Last opp PDF-fil</h6>
+                            <p class="text-muted small">Last opp en PDF-fil for å automatisk skrape og generere JSON/Excel-filer.</p>
+
                             <div class="mb-3">
                                 {{ form.pdf_file.label(class="form-label") }}
                                 {{ form.pdf_file(class="form-control") }}
@@ -81,14 +81,14 @@
                                     </div>
                                 {% endif %}
                                 <small class="form-text text-muted">
-                                    <strong>PDF will be automatically scraped</strong> to generate JSON and Excel files
+                                    <strong>PDF-en vil automatisk bli skrapet</strong> for å generere JSON- og Excel-filer
                                 </small>
                             </div>
                         </div>
-                        
+
                         <div class="d-flex justify-content-between">
                             <a href="{{ url_for('admin.manage_turnus_sets') }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Back to Turnus Sets
+                                <i class="bi bi-arrow-left"></i> Tilbake til turnussett
                             </a>
                             {{ form.submit(class="btn btn-primary") }}
                         </div>

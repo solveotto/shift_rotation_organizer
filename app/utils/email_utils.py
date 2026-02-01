@@ -62,7 +62,7 @@ def send_verification_email(email, token):
                                    _external=True)
 
         # Email subject
-        subject = "Verify Your Email - Shift Rotation System"
+        subject = "Bekreft e-posten din - Turnushjelper"
 
         # HTML body
         html_body = render_template('emails/verification_email.html',
@@ -71,18 +71,18 @@ def send_verification_email(email, token):
 
         # Plain text fallback
         text_body = f"""
-Welcome to Shift Rotation System!
+Velkommen til Turnushjelper!
 
-Please verify your email address by clicking the link below:
+Vennligst bekreft e-postadressen din ved å klikke på lenken nedenfor:
 
 {verification_url}
 
-This link will expire in 48 hours.
+Denne lenken utløper om 48 timer.
 
-If you did not create this account, please ignore this email.
+Hvis du ikke opprettet denne kontoen, kan du ignorere denne e-posten.
 
 ---
-Shift Rotation System
+Turnushjelper
         """
 
         # Send email via Mailgun API
@@ -102,21 +102,21 @@ Shift Rotation System
 def send_welcome_email(email):
     """Send welcome email after successful verification"""
     try:
-        subject = "Welcome to Shift Rotation System!"
+        subject = "Velkommen til Turnushjelper!"
 
         html_body = render_template('emails/welcome_email.html', email=email)
 
         text_body = f"""
-Welcome to Shift Rotation System!
+Velkommen til Turnushjelper!
 
-Your email has been verified successfully. You can now log in and start managing your shift preferences.
+E-posten din er nå verifisert. Du kan nå logge inn og begynne å administrere vaktpreferansene dine.
 
-Log in at: {url_for('auth.login', _external=True)}
+Logg inn på: {url_for('auth.login', _external=True)}
 
-If you have any questions, please contact your administrator.
+Hvis du har spørsmål, vennligst kontakt administratoren din.
 
 ---
-Shift Rotation System
+Turnushjelper
         """
 
         return send_mailgun_email(email, subject, text_body, html_body)
@@ -134,7 +134,7 @@ def send_password_reset_email(email, token):
                             _external=True)
 
         # Email subject
-        subject = "Reset Your Password - Shift Rotation System"
+        subject = "Tilbakestill passordet ditt - Turnushjelper"
 
         # HTML body
         html_body = render_template('emails/password_reset_email.html',
@@ -143,20 +143,20 @@ def send_password_reset_email(email, token):
 
         # Plain text fallback
         text_body = f"""
-Password Reset Request
+Forespørsel om tilbakestilling av passord
 
-You have requested to reset your password for your Shift Rotation System account.
+Du har bedt om å tilbakestille passordet for din Turnushjelper-konto.
 
-Click the link below to reset your password:
+Klikk på lenken nedenfor for å tilbakestille passordet ditt:
 
 {reset_url}
 
-This link will expire in 1 hour.
+Denne lenken utløper om 1 time.
 
-If you did not request a password reset, please ignore this email. Your password will remain unchanged.
+Hvis du ikke ba om tilbakestilling av passord, kan du ignorere denne e-posten. Passordet ditt forblir uendret.
 
 ---
-Shift Rotation System
+Turnushjelper
         """
 
         return send_mailgun_email(email, subject, text_body, html_body)
