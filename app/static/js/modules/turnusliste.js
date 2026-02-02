@@ -162,18 +162,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const showAllRadio = document.getElementById('show-all');
     
     if (hideFavoritesRadio && showAllRadio) {
-        // Initial state - hide favorites by default
-        toggleFavoritesVisibility(true);
-        
+        // Load saved preference from localStorage, default to 'show-all'
+        const savedViewMode = localStorage.getItem('turnuslisteViewMode') || 'show-all';
+        const hideFavorites = savedViewMode === 'hide-favorites';
+
+        // Set the radio button state based on saved preference
+        if (hideFavorites) {
+            hideFavoritesRadio.checked = true;
+            showAllRadio.checked = false;
+        } else {
+            showAllRadio.checked = true;
+            hideFavoritesRadio.checked = false;
+        }
+
+        // Apply the saved state
+        toggleFavoritesVisibility(hideFavorites);
+
         // Add event listeners
         hideFavoritesRadio.addEventListener('change', function() {
             if (this.checked) {
+                localStorage.setItem('turnuslisteViewMode', 'hide-favorites');
                 toggleFavoritesVisibility(true);
             }
         });
-        
+
         showAllRadio.addEventListener('change', function() {
             if (this.checked) {
+                localStorage.setItem('turnuslisteViewMode', 'show-all');
                 toggleFavoritesVisibility(false);
             }
         });

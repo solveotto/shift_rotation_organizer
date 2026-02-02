@@ -1331,32 +1331,45 @@ label input[type="checkbox"] {
 }
 
 .custom-checkbox {
-  margin-left: 2em;
   position: relative;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 31px;
+  border: 1px solid var(--bs-primary);
+  border-radius: 0.25rem;
+  background: transparent;
+  transition: all 0.2s ease-in-out;
 }
 
-.custom-checkbox .bi {
-  color: gold;
-  position: absolute;
-  top: -0.8em;
-  left: -3.25em;
-  font-size: 0.35em;
+.custom-checkbox:hover {
+  background: var(--bs-primary);
+}
+
+.custom-checkbox input[type="checkbox"] {
+  display: none;
 }
 
 .custom-checkbox .bi-star {
   color: gray;
+  font-size: 1rem;
 }
 
-.custom-checkbox .bi-star-fill{
+.custom-checkbox .bi-star-fill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   opacity: 0;
-  transition: all var(--transition-fast);
+  transition: opacity 0.2s ease-in-out;
   color: #ffc107;
+  font-size: 1rem;
 }
 
-.custom-checkbox:hover .bi-star-fill{
+.custom-checkbox:hover .bi-star-fill {
   opacity: 0.6;
-  transform: scale(1.1);
 }
 
 .custom-checkbox input[type="checkbox"]:checked ~ .bi-star-fill {
