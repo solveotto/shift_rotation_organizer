@@ -24,7 +24,7 @@ except ImportError:
     FITZ_AVAILABLE = False
 
 try:
-    from PIL import Image, ImageDraw
+    from PIL import Image, ImageDraw, ImageFont
     import numpy as np
     PIL_AVAILABLE = True
 except ImportError:
@@ -268,24 +268,37 @@ def find_separator_lines(img, min_thickness: int = 2) -> list:
     return lines
 
 
-def create_hour_ruler(width: int, height: int = 20) -> Image.Image | None:
+def create_hour_ruler(width: int, height: int = 30, zoom: int = 1) -> Image.Image | None:
     """Create a horizontal ruler showing hours 0-23."""
     if not PIL_AVAILABLE:
         return None
 
-    ruler = Image.new('RGB', (width, height), 'white')
+    # Scale height with zoom for proportional appearance
+    scaled_height = int(height * zoom / 3)
+    ruler = Image.new('RGB', (width, scaled_height), 'white')
     draw = ImageDraw.Draw(ruler)
 
-    # Timeline spans approximately from x=170 to x=width-10 in the cropped image
-    # The shift info column is on the left, timeline starts after that
-    timeline_start = 165  # Approximate start of timeline (after shift info)
-    timeline_end = width - 35  # Small margin on right
+    # Timeline positions as ratios of width (zoom-independent)
+    # These ratios represent where the timeline starts and ends in the cropped image
+    timeline_start_ratio = 0.149   # Timeline starts at ~30% from left (shift info column)
+    timeline_end_ratio = 0.969    # Timeline ends at ~97% (margin on right)
+
+    timeline_start = int(width * timeline_start_ratio)
+    timeline_end = int(width * timeline_end_ratio)
+
+    # Font size scales with zoom - adjust base size (12) as needed
+    font_size = int(5 * zoom)
+    try:
+        font = ImageFont.truetype("arial.ttf", font_size)
+    except OSError:
+        font = ImageFont.load_default()
 
     # Draw hour marks 0-23
+    y_pos = scaled_height // 2
     for hour in range(24):
         x = timeline_start + (hour / 23) * (timeline_end - timeline_start)
-        # Use anchor='mt' (middle-top) to center text on the x position
-        draw.text((x, 8), str(hour), fill='black', anchor='mt')
+        # Use anchor='mm' (middle-middle) to center text on both axes
+        draw.text((x, y_pos), str(hour), fill='black', anchor='mm', font=font)
 
     return ruler
 
@@ -349,7 +362,7 @@ def render_shift_image(shift_nr: str, version: str) -> bytes | None:
             cropped = img.crop(crop_box)
 
             # Create and attach hour ruler
-            ruler = create_hour_ruler(cropped.width)
+            ruler = create_hour_ruler(cropped.width, zoom=zoom)
             if ruler is not None:
                 combined = Image.new('RGB', (cropped.width, cropped.height + ruler.height), 'white')
                 combined.paste(ruler, (0, 0))
@@ -518,7 +531,7 @@ def generate_all_images(version: str, force: bool = False, progress_callback=Non
             cropped = page_img.crop(crop_box)
 
             # Create and attach hour ruler
-            ruler = create_hour_ruler(cropped.width)
+            ruler = create_hour_ruler(cropped.width, zoom=zoom)
             if ruler is not None:
                 combined = Image.new('RGB', (cropped.width, cropped.height + ruler.height), 'white')
                 combined.paste(ruler, (0, 0))

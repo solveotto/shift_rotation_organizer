@@ -28,24 +28,16 @@ export class ShiftTimelineModal {
         this.maxScale = 5;
         this.zoomStep = 0.25;
 
-        // Suffixes to strip from shift names when looking up images
-        this.suffixesToStrip = ['HLD', 'LHM'];
-
         this.init();
     }
 
     /**
-     * Strip known suffixes from shift name for image lookup
+     * Extract numeric prefix from shift name for image lookup
+     * Examples: "123HLD" -> "123", "456SKNO" -> "456", "789" -> "789"
      */
-    stripSuffixes(shiftNr) {
-        let result = shiftNr;
-        for (const suffix of this.suffixesToStrip) {
-            if (result.endsWith(suffix)) {
-                result = result.slice(0, -suffix.length);
-                break; // Only strip one suffix
-            }
-        }
-        return result;
+    extractNumericPrefix(shiftNr) {
+        const match = shiftNr.match(/^(\d+)/);
+        return match ? match[1] : shiftNr;
     }
 
     init() {
@@ -135,7 +127,7 @@ export class ShiftTimelineModal {
         if (!this.modal) return;
 
         // Strip suffixes for image lookup
-        const lookupShiftNr = this.stripSuffixes(shiftNr);
+        const lookupShiftNr = this.extractNumericPrefix(shiftNr);
 
         // Show modal
         const bsModal = new bootstrap.Modal(this.modal);
