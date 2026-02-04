@@ -1,4 +1,5 @@
 import os
+import re
 import pandas as pd
 import json
 import app.utils.db_utils as _db_utils
@@ -55,10 +56,12 @@ class DataframeManager():
             if os.path.exists(turnus_path):
                 with open(turnus_path, 'r') as f:
                     self.turnus_data = json.load(f)
+                # Apply double shift flags from double_shifts JSON file
+                self.turnus_data = self._apply_double_shift_flags(self.turnus_data, turnus_set['year_identifier'])
             else:
                 print(f"Turnus file not found: {turnus_path}")
                 self.turnus_data = []
-            
+
             return True
         except Exception as e:
             print(f"Error loading turnus set {turnus_set['year_identifier']}: {e}")
@@ -77,3 +80,47 @@ class DataframeManager():
     def has_data(self):
         """Check if we have valid data loaded"""
         return not self.df.empty and len(self.turnus_data) > 0
+
+    def _apply_double_shift_flags(self, turnus_data, year_id):
+        """Apply is_consecutive_shift and is_consecutive_receiver flags based on double_shifts file."""
+
+        # Load double shifts file
+        double_shifts_path = os.path.join(conf.turnusfiler_dir, year_id.lower(), f'double_shifts_{year_id.lower()}.json')
+        if not os.path.exists(double_shifts_path):
+            return turnus_data  # No double shifts file, return unchanged
+
+        with open(double_shifts_path, 'r') as f:
+            double_shifts = json.load(f)
+
+        # Build lookup sets (extract base numbers)
+        first_shifts = set()
+        second_shifts = set()
+        for pair in double_shifts:
+            first_base = re.match(r'^(\d+)', pair['first_shift'])
+            second_base = re.match(r'^(\d+)', pair['second_shift'])
+            if first_base:
+                first_shifts.add(first_base.group(1))
+            if second_base:
+                second_shifts.add(second_base.group(1))
+
+        # Apply flags to turnus_data
+        for turnus_entry in turnus_data:
+            for turnus_name, weeks in turnus_entry.items():
+                for week_nr, week_data in weeks.items():
+                    if not isinstance(week_data, dict):
+                        continue
+                    for day_nr, day_data in week_data.items():
+                        if not isinstance(day_data, dict) or 'dagsverk' not in day_data:
+                            continue
+
+                        dagsverk = day_data.get('dagsverk', '')
+                        base_match = re.match(r'^(\d+)', dagsverk)
+                        if base_match:
+                            base_num = base_match.group(1)
+                            day_data['is_consecutive_shift'] = base_num in first_shifts
+                            day_data['is_consecutive_receiver'] = base_num in second_shifts
+                        else:
+                            day_data['is_consecutive_shift'] = False
+                            day_data['is_consecutive_receiver'] = False
+
+        return turnus_data

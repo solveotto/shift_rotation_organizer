@@ -245,48 +245,13 @@ class ShiftScraper():
                 else:
                     turnus[uke][dag]['start'] = (turnus[uke][dag]['tid'])
 
-        def plasseringslogikk_dagsverk(word, uke, dag, turnus):                 
+        def plasseringslogikk_dagsverk(word, uke, dag, turnus):
             # Hopper over iterering hvis de inneholder :, XX, OO eller TT.
             if any(sub in word["text"] for sub in self.ALLOW_FILTER):
                 pass
             else:
                 text_to_add = word['text']
-                
-                # Check for consecutive number pattern (e.g., 3006 -> 3007)
-                # Extract numeric part from dagsverk if it exists
-                if text_to_add and text_to_add.isdigit() and len(text_to_add) >= 3:
-                    current_number = int(text_to_add)
-                    
-                    # Check if previous day has a consecutive number
-                    prev_day_number = None
-                    if dag > 1 and turnus[uke][dag-1]['dagsverk']:
-                        prev_dagsverk = turnus[uke][dag-1]['dagsverk']
-                        # Extract number from previous dagsverk (handle formats like "3006-OSL")
-                        import re
-                        prev_match = re.search(r'^(\d+)', prev_dagsverk)
-                        if prev_match:
-                            prev_day_number = int(prev_match.group(1))
-                    elif dag == 1 and uke > 1 and turnus[uke-1][7]['dagsverk']:
-                        # Check Sunday to Monday transition
-                        prev_dagsverk = turnus[uke-1][7]['dagsverk']
-                        import re
-                        prev_match = re.search(r'^(\d+)', prev_dagsverk)
-                        if prev_match:
-                            prev_day_number = int(prev_match.group(1))
-                    
-                    # If we found a consecutive number pattern, mark both shifts for tooltips
-                    if prev_day_number and current_number == prev_day_number + 1:
-                        if dag > 1:
-                            # Mark the previous day (first shift) with arrow
-                            turnus[uke][dag-1]['is_consecutive_shift'] = True
-                            # Mark the current day (second shift) as receiver
-                            turnus[uke][dag]['is_consecutive_receiver'] = True
-                        elif dag == 1 and uke > 1:
-                            # Mark the Sunday (first shift) with arrow
-                            turnus[uke-1][7]['is_consecutive_shift'] = True
-                            # Mark the Monday (second shift) as receiver
-                            turnus[uke][dag]['is_consecutive_receiver'] = True
-                
+
                 # Check if this dagsverk text crosses into next day's column
                 # Look for the current day's x boundary
                 for dager in self.DAG_POS:
