@@ -82,17 +82,25 @@ class DataframeManager():
         return not self.df.empty and len(self.turnus_data) > 0
 
     def _apply_double_shift_flags(self, turnus_data, year_id):
-        """Apply is_consecutive_shift and is_consecutive_receiver flags based on double_shifts file."""
+        """Apply shift flags based on double_shifts file."""
 
-        # Load double shifts file
         double_shifts_path = os.path.join(conf.turnusfiler_dir, year_id.lower(), f'double_shifts_{year_id.lower()}.json')
         if not os.path.exists(double_shifts_path):
-            return turnus_data  # No double shifts file, return unchanged
+            return turnus_data
 
         with open(double_shifts_path, 'r') as f:
-            double_shifts = json.load(f)
+            shifts_data = json.load(f)
 
-        # Build lookup sets (extract base numbers)
+        # Handle new dict structure or old list structure
+        if isinstance(shifts_data, dict):
+            double_shifts = shifts_data.get('dobbelt_tur', [])
+            delt_dagsverk_list = shifts_data.get('delt_dagsverk', [])
+        else:
+            # Backwards compatibility with old format
+            double_shifts = shifts_data
+            delt_dagsverk_list = []
+
+        # Build lookup sets for dobbelt tur
         first_shifts = set()
         second_shifts = set()
         for pair in double_shifts:
@@ -102,6 +110,13 @@ class DataframeManager():
                 first_shifts.add(first_base.group(1))
             if second_base:
                 second_shifts.add(second_base.group(1))
+
+        # Build lookup set for delt dagsverk
+        delt_dagsverk_shifts = set()
+        for shift in delt_dagsverk_list:
+            base = re.match(r'^(\d+)', shift)
+            if base:
+                delt_dagsverk_shifts.add(base.group(1))
 
         # Apply flags to turnus_data
         for turnus_entry in turnus_data:
@@ -119,8 +134,10 @@ class DataframeManager():
                             base_num = base_match.group(1)
                             day_data['is_consecutive_shift'] = base_num in first_shifts
                             day_data['is_consecutive_receiver'] = base_num in second_shifts
+                            day_data['is_delt_dagsverk'] = base_num in delt_dagsverk_shifts
                         else:
                             day_data['is_consecutive_shift'] = False
                             day_data['is_consecutive_receiver'] = False
+                            day_data['is_delt_dagsverk'] = False
 
         return turnus_data
