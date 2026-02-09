@@ -26,3 +26,4 @@ dummy.db
 *.sql
 tmpclaude-* 
 .claude/
+CLAUDE.md

@@ -95,7 +95,9 @@ class ShiftScraper():
         while i < len(text_objects):
             word = text_objects[i]
             # Stop if we hit a known separator or the y-position changes significantly
-            if word['text'] in separators or abs(word['top'] - text_objects[word_pos]['top']) > 5:
+            # Tolerance of 10px allows for slight vertical offsets of suffix characters
+            # (e.g., "F" in "5012-73 N05 5 F") while staying within the same line
+            if word['text'] in separators or abs(word['top'] - text_objects[word_pos]['top']) > 10:
                 break
             turnus_parts.append(word['text'])
             i += 1
@@ -265,42 +267,62 @@ class ShiftScraper():
                                 # We'll mark this and let the next object be added to it
                                 pass
                 
-                # Check if previous day has incomplete dagsverk that this might complete
-                # (e.g., "1511-N05" in Monday, "01" in Tuesday should become "1511-N05 01" in Monday)
-                should_append_to_previous = False
+                # Check if previous day has incomplete dagsverk that this might complete.
+                # Two tiers:
+                # 1) Tight spillover (within 8px of column boundary): dagsverk suffix chars
+                #    like "5", "F" that spill just past the column edge. Only requires
+                #    the previous dagsverk to contain an N-pattern (e.g., "N05").
+                # 2) Wider spillover (within 20px): multi-char continuations like "01"
+                #    in "1511-N05 01". Uses the original stricter checks.
+                import re
+                n_pattern = re.compile(r'N\d{2}')  # Matches N05, N01, etc.
+
                 if dag > 1 and turnus[uke][dag-1]['dagsverk']:
                     prev_dagsverk = turnus[uke][dag-1]['dagsverk']
-                    # Get the previous day's end boundary
-                    prev_dag_x_end = self.DAG_POS[dag-2][dag-1][1] if dag > 1 else 0
                     current_dag_x_start = self.DAG_POS[dag-1][dag][0]
-                    
-                    # Check if previous dagsverk ends with pattern like "N05" or similar
-                    # and current text is very close to the boundary (within 20 pixels of start)
-                    # This catches cases like "1511-N05" + " 01" that span cells
-                    # BUT also check that current day doesn't have times (indicating it's empty)
-                    if (word['x0'] < current_dag_x_start + 20 and  # Very close to current day's start
-                        len(word['text']) <= 3 and  # Short text like "01", "1", "2"
-                        word['text'].isdigit() and  # Is a number
-                        len(turnus[uke][dag]['tid']) == 0 and  # Current day has no times (is empty)
-                        ('-N05' in prev_dagsverk or '-N' in prev_dagsverk)):  # Previous ends with N05 pattern
-                        # Append to previous day
-                        turnus[uke][dag-1]['dagsverk'] = prev_dagsverk + ' ' + text_to_add
-                        return  # Don't process further
+                    dist_from_start = word['x0'] - current_dag_x_start
+
+                    # Tier 1: Tight spillover — suffix chars barely past column boundary
+                    if (dist_from_start < 8 and
+                        len(word['text']) <= 3 and
+                        n_pattern.search(prev_dagsverk)):
+                        turnus[uke][dag-1]['dagsverk'] = prev_dagsverk + '_' + text_to_add
+                        return
+
+                    # Tier 2: Wider spillover — original logic for "01" continuations
+                    if (dist_from_start < 20 and
+                        len(word['text']) <= 3 and
+                        word['text'].isdigit() and
+                        len(turnus[uke][dag]['tid']) == 0 and
+                        ('-N05' in prev_dagsverk or '-N' in prev_dagsverk)):
+                        turnus[uke][dag-1]['dagsverk'] = prev_dagsverk + '_' + text_to_add
+                        return
+
                 elif dag == 1 and uke > 1 and turnus[uke-1][7]['dagsverk']:
                     prev_dagsverk = turnus[uke-1][7]['dagsverk']
-                    # Check for continuation from Sunday to Monday
-                    if (word['x0'] < 130 and  # Close to Monday's start
+                    current_dag_x_start = self.DAG_POS[0][1][0]
+                    dist_from_start = word['x0'] - current_dag_x_start
+
+                    # Tier 1: Tight spillover
+                    if (dist_from_start < 8 and
+                        len(word['text']) <= 3 and
+                        n_pattern.search(prev_dagsverk)):
+                        turnus[uke-1][7]['dagsverk'] = prev_dagsverk + '_' + text_to_add
+                        return
+
+                    # Tier 2: Wider spillover (original Sunday→Monday logic)
+                    if (word['x0'] < 130 and
                         len(word['text']) <= 3 and
                         word['text'].isdigit() and
                         ('-N05' in prev_dagsverk or '-N' in prev_dagsverk)):
-                        turnus[uke-1][7]['dagsverk'] = prev_dagsverk + ' ' + text_to_add
+                        turnus[uke-1][7]['dagsverk'] = prev_dagsverk + '_' + text_to_add
                         return
                 
                 # Normal placement logic
                 # Hvis det er uke1 og dag1, lagres objektet i nåværende dag og uke.
                 if (uke == 1 and dag == 1) and word['text'] not in self.REMOVE_FILTER:
                     if turnus[uke][dag]['dagsverk']:
-                        turnus[uke][dag]['dagsverk'] += ' ' + text_to_add
+                        turnus[uke][dag]['dagsverk'] += '_' + text_to_add
                     else:
                         turnus[uke][dag]['dagsverk'] = text_to_add
                 
@@ -316,7 +338,7 @@ class ShiftScraper():
                         turnus[uke-1][7]['dagsverk'] = text_to_add
                     else:
                         if turnus[uke][dag]['dagsverk']:
-                            turnus[uke][dag]['dagsverk'] += ' ' + text_to_add
+                            turnus[uke][dag]['dagsverk'] += '_' + text_to_add
                         else:
                             turnus[uke][dag]['dagsverk'] = text_to_add
                                     
@@ -337,7 +359,7 @@ class ShiftScraper():
                             pass
                         else:
                             if turnus[uke][dag]['dagsverk']:
-                                turnus[uke][dag]['dagsverk'] += ' ' + text_to_add
+                                turnus[uke][dag]['dagsverk'] += '_' + text_to_add
                             else:
                                 turnus[uke][dag]['dagsverk'] = text_to_add
        

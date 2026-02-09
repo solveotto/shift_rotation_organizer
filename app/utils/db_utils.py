@@ -322,6 +322,80 @@ def update_turnus_set_paths(turnus_set_id, turnus_file_path, df_file_path):
     finally:
         session.close()
 
+def refresh_turnus_set_shifts(turnus_set_id, json_file_path):
+    """Re-sync shift names from a new JSON file into the database.
+
+    Matches old names to new names by prefix to preserve favorites.
+    Returns a summary dict: {renamed: [...], added: [...], removed: [...], unchanged: [...]}
+    """
+    session = get_db_session()
+    try:
+        # Load old shift names from DB
+        old_shifts = session.query(Shifts).filter_by(turnus_set_id=turnus_set_id).all()
+        old_names = set(s.title for s in old_shifts)
+
+        # Load new shift names from JSON
+        with open(json_file_path, 'r') as f:
+            turnus_data = json.load(f)
+        new_names = set()
+        for entry in turnus_data:
+            for name in entry.keys():
+                new_names.add(name)
+
+        # Find exact matches (unchanged)
+        unchanged = old_names & new_names
+        unmatched_old = old_names - unchanged
+        unmatched_new = new_names - unchanged
+
+        # Build rename map by prefix matching
+        rename_map = {}
+        matched_new = set()
+        for old_name in list(unmatched_old):
+            candidates = [n for n in unmatched_new if n.startswith(old_name) or old_name.startswith(n)]
+            if len(candidates) == 1:
+                rename_map[old_name] = candidates[0]
+                matched_new.add(candidates[0])
+
+        # Names not matched at all
+        removed = unmatched_old - set(rename_map.keys())
+        added = unmatched_new - matched_new
+
+        # Apply changes in a single transaction
+        # 1. Renames
+        for old_name, new_name in rename_map.items():
+            # Update shifts table
+            session.query(Shifts).filter_by(
+                title=old_name, turnus_set_id=turnus_set_id
+            ).update({'title': new_name})
+            # Update favorites table
+            session.query(Favorites).filter_by(
+                shift_title=old_name, turnus_set_id=turnus_set_id
+            ).update({'shift_title': new_name})
+
+        # 2. Delete orphaned shifts
+        for name in removed:
+            session.query(Shifts).filter_by(
+                title=name, turnus_set_id=turnus_set_id
+            ).delete()
+
+        # 3. Add new shifts
+        for name in added:
+            session.add(Shifts(title=name, turnus_set_id=turnus_set_id))
+
+        session.commit()
+
+        return {
+            'renamed': [{'old': k, 'new': v} for k, v in rename_map.items()],
+            'added': sorted(added),
+            'removed': sorted(removed),
+            'unchanged': sorted(unchanged)
+        }
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
+
 ## TURNUSSET END ##
 
 

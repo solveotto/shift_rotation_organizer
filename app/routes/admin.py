@@ -283,6 +283,80 @@ def switch_turnus_set():
     
     return redirect(url_for('admin.manage_turnus_sets'))
 
+@admin.route('/refresh-turnus-set/<int:turnus_set_id>', methods=['POST'])
+@login_required
+def refresh_turnus_set(turnus_set_id):
+    """Re-scrape the PDF and update shift names in the database, preserving favorites."""
+    if not current_user.is_admin:
+        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
+        return redirect(url_for('shifts.turnusliste'))
+
+    turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
+    if not turnus_set:
+        flash('Turnussett ikke funnet.', 'danger')
+        return redirect(url_for('admin.manage_turnus_sets'))
+
+    year_id = turnus_set['year_identifier']
+    version = year_id.lower()
+
+    try:
+        from config import conf
+        from app.utils.shiftscraper import ShiftScraper
+        from app.utils.shift_stats import Turnus
+
+        # Find the original PDF
+        turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', version)
+        pdf_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.pdf')
+
+        if not os.path.exists(pdf_path):
+            flash(f'PDF ikke funnet: {pdf_path}', 'danger')
+            return redirect(url_for('admin.manage_turnus_sets'))
+
+        # Re-scrape the PDF
+        scraper = ShiftScraper()
+        scraper.scrape_pdf(pdf_path, year_id)
+        turnus_json_path = scraper.create_json(year_id=year_id)
+        scraper.create_excel(year_id=year_id)
+
+        # Regenerate statistics JSON
+        stats = Turnus(turnus_json_path)
+        df_json_path = os.path.join(turnusfiler_dir, f'turnus_df_{year_id}.json')
+        stats.stats_df.to_json(df_json_path)
+
+        # Update shift names in DB (preserving favorites)
+        summary = db_utils.refresh_turnus_set_shifts(turnus_set_id, turnus_json_path)
+
+        # Update file paths in DB
+        db_utils.update_turnus_set_paths(turnus_set_id, turnus_json_path, df_json_path)
+
+        # Reload data manager if this is the active set
+        active_set = db_utils.get_active_turnus_set()
+        if active_set and active_set['id'] == turnus_set_id:
+            from app.routes.main import df_manager
+            df_manager.reload_active_set()
+
+        # Build summary message
+        parts = []
+        if summary['renamed']:
+            parts.append(f"{len(summary['renamed'])} omdøpt")
+        if summary['added']:
+            parts.append(f"{len(summary['added'])} nye")
+        if summary['removed']:
+            parts.append(f"{len(summary['removed'])} fjernet")
+        parts.append(f"{len(summary['unchanged'])} uendret")
+        flash(f"Turnussett {year_id} oppdatert: {', '.join(parts)}.", 'success')
+
+        if summary['renamed']:
+            renamed_details = '; '.join(f"{r['old']} → {r['new']}" for r in summary['renamed'][:10])
+            if len(summary['renamed']) > 10:
+                renamed_details += f' ... og {len(summary["renamed"]) - 10} til'
+            flash(f"Omdøpte vakter: {renamed_details}", 'info')
+
+    except Exception as e:
+        flash(f'Feil ved oppdatering av turnussett: {e}', 'danger')
+
+    return redirect(url_for('admin.manage_turnus_sets'))
+
 @admin.route('/delete-turnus-set/<int:turnus_set_id>', methods=['POST'])
 @login_required
 def delete_turnus_set(turnus_set_id):

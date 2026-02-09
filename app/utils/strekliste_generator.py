@@ -188,14 +188,14 @@ def get_shift_rows(page) -> list:
 
 
 def get_full_shift_name(shift: dict) -> str:
-    """Create filename-safe full shift name with whitespace removed for consistent matching."""
+    """Create filename-safe full shift name with underscores instead of whitespace."""
     name = shift["nr"]
     if shift.get("suffix"):
         # Remove invalid filename chars
         suffix = re.sub(r'[\\/*?:"<>|]', '', shift["suffix"])
         name = f"{name}{suffix}"
-    # Remove all whitespace for consistent matching between PDF and web lookups
-    name = re.sub(r'\s+', '', name)
+    # Replace all whitespace with underscores for consistent matching
+    name = re.sub(r'\s+', '_', name)
     return name
 
 
@@ -228,11 +228,14 @@ def find_row_bounds(page, shift_nr: str) -> tuple | None:
     return None
 
 
-def find_separator_lines(img, min_thickness: int = 2) -> list:
+def find_separator_lines(img, min_thickness: int = 2, max_brightness: int = 100) -> list:
     """
     Detect horizontal black separator lines in the image.
     Returns list of y-positions where thick black lines are found.
-    Only returns lines that are at least min_thickness pixels thick.
+    Only returns lines that are at least min_thickness pixels thick
+    and where the darkest row in the group has mean brightness below max_brightness.
+    Real separator lines span most of the page width, giving very low mean brightness
+    (typically 30-80), while text/content rows are much brighter (140-180).
     """
     if not PIL_AVAILABLE:
         return []
@@ -247,7 +250,7 @@ def find_separator_lines(img, min_thickness: int = 2) -> list:
     if len(dark_rows) == 0:
         return []
 
-    # Group consecutive dark rows and filter by thickness
+    # Group consecutive dark rows and filter by thickness + darkness
     lines = []
     start = dark_rows[0]
     prev = dark_rows[0]
@@ -255,15 +258,21 @@ def find_separator_lines(img, min_thickness: int = 2) -> list:
     for row in dark_rows[1:]:
         if row - prev > 3:  # Gap indicates a new line
             thickness = prev - start + 1
-            if thickness >= min_thickness:  # Only keep thick lines
-                lines.append((start + prev) // 2)
+            if thickness >= min_thickness:
+                # Check that at least one row in the group is truly dark
+                # (real separator lines have very low mean brightness)
+                group_min_brightness = np.min(row_brightness[start:prev + 1])
+                if group_min_brightness < max_brightness:
+                    lines.append((start + prev) // 2)
             start = row
         prev = row
 
     # Don't forget the last group
     thickness = prev - start + 1
     if thickness >= min_thickness:
-        lines.append((start + prev) // 2)
+        group_min_brightness = np.min(row_brightness[start:prev + 1])
+        if group_min_brightness < max_brightness:
+            lines.append((start + prev) // 2)
 
     return lines
 
