@@ -263,27 +263,29 @@ def generate_turnusnokkel():
             filename = result['filename']
             
             if workbook:
-                # Save workbook to a temporary file
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as temp_file:
-                    workbook.save(temp_file.name)
-                    temp_file_path = temp_file.name
-                
+                # Create a temp file, close it, then save workbook to it
+                # (Windows locks files so we can't have two handles open)
+                temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx')
+                temp_file_path = temp_file.name
+                temp_file.close()
+                workbook.save(temp_file_path)
+
                 try:
-                    # Send the file as a download
                     response = send_file(
                         temp_file_path,
                         as_attachment=True,
                         download_name=filename,
                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                     )
-                    
-                    # Clean up temp file after sending
-                    if os.path.exists(temp_file_path):
-                        os.unlink(temp_file_path)
-                    
+
+                    # Clean up temp file after response is sent
+                    @response.call_on_close
+                    def cleanup():
+                        if os.path.exists(temp_file_path):
+                            os.unlink(temp_file_path)
+
                     return response
                 except Exception as e:
-                    # Clean up temp file on error
                     if os.path.exists(temp_file_path):
                         os.unlink(temp_file_path)
                     raise e

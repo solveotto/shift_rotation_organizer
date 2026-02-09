@@ -39,6 +39,25 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+/* Sunday: keep arrow visible inside cell */
+.last-day.consecutive-shift-arrow::after {
+    right: -1px;
+}
+
+/* Monday: show left arrow on receiver when dobbelttur wraps from Sunday */
+.first-day.consecutive-shift-receiver::after {
+    content: "→";
+    position: absolute;
+    top: 8px;
+    left: -1px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+    z-index: 15;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    cursor: help;
+}
+
 /* Modern tooltip - appears ABOVE cell by default */
 .consecutive-shift-arrow::before,
 .consecutive-shift-receiver::before {
@@ -47,7 +66,7 @@
     top: -36px;
     left: 50%;
     transform: translateX(-50%) scale(0.9);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #ff0000 0%, #c41010 100%);
     color: white;
     padding: 8px 14px;
     border-radius: 8px;
@@ -77,6 +96,12 @@ tbody tr:first-child .consecutive-shift-receiver::before {
     bottom: -36px;
 }
 
+/* Top row (week 1): tooltip appears BELOW cell */
+tbody tr:first-child .delt-dagsverk::before {
+    top: auto;
+    bottom: -36px;
+}
+
 /* Receiver shift base styling */
 .consecutive-shift-receiver {
     position: relative;
@@ -85,40 +110,18 @@ tbody tr:first-child .consecutive-shift-receiver::before {
 
 /* Option 2: Thicker border around both shifts */
 .consecutive-shift-border {
-    border: 3px solid #ff6b35 !important;
-    box-shadow: 0 0 8px rgba(255, 107, 53, 0.4) !important;
-    background: linear-gradient(135deg, #fff5f0 0%, #ffe8e0 100%) !important;
+    border: 2px solid #000000 !important;
+    box-shadow: 0 0 8px rgba(22, 22, 22, 0.4) !important;
+    /* background: linear-gradient(135deg, #fff5f0 0%, #ffe8e0 100%) !important; */
 }
 
-/* Option 3: Bold dotted line */
-.consecutive-shift-bold-dotted {
-    position: relative;
-}
-
-.consecutive-shift-bold-dotted::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: -2px;
-    width: 12px;
-    height: 3px;
-    background: repeating-linear-gradient(
-        to right,
-        #ff6b35 0px,
-        #ff6b35 4px,
-        transparent 4px,
-        transparent 8px
-    );
-    transform: translateY(-50%);
-    z-index: 5;
-}
 
 /* Option 4: Connection line with arrow head */
-.consecutive-shift-line-arrow {
+/* .consecutive-shift-line-arrow {
     position: relative;
-}
+} */
 
-.consecutive-shift-line-arrow::after {
+/* .consecutive-shift-line-arrow::after {
     content: "";
     position: absolute;
     top: 50%;
@@ -128,9 +131,9 @@ tbody tr:first-child .consecutive-shift-receiver::before {
     background: #ff6b35;
     transform: translateY(-50%);
     z-index: 5;
-}
+} */
 
-.consecutive-shift-line-arrow::before {
+/* .consecutive-shift-line-arrow::before {
     content: "";
     position: absolute;
     top: 50%;
@@ -142,7 +145,7 @@ tbody tr:first-child .consecutive-shift-receiver::before {
     border-bottom: 4px solid transparent;
     transform: translateY(-50%);
     z-index: 5;
-}
+} */
 
 /* Delt Dagsverk indicator - marked with ** in strekliste */
 .delt-dagsverk {
@@ -188,8 +191,3 @@ tbody tr:first-child .consecutive-shift-receiver::before {
     transform: translateX(-50%) scale(1);
 }
 
-/* Top row (week 1): tooltip appears BELOW cell */
-tbody tr:first-child .delt-dagsverk::before {
-    top: auto;
-    bottom: -36px;
-}

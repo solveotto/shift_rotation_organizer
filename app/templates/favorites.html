@@ -174,7 +174,7 @@
                                             <td style="border: 1px solid black; font-size: small;">{{ week_nr }}</td>
 
                                             {% for day_nr, day_data in week_data.items() if day_data is mapping %}
-                                                <td id="cell" class="min-width-td {% if day_data.is_consecutive_shift %}consecutive-shift-arrow{% elif day_data.is_consecutive_receiver %}consecutive-shift-receiver{% endif %}{% if day_data.is_delt_dagsverk %} delt-dagsverk{% endif %}" style="border: 1px solid black;">
+                                                <td id="cell" class="min-width-td {% if day_data.is_consecutive_shift %}consecutive-shift-arrow{% elif day_data.is_consecutive_receiver %}consecutive-shift-receiver{% endif %}{% if day_data.is_delt_dagsverk %} delt-dagsverk{% endif %}{% if loop.last %} last-day{% endif %}{% if loop.first %} first-day{% endif %}" style="border: 1px solid black;">
                                                     <div class="custom-text dagsverk-link" style="font-size: xx-small;" data-shift-nr="{{day_data.dagsverk}}">{{day_data.dagsverk}}</div>
                                                     <div class="time-text" style="font-size: small;">
                                                         {% for time in day_data.tid %}

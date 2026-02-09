@@ -121,6 +121,10 @@ class TurnusnokkelGen():
             else:
                 return {'success': False, 'error': f"Sheet '{self.sheet_name}' not found in the Excel file"}
             
+            for name in workbook.sheetnames:
+                if name != self.sheet_name:
+                    workbook[name].sheet_state = 'hidden'
+            
             # Process the turnus data and insert into Excel
             for uke_nr, ukedata in target_turnus_data.items():
                 for dag_nr, dag_data in ukedata.items():
@@ -145,7 +149,10 @@ class TurnusnokkelGen():
                     # Set the value in the appropriate cell
                     col_letter = get_column_letter(self.start_col + int(dag_nr))
                     sheet[f"{col_letter}{self.start_row + int(uke_nr)}"] = cell_value
-            
+
+            # Reset scroll position so the sheet opens at the top
+            sheet.sheet_view.topLeftCell = 'A1'
+
             # Generate filename (no need to save to disk)
             filename = f"Turnusnøkkel_{self.turnus_name}_{year_identifier}.xlsx"
             
