@@ -51,9 +51,14 @@ def cleanup_old_backups():
     try:
         cutoff_date = datetime.now() - timedelta(days=KEEP_DAYS)
         backup_pattern = os.path.join(BACKUP_DIR, 'backup_*.sql')
-        
+
+        all_backups = glob.glob(backup_pattern)
+        if len(all_backups) <= 3:
+            log_message(f"Skipping cleanup: only {len(all_backups)} backup(s) exist (minimum 3 kept)")
+            return
+
         deleted_count = 0
-        for backup_file in glob.glob(backup_pattern):
+        for backup_file in all_backups:
             # Extract date from filename (backup_YYYYMMDD_HHMMSS.sql)
             try:
                 basename = os.path.basename(backup_file)
