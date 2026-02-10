@@ -6,6 +6,7 @@
 
 The `claude-code-update` branch adds these major features:
 - **User self-registration** with email verification (48-hour tokens)
+- **Password reset** via email token
 - **Authorized emails management** (admin whitelists email+rullenummer combinations)
 - **Strekliste PDF→PNG conversion** (shift timeline image generation)
 - **Favorites import** from previous turnus years with statistical matching
@@ -90,12 +91,17 @@ The `claude-code-update` branch adds these major features:
 
 - [ ] **5.1 First migration** (email verification)
   ```bash
-  python app/utils/migrate_add_email_verification.py
+  python app/utils/migrate_tools/migrate_add_email_verification.py
   ```
 
 - [ ] **5.2 Second migration** (name & rullenummer)
   ```bash
-  python app/utils/migrate_add_name_and_rullenummer.py
+  python app/utils/migrate_tools/migrate_add_name_and_rullenummer.py
+  ```
+
+- [ ] **5.3 Third migration** (password reset)
+  ```bash
+  python app/utils/migrate_tools/migrate_add_password_reset.py
   ```
 
 ### Phase 6: Reload & Verify
@@ -138,8 +144,9 @@ python app/utils/backup/restore_backup.py
 
 ## Critical Files
 
-- `app/utils/migrate_add_email_verification.py` - First migration
-- `app/utils/migrate_add_name_and_rullenummer.py` - Second migration
+- `app/utils/migrate_tools/migrate_add_email_verification.py` - First migration
+- `app/utils/migrate_tools/migrate_add_name_and_rullenummer.py` - Second migration
+- `app/utils/migrate_tools/migrate_add_password_reset.py` - Third migration
 - `config.ini` - Needs email settings added
 - `app/utils/backup/daily_mysql_backup.py` - Backup script
 

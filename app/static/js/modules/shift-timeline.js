@@ -113,7 +113,7 @@ export class ShiftTimelineModal {
                 }
 
                 element.classList.add('shift-timeline-trigger');
-                element.title = 'Klikk for tidslinje';
+                element.title = 'Klikk for strekliste';
                 element.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
