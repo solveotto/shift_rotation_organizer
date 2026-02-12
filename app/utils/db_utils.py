@@ -399,31 +399,6 @@ def refresh_turnus_set_shifts(turnus_set_id, json_file_path):
 ## TURNUSSET END ##
 
 
-def add_shifts_to_database(file_path):
-    session = get_db_session()
-    try:
-        with open(file_path, 'r') as f:
-            turnus_data = json.load(f)
-        
-        for x in turnus_data:
-            for name in x.keys():
-                # Check if shift already exists to avoid duplicates
-                existing = session.query(Shifts).filter_by(title=name).first()
-                if not existing:
-                    new_shift = Shifts(title=name)
-                    session.add(new_shift)
-        
-        session.commit()
-        print("Shifts added to database successfully")
-        return True
-    except Exception as e:
-        session.rollback()
-        print(f"Error adding shifts to database: {e}")
-        return False
-    finally:
-        session.close()
-
-
 #### USER LOGIN AND REG ####
 def hash_password(password):
         salt = bcrypt.gensalt()
@@ -511,6 +486,20 @@ def get_favorite_lst(user_id, turnus_set_id=None):
                 shift_titles.append(result.shift_title)
         
         return shift_titles
+    finally:
+        session.close()
+
+
+def user_has_favorites_in_other_sets(user_id, exclude_turnus_set_id):
+    """Check if user has favorites in any turnus set other than the specified one."""
+    session = get_db_session()
+    try:
+        return session.query(
+            session.query(Favorites)
+            .filter(Favorites.user_id == user_id)
+            .filter(Favorites.turnus_set_id != exclude_turnus_set_id)
+            .exists()
+        ).scalar()
     finally:
         session.close()
 
@@ -1231,16 +1220,5 @@ def can_send_password_reset_email(email):
 
 if __name__ == '__main__':
     create_new_user('testuser', 'testuser', 0)
-
-    #try:
-    #    username = get_user_data('testuser')
-    #    print(username)
-    #except TypeError:
-    #    print("User Does Not Exsist")
-    
-    
-    
-    # result = execute_query(query, fetch=True)
-    # print(result)
  
 

@@ -1,31 +1,10 @@
 import os
-from flask import Blueprint, send_from_directory, request, session, flash, redirect, url_for
+from flask import Blueprint, send_from_directory, flash, redirect, url_for
 from flask_login import login_required
 from config import conf
-from app.utils import db_utils
+from app.utils.turnus_helpers import get_user_turnus_set
 
 downloads = Blueprint('downloads', __name__)
-
-@login_required
-def get_user_turnus_set():
-    """Get the turnus set for current user (their current session choice or database active set)"""
-    # Get the current database active set
-    active_set = db_utils.get_active_turnus_set()
-    
-    # Check if user has selected a specific year to view in THIS session
-    user_choice = session.get('user_selected_turnus_set')
-    if user_choice:
-        all_sets = db_utils.get_all_turnus_sets()
-        user_set = next((ts for ts in all_sets if ts['id'] == user_choice), None)
-        if user_set:
-            # If user's session choice exists, use it
-            return user_set
-        else:
-            # If user's session choice doesn't exist anymore, clear it
-            session.pop('user_selected_turnus_set', None)
-    
-    # Always default to the database active set
-    return active_set
 
 
 # Legacy route

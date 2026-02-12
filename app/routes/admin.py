@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user
+from app.decorators import admin_required
 from app.forms import CreateUserForm, EditUserForm, CreateTurnusSetForm, SelectTurnusSetForm, UploadStreklisteForm
 from app.utils import db_utils
 from app.utils import strekliste_generator
@@ -8,26 +9,16 @@ from app.utils import strekliste_generator
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 
 @admin.route('/dashboard')
-@login_required
+@admin_required
 def admin_dashboard():
-    # Check if user is authorized (is_auth = 1)
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Du trenger administratorrettigheter for å se denne siden.', 'danger')
-        return redirect(url_for('shifts.home'))
-    
     users = db_utils.get_all_users()
     return render_template('admin.html', 
                          users=users,
                          page_name='Admin Panel')
 
 @admin.route('/create_user', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def create_user():
-    # Check if user is authorized (is_auth = 1)
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Du trenger administratorrettigheter for å utføre denne handlingen.', 'danger')
-        return redirect(url_for('shifts.home'))
-    
     form = CreateUserForm()
     if form.validate_on_submit():
         success, message = db_utils.create_user(
@@ -46,13 +37,8 @@ def create_user():
                          page_name='Create User')
 
 @admin.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def edit_user(user_id):
-    # Check if user is authorized (is_auth = 1)
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Du trenger administratorrettigheter for å utføre denne handlingen.', 'danger')
-        return redirect(url_for('shifts.home'))
-
     user = db_utils.get_user_by_id(user_id)
     if not user:
         flash('Bruker ikke funnet.', 'danger')
@@ -86,13 +72,8 @@ def edit_user(user_id):
                          page_name='Edit User')
 
 @admin.route('/delete_user/<int:user_id>', methods=['POST'])
-@login_required
+@admin_required
 def delete_user(user_id):
-    # Check if user is authorized (is_auth = 1)
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Du trenger administratorrettigheter for å utføre denne handlingen.', 'danger')
-        return redirect(url_for('shifts.home'))
-
     # Prevent admin from deleting themselves
     if user_id == current_user.id:
         flash('Du kan ikke slette din egen konto.', 'danger')
@@ -107,13 +88,8 @@ def delete_user(user_id):
     return redirect(url_for('admin.admin_dashboard'))
 
 @admin.route('/toggle_auth/<int:user_id>', methods=['POST'])
-@login_required
+@admin_required
 def toggle_auth(user_id):
-    # Check if user is authorized (is_auth = 1)
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Du trenger administratorrettigheter for å utføre denne handlingen.', 'danger')
-        return redirect(url_for('shifts.home'))
-
     # Prevent admin from disabling their own auth
     if user_id == current_user.id:
         flash('Du kan ikke deaktivere dine egne rettigheter.', 'danger')
@@ -134,13 +110,9 @@ def toggle_auth(user_id):
 
     
 @admin.route('/turnus-sets')
-@login_required
+@admin_required
 def manage_turnus_sets():
     """Manage turnus sets"""
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
-        return redirect(url_for('shifts.turnusliste'))
-
     turnus_sets = db_utils.get_all_turnus_sets()
     active_set = db_utils.get_active_turnus_set()
     upload_form = UploadStreklisteForm()
@@ -152,13 +124,9 @@ def manage_turnus_sets():
                          upload_form=upload_form)
 
 @admin.route('/create-turnus-set', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def create_turnus_set():
     """Create a new turnus set"""
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
-        return redirect(url_for('shifts.turnusliste'))
-    
     form = CreateTurnusSetForm()
     
     if form.validate_on_submit():
@@ -263,13 +231,9 @@ def handle_pdf_upload(pdf_file, year_id):
         return None, None
 
 @admin.route('/switch-turnus-set', methods=['POST'])
-@login_required
+@admin_required
 def switch_turnus_set():
     """Switch to a different turnus set"""
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
-        return redirect(url_for('shifts.turnusliste'))
-    
     turnus_set_id = request.form.get('turnus_set_id', type=int)
     success, message = db_utils.set_active_turnus_set(turnus_set_id)
     
@@ -284,13 +248,9 @@ def switch_turnus_set():
     return redirect(url_for('admin.manage_turnus_sets'))
 
 @admin.route('/refresh-turnus-set/<int:turnus_set_id>', methods=['POST'])
-@login_required
+@admin_required
 def refresh_turnus_set(turnus_set_id):
     """Re-scrape the PDF and update shift names in the database, preserving favorites."""
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
-        return redirect(url_for('shifts.turnusliste'))
-
     turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
     if not turnus_set:
         flash('Turnussett ikke funnet.', 'danger')
@@ -358,13 +318,9 @@ def refresh_turnus_set(turnus_set_id):
     return redirect(url_for('admin.manage_turnus_sets'))
 
 @admin.route('/delete-turnus-set/<int:turnus_set_id>', methods=['POST'])
-@login_required
+@admin_required
 def delete_turnus_set(turnus_set_id):
     """Delete a turnus set"""
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
-        return redirect(url_for('shifts.turnusliste'))
-
     # Get the turnus set info before deleting (for cleanup)
     turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
     version = turnus_set['year_identifier'].lower() if turnus_set else None
@@ -389,26 +345,18 @@ def delete_turnus_set(turnus_set_id):
 
 # Authorized Email Management Routes
 @admin.route('/authorized-emails')
-@login_required
+@admin_required
 def manage_authorized_emails():
     """Manage authorized emails for self-registration"""
-    if not current_user.is_admin:
-        flash('Ingen tilgang. Administratorrettigheter påkrevd.', 'danger')
-        return redirect(url_for('shifts.home'))
-
     emails = db_utils.get_all_authorized_emails()
     return render_template('admin_authorized_emails.html',
                          page_name='Manage Authorized Emails',
                          emails=emails)
 
 @admin.route('/add-authorized-email', methods=['POST'])
-@login_required
+@admin_required
 def add_authorized_email():
     """Add new authorized email"""
-    if not current_user.is_admin:
-        flash('Ingen tilgang.', 'danger')
-        return redirect(url_for('shifts.home'))
-
     email = request.form.get('email', '').lower().strip()
     rullenummer = request.form.get('rullenummer', '').strip()
     notes = request.form.get('notes', '').strip()
@@ -432,25 +380,17 @@ def add_authorized_email():
     return redirect(url_for('admin.manage_authorized_emails'))
 
 @admin.route('/delete-authorized-email/<int:email_id>', methods=['POST'])
-@login_required
+@admin_required
 def delete_authorized_email(email_id):
     """Remove authorized email"""
-    if not current_user.is_admin:
-        flash('Ingen tilgang.', 'danger')
-        return redirect(url_for('shifts.home'))
-
     success, message = db_utils.delete_authorized_email(email_id)
     flash(message, 'success' if success else 'danger')
     return redirect(url_for('admin.manage_authorized_emails'))
 
 @admin.route('/bulk-add-emails', methods=['POST'])
-@login_required
+@admin_required
 def bulk_add_authorized_emails():
     """Bulk add emails from textarea (one per line)"""
-    if not current_user.is_admin:
-        flash('Ingen tilgang.', 'danger')
-        return redirect(url_for('shifts.home'))
-
     emails_text = request.form.get('emails_bulk', '')
     emails = [e.strip().lower() for e in emails_text.split('\n') if e.strip()]
 
@@ -470,12 +410,9 @@ def bulk_add_authorized_emails():
 
 # Strekliste Management Routes
 @admin.route('/strekliste-status/<int:turnus_set_id>')
-@login_required
+@admin_required
 def strekliste_status(turnus_set_id):
     """AJAX endpoint to get strekliste status for a turnus set"""
-    if not current_user.is_admin:
-        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
-
     turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
     if not turnus_set:
         return jsonify({'status': 'error', 'message': 'Turnus set not found'}), 404
@@ -490,13 +427,9 @@ def strekliste_status(turnus_set_id):
 
 
 @admin.route('/upload-strekliste/<int:turnus_set_id>', methods=['POST'])
-@login_required
+@admin_required
 def upload_strekliste(turnus_set_id):
     """Upload a strekliste PDF for a turnus set"""
-    if not current_user.is_admin:
-        flash('Access denied. Admin rights required.', 'danger')
-        return redirect(url_for('admin.manage_turnus_sets'))
-
     turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
     if not turnus_set:
         flash('Turnussett ikke funnet.', 'danger')
@@ -520,12 +453,9 @@ def upload_strekliste(turnus_set_id):
 
 
 @admin.route('/generate-strekliste/<int:turnus_set_id>', methods=['POST'])
-@login_required
+@admin_required
 def generate_strekliste(turnus_set_id):
     """Generate PNG images from strekliste PDF"""
-    if not current_user.is_admin:
-        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
-
     turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
     if not turnus_set:
         return jsonify({'status': 'error', 'message': 'Turnus set not found'}), 404
@@ -569,12 +499,9 @@ def generate_strekliste(turnus_set_id):
 
 
 @admin.route('/delete-strekliste-images/<int:turnus_set_id>', methods=['POST'])
-@login_required
+@admin_required
 def delete_strekliste_images(turnus_set_id):
     """Delete all generated strekliste images for a turnus set"""
-    if not current_user.is_admin:
-        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
-
     turnus_set = db_utils.get_turnus_set_by_id(turnus_set_id)
     if not turnus_set:
         return jsonify({'status': 'error', 'message': 'Turnus set not found'}), 404

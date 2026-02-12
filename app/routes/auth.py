@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import logout_user, login_required, login_user as flask_login_user, current_user
-from mysql.connector import Error
 import secrets
 from app.forms import LoginForm, ForgotPasswordForm, ResetPasswordForm
 from app.models import User
@@ -35,7 +34,7 @@ def login():
                 return redirect(url_for('shifts.index'))
             else:
                 flash('Innlogging mislyktes. Vennligst sjekk brukernavn og passord', 'danger')
-        except Error as e:
+        except Exception as e:
             print(f'Error: {e}')
     else:
         print("ERROR", form.errors)

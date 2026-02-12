@@ -39,7 +39,7 @@ def toggle_favorite():
     with favorite_lock:
         try:
             # Get user's selected turnus set
-            from app.routes.shifts import get_user_turnus_set
+            from app.utils.turnus_helpers import get_user_turnus_set
             user_turnus_set = get_user_turnus_set()
             turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
             
@@ -90,64 +90,64 @@ def move_favorite():
     
     try:
         # Get user's selected turnus set
-        from app.routes.shifts import get_user_turnus_set
+        from app.utils.turnus_helpers import get_user_turnus_set
         user_turnus_set = get_user_turnus_set()
         turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
         
         if not turnus_set_id:
             return jsonify({'status': 'error', 'message': 'No turnus set selected'})
         
-        session = db_utils.get_db_session()
-        
+        db_session = db_utils.get_db_session()
+
         # Get current favorites with order FOR THE SPECIFIC TURNUS SET
-        current_favorites = session.query(db_utils.Favorites).filter_by(
-            user_id=user_id, 
+        current_favorites = db_session.query(db_utils.Favorites).filter_by(
+            user_id=user_id,
             turnus_set_id=turnus_set_id
         ).order_by(db_utils.Favorites.order_index).all()
-        
+
         if not current_favorites:
-            session.close()
+            db_session.close()
             return jsonify({'status': 'error', 'message': 'No favorites found'})
-        
+
         # Find current position
         current_index = None
         for i, favorite in enumerate(current_favorites):
             if favorite.shift_title == shift_title:
                 current_index = i
                 break
-        
+
         if current_index is None:
-            session.close()
+            db_session.close()
             return jsonify({'status': 'error', 'message': 'Favorite not found'})
-        
+
         # Calculate new position
         if direction == 'up' and current_index > 0:
             new_index = current_index - 1
         elif direction == 'down' and current_index < len(current_favorites) - 1:
             new_index = current_index + 1
         else:
-            session.close()
+            db_session.close()
             return jsonify({'status': 'error', 'message': 'Cannot move in that direction'})
-        
+
         # Swap the order_index values
         current_favorite = current_favorites[current_index]
         target_favorite = current_favorites[new_index]
-        
+
         # Store the current order_index values
         temp_order = current_favorite.order_index
         current_favorite.order_index = target_favorite.order_index
         target_favorite.order_index = temp_order
-        
+
         # Commit the changes
-        session.commit()
-        session.close()
-        
+        db_session.commit()
+        db_session.close()
+
         return jsonify({'status': 'success', 'message': 'Favorite moved successfully'})
 
     except Exception as e:
-        if 'session' in locals():
-            session.rollback()
-            session.close()
+        if 'db_session' in locals():
+            db_session.rollback()
+            db_session.close()
         return jsonify({'status': 'error', 'message': str(e)})
 
 @api.route('/set-favorite-position', methods=['POST'])
@@ -171,23 +171,23 @@ def set_favorite_position():
 
     try:
         # Get user's selected turnus set
-        from app.routes.shifts import get_user_turnus_set
+        from app.utils.turnus_helpers import get_user_turnus_set
         user_turnus_set = get_user_turnus_set()
         turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
 
         if not turnus_set_id:
             return jsonify({'status': 'error', 'message': 'No turnus set selected'})
 
-        session = db_utils.get_db_session()
+        db_session = db_utils.get_db_session()
 
         # Get current favorites ordered by order_index
-        current_favorites = session.query(db_utils.Favorites).filter_by(
+        current_favorites = db_session.query(db_utils.Favorites).filter_by(
             user_id=user_id,
             turnus_set_id=turnus_set_id
         ).order_by(db_utils.Favorites.order_index).all()
 
         if not current_favorites:
-            session.close()
+            db_session.close()
             return jsonify({'status': 'error', 'message': 'No favorites found'})
 
         # Clamp position to valid range
@@ -205,12 +205,12 @@ def set_favorite_position():
                 break
 
         if favorite_to_move is None:
-            session.close()
+            db_session.close()
             return jsonify({'status': 'error', 'message': 'Favorite not found'})
 
         # If already at the target position, nothing to do
         if current_index == new_index:
-            session.close()
+            db_session.close()
             return jsonify({'status': 'success', 'message': 'Already at that position'})
 
         # Remove the favorite from the list and reinsert at new position
@@ -221,15 +221,15 @@ def set_favorite_position():
         for i, favorite in enumerate(current_favorites):
             favorite.order_index = i
 
-        session.commit()
-        session.close()
+        db_session.commit()
+        db_session.close()
 
         return jsonify({'status': 'success', 'message': 'Favorite position updated'})
 
     except Exception as e:
-        if 'session' in locals():
-            session.rollback()
-            session.close()
+        if 'db_session' in locals():
+            db_session.rollback()
+            db_session.close()
         return jsonify({'status': 'error', 'message': str(e)})
 
 @api.route('/generate-turnusnokkel', methods=['POST'])
@@ -342,7 +342,7 @@ def import_favorites_preview():
         top_n = 5
 
     # Get current turnus set
-    from app.routes.shifts import get_user_turnus_set
+    from app.utils.turnus_helpers import get_user_turnus_set
     user_turnus_set = get_user_turnus_set()
     target_turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
 
@@ -437,7 +437,7 @@ def import_favorites_confirm():
         return jsonify({'status': 'error', 'message': 'Shifts must be a list'})
 
     # Get current turnus set
-    from app.routes.shifts import get_user_turnus_set
+    from app.utils.turnus_helpers import get_user_turnus_set
     user_turnus_set = get_user_turnus_set()
     turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
 
@@ -490,7 +490,7 @@ def get_turnus_sets_for_import():
     user_id = current_user.get_id()
 
     # Get current turnus set to exclude it
-    from app.routes.shifts import get_user_turnus_set
+    from app.utils.turnus_helpers import get_user_turnus_set
     user_turnus_set = get_user_turnus_set()
     current_turnus_set_id = user_turnus_set['id'] if user_turnus_set else None
 

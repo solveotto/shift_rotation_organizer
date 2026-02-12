@@ -2,6 +2,7 @@ import time
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_login import login_required, current_user
 from app.utils import db_utils, df_utils
+from app.utils.turnus_helpers import get_user_turnus_set
 from app.routes.main import df_manager, turnus_data
 
 shifts = Blueprint('shifts', __name__)
@@ -17,8 +18,9 @@ def index():
     # Get favorites for current user
     favoritt = db_utils.get_favorite_lst(current_user.get_id(), turnus_set_id) if current_user.is_authenticated else []
 
-    # If no favorites selected, go to favorites page, otherwise go to turnusliste
-    if not favoritt:
+    if favoritt:
+        return redirect(url_for('shifts.turnusliste'))
+    elif turnus_set_id and db_utils.user_has_favorites_in_other_sets(current_user.get_id(), turnus_set_id):
         return redirect(url_for('shifts.favorites'))
     else:
         return redirect(url_for('shifts.turnusliste'))
@@ -70,27 +72,6 @@ def switch_user_year(turnus_set_id):
         next_page = url_for('shifts.turnusliste')
     
     return redirect(next_page)
-
-def get_user_turnus_set():
-    """Get the turnus set for current user (their current session choice or database active set)"""
-    # Get the current database active set
-    active_set = db_utils.get_active_turnus_set()
-    
-    # Check if user has selected a specific year to view in THIS session
-    user_choice = session.get('user_selected_turnus_set')
-    if user_choice:
-        from app.utils.db_utils import get_all_turnus_sets
-        all_sets = get_all_turnus_sets()
-        user_set = next((ts for ts in all_sets if ts['id'] == user_choice), None)
-        if user_set:
-            # If user's session choice exists, use it
-            return user_set
-        else:
-            # If user's session choice doesn't exist anymore, clear it
-            session.pop('user_selected_turnus_set', None)
-    
-    # Always default to the database active set
-    return active_set
 
 
 @shifts.route('/favorites')
