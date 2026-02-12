@@ -1,5 +1,6 @@
 import sys
 import os
+import logging
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, UniqueConstraint, func, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker, declarative_base, Mapped, mapped_column
 import json
@@ -8,10 +9,12 @@ from flask import flash
 from datetime import datetime, timedelta
 import secrets
 
+logger = logging.getLogger(__name__)
+
 # Add project root to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, project_root)
-from config import conf
+from config import AppConfig, get_database_uri
 
 # SQLAlchemy Models
 Base = declarative_base()
@@ -81,18 +84,7 @@ class Shifts(Base):
 
 
 
-config = conf.CONFIG
-db_type = config['general'].get('db_type', 'mysql')
-
-if db_type == 'mysql':
-    mysql_host = config['mysql']['host']
-    mysql_user = config['mysql']['user']
-    mysql_password = config['mysql']['password']
-    mysql_database = config['mysql']['database']
-    DATABASE_URL = f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}"
-elif db_type == 'sqlite':
-    sqlite_path = config['sqlite']['path']
-    DATABASE_URL = f"sqlite:///{sqlite_path}"
+DATABASE_URL = get_database_uri()
 
 engine = create_engine(
     DATABASE_URL,
@@ -102,7 +94,7 @@ engine = create_engine(
         'connect_timeout': 20,
         'read_timeout': 20,
         'write_timeout': 20,
-    } if db_type == 'mysql' else {}
+    } if AppConfig.db_type == 'mysql' else {}
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -261,11 +253,11 @@ def add_shifts_to_turnus_set(file_path, turnus_set_id):
                     session.add(new_shift)
         
         session.commit()
-        print(f"Shifts added to turnus set {turnus_set_id} successfully")
+        logger.info("Shifts added to turnus set %s successfully", turnus_set_id)
         return True
     except Exception as e:
         session.rollback()
-        print(f"Error adding shifts to turnus set: {e}")
+        logger.error("Error adding shifts to turnus set: %s", e)
         return False
     finally:
         session.close()
@@ -412,11 +404,11 @@ def create_new_user(username, password, is_auth):
         new_user = DBUser(username=username, password=hash_password(password), is_auth=is_auth)
         session.add(new_user)
         session.commit()
-        print(f"User created")
+        logger.info("User created")
         return True
     except Exception as e:
         session.rollback()
-        print(f'Error creating user: {e}')
+        logger.error("Error creating user: %s", e)
         return False
     finally:
         session.close()
@@ -444,7 +436,7 @@ def get_user_data(username_or_email):
             }
             return data
         else:
-            print("Failed to execute login query!")
+            logger.warning("User not found: %s", username_or_email)
             return None
     finally:
         session.close()
@@ -532,11 +524,11 @@ def update_favorite_order(user_id, turnus_set_id=None):
                 favorite.order_index = index
         
         session.commit()
-        print("Favorite order updated successfully")
+        logger.debug("Favorite order updated successfully")
         return True
     except Exception as e:
         session.rollback()
-        print(f"Failed to modify database. Changes only stored locally. Error = {e}")
+        logger.error("Failed to modify database. Changes only stored locally. Error = %s", e)
         return False
     finally:
         session.close()
@@ -579,10 +571,10 @@ def cleanup_duplicate_favorites(session, user_id, shift_title, turnus_set_id):
             for entry in delete_entries:
                 session.delete(entry)
             
-            print(f"Cleaned up {len(delete_entries)} duplicate favorites for user {user_id}, shift '{shift_title}'")
+            logger.info("Cleaned up %d duplicate favorites for user %s, shift '%s'", len(delete_entries), user_id, shift_title)
             
     except Exception as e:
-        print(f"Error cleaning up duplicates: {e}")
+        logger.error("Error cleaning up duplicates: %s", e)
         raise
 
 def add_favorite(user_id, title, order_index, turnus_set_id=None):
@@ -619,7 +611,7 @@ def add_favorite(user_id, title, order_index, turnus_set_id=None):
         return True
     except Exception as e:
         session.rollback()
-        print(f"Error adding favorite: {e}")
+        logger.error("Error adding favorite: %s", e)
         return False
     finally:
         session.close()
@@ -651,12 +643,12 @@ def remove_favorite(user_id, title, turnus_set_id=None):
             
             session.commit()
             if deleted_count > 1:
-                print(f"Removed {deleted_count} duplicate favorites for user {user_id}, shift '{title}'")
+                logger.info("Removed %d duplicate favorites for user %s, shift '%s'", deleted_count, user_id, title)
             return True
         return False
     except Exception as e:
         session.rollback()
-        print(f"Error removing favorite: {e}")
+        logger.error("Error removing favorite: %s", e)
         return False
     finally:
         session.close()
@@ -999,7 +991,7 @@ def create_verification_token(user_id, token):
     """Create email verification token"""
     session = get_db_session()
     try:
-        expiry_hours = conf.CONFIG.getint('verification', 'token_expiry_hours', fallback=48)
+        expiry_hours = AppConfig.CONFIG.getint('verification', 'token_expiry_hours', fallback=48)
         expires_at = datetime.now() + timedelta(hours=expiry_hours)
 
         # Invalidate old tokens
@@ -1018,7 +1010,7 @@ def create_verification_token(user_id, token):
         return True
     except Exception as e:
         session.rollback()
-        print(f"Error creating token: {e}")
+        logger.error("Error creating token: %s", e)
         return False
     finally:
         session.close()
@@ -1054,7 +1046,7 @@ def verify_token(token):
 
     except Exception as e:
         session.rollback()
-        print(f"Error verifying token: {e}")
+        logger.error("Error verifying token: %s", e)
         return {'success': False, 'message': 'En feil oppstod under verifisering'}
     finally:
         session.close()
@@ -1063,7 +1055,7 @@ def can_send_verification_email(user_id):
     """Check rate limiting for verification emails"""
     session = get_db_session()
     try:
-        max_per_day = conf.CONFIG.getint('verification', 'max_verification_emails_per_day', fallback=3)
+        max_per_day = AppConfig.CONFIG.getint('verification', 'max_verification_emails_per_day', fallback=3)
 
         user = session.query(DBUser).filter_by(id=user_id).first()
         if not user:
@@ -1095,7 +1087,7 @@ def update_verification_sent_time(email):
             session.commit()
     except Exception as e:
         session.rollback()
-        print(f"Error updating verification sent time: {e}")
+        logger.error("Error updating verification sent time: %s", e)
     finally:
         session.close()
 
@@ -1126,7 +1118,7 @@ def create_password_reset_token(user_id, token):
         return True
     except Exception as e:
         session.rollback()
-        print(f"Error creating password reset token: {e}")
+        logger.error("Error creating password reset token: %s", e)
         return False
     finally:
         session.close()
@@ -1162,7 +1154,7 @@ def verify_password_reset_token(token):
             return {'success': False, 'message': 'Bruker ikke funnet'}
 
     except Exception as e:
-        print(f"Error verifying password reset token: {e}")
+        logger.error("Error verifying password reset token: %s", e)
         return {'success': False, 'message': 'En feil oppstod under verifisering'}
     finally:
         session.close()

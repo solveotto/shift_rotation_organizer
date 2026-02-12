@@ -3,7 +3,7 @@ import json
 import logging
 from logging.handlers import RotatingFileHandler
 from flask import Blueprint
-from config import conf
+from config import AppConfig
 from app.utils import df_utils
 
 # Global variables that need to be shared across Blueprints
@@ -14,8 +14,8 @@ df_manager = df_utils.DataframeManager()
 turnus_data = df_manager.turnus_data if df_manager.turnus_data else []
 
 # Configure logging
-os.makedirs(conf.log_dir, exist_ok=True)
-log_file_path = os.path.join(conf.log_dir, 'app.log')
+os.makedirs(AppConfig.log_dir, exist_ok=True)
+log_file_path = os.path.join(AppConfig.log_dir, 'app.log')
 rotating_handler = RotatingFileHandler(log_file_path, maxBytes=10*1024*1024, backupCount=5)
 rotating_handler.setLevel(logging.WARNING)
 rotating_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))

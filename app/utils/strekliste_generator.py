@@ -13,7 +13,7 @@ Adapted from the standalone strekliste API.
 import os
 import re
 import io
-from config import conf
+from config import AppConfig
 from typing import Optional, Tuple, Dict, Any
 
 
@@ -50,7 +50,7 @@ def get_paths(version: str) -> dict:
         dict with 'pdf_path', 'images_dir', and 'exists' status
     """
     version = version.lower()
-    base_dir = os.path.join(conf.turnusfiler_dir, version, 'streklister')
+    base_dir = os.path.join(AppConfig.turnusfiler_dir, version, 'streklister')
     pdf_path = os.path.join(base_dir, f'{version}_streker.pdf')
     images_dir = os.path.join(base_dir, 'png')
 

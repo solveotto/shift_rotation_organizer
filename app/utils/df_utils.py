@@ -1,9 +1,12 @@
 import os
 import re
+import logging
 import pandas as pd
 import json
 import app.utils.db_utils as _db_utils
-from config import conf
+from config import AppConfig
+
+logger = logging.getLogger(__name__)
 
 class DataframeManager():
     def __init__(self, turnus_set_id=None):
@@ -25,7 +28,7 @@ class DataframeManager():
             turnus_set = _db_utils.get_active_turnus_set()
         
         if not turnus_set:
-            print("No turnus set found! Using empty data.")
+            logger.warning("No turnus set found! Using empty data.")
             self.current_turnus_set = None
             self.df = pd.DataFrame()
             self.turnus_data = []
@@ -42,14 +45,14 @@ class DataframeManager():
             else:
                 # Construct paths based on turnus set identifier
                 year_id = turnus_set['year_identifier'].lower()
-                turnus_path = os.path.join(conf.turnusfiler_dir, year_id, f'turnuser_{turnus_set["year_identifier"]}.json')
-                df_path = os.path.join(conf.turnusfiler_dir, year_id, f'turnus_df_{turnus_set["year_identifier"]}.json')
+                turnus_path = os.path.join(AppConfig.turnusfiler_dir, year_id, f'turnuser_{turnus_set["year_identifier"]}.json')
+                df_path = os.path.join(AppConfig.turnusfiler_dir, year_id, f'turnus_df_{turnus_set["year_identifier"]}.json')
             
             # Load dataframe
             if os.path.exists(df_path):
                 self.df = pd.read_json(df_path)
             else:
-                print(f"DataFrame file not found: {df_path}")
+                logger.warning("DataFrame file not found: %s", df_path)
                 self.df = pd.DataFrame()
             
             # Load turnus data
@@ -59,12 +62,12 @@ class DataframeManager():
                 # Apply double shift flags from double_shifts JSON file
                 self.turnus_data = self._apply_double_shift_flags(self.turnus_data, turnus_set['year_identifier'])
             else:
-                print(f"Turnus file not found: {turnus_path}")
+                logger.warning("Turnus file not found: %s", turnus_path)
                 self.turnus_data = []
 
             return True
         except Exception as e:
-            print(f"Error loading turnus set {turnus_set['year_identifier']}: {e}")
+            logger.error("Error loading turnus set %s: %s", turnus_set['year_identifier'], e)
             self.df = pd.DataFrame()
             self.turnus_data = []
             return False
@@ -84,7 +87,7 @@ class DataframeManager():
     def _apply_double_shift_flags(self, turnus_data, year_id):
         """Apply shift flags based on double_shifts file."""
 
-        double_shifts_path = os.path.join(conf.turnusfiler_dir, year_id.lower(), f'double_shifts_{year_id.lower()}.json')
+        double_shifts_path = os.path.join(AppConfig.turnusfiler_dir, year_id.lower(), f'double_shifts_{year_id.lower()}.json')
         if not os.path.exists(double_shifts_path):
             return turnus_data
 

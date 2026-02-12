@@ -12,7 +12,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, project_root)
 
 from app.utils.db_utils import SessionLocal, DBUser, EmailVerificationToken, Favorites
-from config import conf
+from config import AppConfig
 
 def cleanup_unverified_users():
     """Delete unverified users older than configured days"""
@@ -20,7 +20,7 @@ def cleanup_unverified_users():
 
     try:
         # Get cleanup threshold from config
-        cleanup_days = conf.CONFIG.getint('verification', 'unverified_user_cleanup_days', fallback=14)
+        cleanup_days = AppConfig.CONFIG.getint('verification', 'unverified_user_cleanup_days', fallback=14)
         cutoff_date = datetime.now() - timedelta(days=cleanup_days)
 
         print(f"Cleanup unverified users created before: {cutoff_date.strftime('%Y-%m-%d %H:%M:%S')}")

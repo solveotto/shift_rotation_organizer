@@ -1,12 +1,15 @@
 import os
 import re
 import glob
+import logging
 from flask import Blueprint, request, jsonify, send_from_directory
 from flask_login import login_required, current_user
 from app.utils import db_utils
 from app.utils import shift_matcher
 from app.routes.main import favorite_lock
-from config import conf
+from config import AppConfig
+
+logger = logging.getLogger(__name__)
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
@@ -74,7 +77,7 @@ def toggle_favorite():
                 else:
                     return jsonify({'status': 'error', 'message': 'Failed to remove favorite'})
         except Exception as e:
-            print(f"Error in toggle_favorite: {e}")
+            logger.error("Error in toggle_favorite: %s", e)
             return jsonify({'status': 'error', 'message': f'Server error: {str(e)}'})
 
 @api.route('/move-favorite', methods=['POST'])
@@ -243,7 +246,7 @@ def generate_turnusnokkel():
         return jsonify({'status': 'error', 'message': 'Missing turnus name or turnus set ID'})
     
     try:
-        print(f"DEBUG API: Generating turnusnøkkel for turnus_name={turnus_name}, turnus_set_id={turnus_set_id}")
+        logger.debug("Generating turnusnøkkel for turnus_name=%s, turnus_set_id=%s", turnus_name, turnus_set_id)
         
         # Import the turnusnøkkel generator
         from app.utils.turnusnokkel_gen import TurnusnokkelGen
@@ -255,7 +258,7 @@ def generate_turnusnokkel():
         generator = TurnusnokkelGen(turnus_name, turnus_set_id)
         result = generator.generate_single_turnus_nokkel()
         
-        print(f"DEBUG API: Generator result: {result}")
+        logger.debug("Turnusnøkkel generator result: %s", result)
         
         if result['success']:
             # Get the workbook object from the result
@@ -536,7 +539,7 @@ def get_shift_image(turnus_set_id, shift_nr):
     version = turnus_set['year_identifier'].lower()
 
     # Build path to PNG directory
-    png_dir = os.path.join(conf.turnusfiler_dir, version, 'streklister', 'png')
+    png_dir = os.path.join(AppConfig.turnusfiler_dir, version, 'streklister', 'png')
 
     # Sanitize shift_nr to prevent path traversal and normalize whitespace
     # Remove all whitespace to match filename convention (PDF names may have line breaks)

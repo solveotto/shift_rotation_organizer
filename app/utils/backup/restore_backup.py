@@ -17,7 +17,7 @@ from datetime import datetime
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, project_root)
 
-from config import conf
+from config import AppConfig
 
 BACKUP_DIR = os.path.join(project_root, 'backups')
 
@@ -62,7 +62,7 @@ def list_backups():
 def restore_backup(backup_file):
     """Restore database from backup file"""
     
-    config = conf.CONFIG
+    config = AppConfig.CONFIG
     db_type = config['general'].get('db_type', 'sqlite')
     
     if db_type != 'mysql':

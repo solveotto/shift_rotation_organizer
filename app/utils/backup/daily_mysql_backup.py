@@ -23,7 +23,7 @@ import glob
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, project_root)
 
-from config import conf
+from config import AppConfig
 
 # Configuration
 BACKUP_DIR = os.path.join(project_root, 'backups')
@@ -88,7 +88,7 @@ def create_backup():
     
     try:
         # Get database configuration
-        config = conf.CONFIG
+        config = AppConfig.CONFIG
         db_type = config['general'].get('db_type', 'sqlite')
         
         if db_type != 'mysql':

@@ -4,7 +4,7 @@ import openpyxl
 import os
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
-from config import conf
+from config import AppConfig
 from app.utils import db_utils, df_utils
 
 
@@ -21,13 +21,13 @@ class TurnusnokkelGen():
             turnus_set = db_utils.get_turnus_set_by_id(self.turnus_set_id)
             if turnus_set:
                 year_identifier = turnus_set['year_identifier']
-                self.file_path = f'{conf.turnusfiler_dir}/{year_identifier.lower()}/turnusnøkkel_{year_identifier}_org.xlsx'
+                self.file_path = f'{AppConfig.turnusfiler_dir}/{year_identifier.lower()}/turnusnøkkel_{year_identifier}_org.xlsx'
             else:
                 # Fallback to R25 if turnus set not found
-                self.file_path = f'{conf.turnusfiler_dir}/turnusnøkkel_R25_org.xlsx'
+                self.file_path = f'{AppConfig.turnusfiler_dir}/turnusnøkkel_R25_org.xlsx'
         else:
             # Fallback to R25 if no turnus set ID provided
-            self.file_path = f'{conf.turnusfiler_dir}/turnusnøkkel_R25_org.xlsx'
+            self.file_path = f'{AppConfig.turnusfiler_dir}/turnusnøkkel_R25_org.xlsx'
         
         # Only load workbook if we're not doing single turnus generation
         # (single generation uses its own path logic)
@@ -46,8 +46,8 @@ class TurnusnokkelGen():
         else:
             # Fallback: try to find it in the proper location
             try:
-                from config import conf
-                fallback_path = f'{conf.turnusfiler_dir}/turnusnøkkel_R25_org.xlsx'
+                from config import AppConfig
+                fallback_path = f'{AppConfig.turnusfiler_dir}/turnusnøkkel_R25_org.xlsx'
                 if os.path.exists(fallback_path):
                     workbook = load_workbook(fallback_path)
                     sheet = workbook.active

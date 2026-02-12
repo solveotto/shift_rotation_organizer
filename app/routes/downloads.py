@@ -1,8 +1,11 @@
 import os
+import logging
 from flask import Blueprint, send_from_directory, flash, redirect, url_for
 from flask_login import login_required
-from config import conf
+from config import AppConfig
 from app.utils.turnus_helpers import get_user_turnus_set
+
+logger = logging.getLogger(__name__)
 
 downloads = Blueprint('downloads', __name__)
 
@@ -20,12 +23,10 @@ def download_excel():
     # Construct file path based on turnus set
     year_id = turnus_set['year_identifier'].lower()
     filename = f'turnuser_{turnus_set["year_identifier"]}.xlsx'
-    directory = os.path.join(conf.turnusfiler_dir, year_id)
+    directory = os.path.join(AppConfig.turnusfiler_dir, year_id)
     file_path = os.path.join(directory, filename)
     
-    print(f"Directory: {directory}")
-    print(f"Filename: {filename}")
-    print(f"Full path: {file_path}")
+    logger.debug("Download excel: directory=%s, filename=%s, path=%s", directory, filename, file_path)
     
     # Check if file exists
     if not os.path.exists(file_path):
@@ -46,7 +47,7 @@ def download_pdf():
     # Construct file path based on turnus set
     year_id = turnus_set['year_identifier'].lower()
     filename = f'turnuser_{turnus_set["year_identifier"]}.pdf'
-    directory = os.path.join(conf.turnusfiler_dir, year_id)
+    directory = os.path.join(AppConfig.turnusfiler_dir, year_id)
     file_path = os.path.join(directory, filename)
     
     # Check if file exists

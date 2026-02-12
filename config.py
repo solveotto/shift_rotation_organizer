@@ -33,7 +33,7 @@ def get_database_uri():
         raise ValueError(f"Unsupported database type: {db_type}")
 
 
-class conf:
+class AppConfig:
     # Flask settings from INI
     # Use environment variable first, then INI, then fail
     SECRET_KEY = os.environ.get('SECRET_KEY') or config.get('flask', 'secret_key', fallback='PLEASE_SET_SECRET_KEY_IN_CONFIG')

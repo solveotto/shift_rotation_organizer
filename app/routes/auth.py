@@ -1,6 +1,9 @@
+import logging
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import logout_user, login_required, login_user as flask_login_user, current_user
 import secrets
+
+logger = logging.getLogger(__name__)
 from app.forms import LoginForm, ForgotPasswordForm, ResetPasswordForm
 from app.models import User
 from app.utils import db_utils
@@ -35,9 +38,10 @@ def login():
             else:
                 flash('Innlogging mislyktes. Vennligst sjekk brukernavn og passord', 'danger')
         except Exception as e:
-            print(f'Error: {e}')
+            logger.error("Login error: %s", e)
     else:
-        print("ERROR", form.errors)
+        if form.errors:
+            logger.warning("Login form validation errors: %s", form.errors)
     
     return render_template('login.html', form=form)
 
@@ -78,7 +82,7 @@ def forgot_password():
                     pass  # Email sent successfully
                 else:
                     # Log error but show generic message
-                    print(f"Failed to send password reset email to {email}")
+                    logger.error("Failed to send password reset email to %s", email)
 
         # Always show success modal to prevent email enumeration
         show_success_modal = True

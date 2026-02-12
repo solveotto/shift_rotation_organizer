@@ -38,12 +38,15 @@ Workflow Integration:
     3. Files are automatically organized in turnusfiler structure
 """
 
+import logging
 from datetime import datetime
 import json
 import copy
 import pandas as pd
 import pdfplumber
 import xlsxwriter
+
+logger = logging.getLogger(__name__)
 
 
 class ShiftScraper():
@@ -429,10 +432,10 @@ class ShiftScraper():
             # Add project root to path to import config
             project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             sys.path.insert(0, project_root)
-            from config import conf
+            from config import AppConfig
             
             # Create turnusfiler directory structure
-            turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+            turnusfiler_dir = os.path.join(AppConfig.static_dir, 'turnusfiler', year_id.lower())
             os.makedirs(turnusfiler_dir, exist_ok=True)
             output_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.xlsx')
         
@@ -549,7 +552,7 @@ class ShiftScraper():
                                                             'criteria': '=(' + cell + '="XX ")' 'OR (' + cell + '="OO ")' 'OR (' + cell + '="TT ")',
                                                             'format': turnusfri_format})
         
-        print(f"Excel file created: {output_path}")
+        logger.info("Excel file created: %s", output_path)
         return output_path
 
     def create_json(self, output_path='turnuser_R25.json', year_id=None):
@@ -561,16 +564,16 @@ class ShiftScraper():
             # Add project root to path to import config
             project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             sys.path.insert(0, project_root)
-            from config import conf
+            from config import AppConfig
             
             # Create turnusfiler directory structure
-            turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+            turnusfiler_dir = os.path.join(AppConfig.static_dir, 'turnusfiler', year_id.lower())
             os.makedirs(turnusfiler_dir, exist_ok=True)
             output_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.json')
         
         with open(output_path, 'w') as f:
             json.dump(self.turnuser, f, indent=4)
-        print(f"JSON file created: {output_path}")
+        logger.info("JSON file created: %s", output_path)
         return output_path
 
 

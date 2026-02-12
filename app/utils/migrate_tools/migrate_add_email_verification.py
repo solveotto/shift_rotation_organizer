@@ -12,7 +12,7 @@ sys.path.insert(0, project_root)
 
 from app.utils.db_utils import engine, SessionLocal, DBUser
 from sqlalchemy import text
-from config import conf
+from config import AppConfig
 
 def migrate_database():
     """Add new columns and tables for email verification"""
@@ -22,7 +22,7 @@ def migrate_database():
         print("Starting migration...")
 
         # Check database type
-        db_type = conf.CONFIG.get('general', 'db_type', fallback='sqlite')
+        db_type = AppConfig.CONFIG.get('general', 'db_type', fallback='sqlite')
         print(f"Database type: {db_type}")
 
         # Add columns to users table

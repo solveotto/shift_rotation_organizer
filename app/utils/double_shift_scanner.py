@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 import pdfplumber
 import numpy as np
 from PIL import Image
-from config import conf
+from config import AppConfig
 
 
 # Shift numbers appear in the leftmost column (consistent with strekliste_generator.py)
@@ -280,10 +280,10 @@ def scan_double_shifts(pdf_path: str) -> DoubleShiftResult:
 def main():
     version = 'r26'
     pdf_path = os.path.join(
-        conf.turnusfiler_dir, version, 'streklister', f'{version}_streker.pdf'
+        AppConfig.turnusfiler_dir, version, 'streklister', f'{version}_streker.pdf'
     )
     output_path = os.path.join(
-        conf.turnusfiler_dir, version, f'double_shifts_{version}.json'
+        AppConfig.turnusfiler_dir, version, f'double_shifts_{version}.json'
     )
 
     if not os.path.exists(pdf_path):

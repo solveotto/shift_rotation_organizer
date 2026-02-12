@@ -27,6 +27,7 @@ app/utils/sessions
 config.ini
 dummy.db
 *.sql
+backups/
 tmpclaude-* 
 .claude/
 CLAUDE.md

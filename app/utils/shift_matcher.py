@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 from typing import List, Dict, Tuple, Optional
 
-from config import conf
+from config import AppConfig
 from app.utils import db_utils
 
 
@@ -54,7 +54,7 @@ def load_stats_for_turnus_set(turnus_set_id: int) -> Optional[pd.DataFrame]:
 
     # Fallback to standard location
     standard_path = os.path.join(
-        conf.static_dir, 'turnusfiler',
+        AppConfig.static_dir, 'turnusfiler',
         year_id.lower(), f'turnus_df_{year_id}.json'
     )
 

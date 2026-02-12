@@ -135,8 +135,8 @@ def create_turnus_set():
         # Determine file paths
         if form.use_existing_files.data:
             # Use existing files from turnusfiler directory
-            from config import conf
-            turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+            from config import AppConfig
+            turnusfiler_dir = os.path.join(AppConfig.static_dir, 'turnusfiler', year_id.lower())
             turnus_json_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.json')
             df_json_path = os.path.join(turnusfiler_dir, f'turnus_df_{year_id}.json')
 
@@ -165,9 +165,9 @@ def create_turnus_set():
         if not df_json_path or not os.path.exists(df_json_path):
             try:
                 from app.utils.shift_stats import Turnus
-                from config import conf
+                from config import AppConfig
                 stats = Turnus(turnus_json_path)
-                df_json_path = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower(), f'turnus_df_{year_id}.json')
+                df_json_path = os.path.join(AppConfig.static_dir, 'turnusfiler', year_id.lower(), f'turnus_df_{year_id}.json')
                 stats.stats_df.to_json(df_json_path)
                 flash('Statistikk-JSON generert automatisk.', 'info')
             except Exception as e:
@@ -204,11 +204,11 @@ def create_turnus_set():
 def handle_pdf_upload(pdf_file, year_id):
     """Handle PDF upload and scraping"""
     try:
-        from config import conf
+        from config import AppConfig
         from app.utils.shiftscraper import ShiftScraper
         
         # Create turnusfiler directory
-        turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+        turnusfiler_dir = os.path.join(AppConfig.static_dir, 'turnusfiler', year_id.lower())
         os.makedirs(turnusfiler_dir, exist_ok=True)
         
         # Save PDF file
@@ -260,12 +260,12 @@ def refresh_turnus_set(turnus_set_id):
     version = year_id.lower()
 
     try:
-        from config import conf
+        from config import AppConfig
         from app.utils.shiftscraper import ShiftScraper
         from app.utils.shift_stats import Turnus
 
         # Find the original PDF
-        turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', version)
+        turnusfiler_dir = os.path.join(AppConfig.static_dir, 'turnusfiler', version)
         pdf_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.pdf')
 
         if not os.path.exists(pdf_path):

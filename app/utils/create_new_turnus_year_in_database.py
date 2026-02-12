@@ -77,7 +77,7 @@ sys.path.insert(0, project_root)
 # Now we can import from app
 from app.utils.db_utils import create_turnus_set, add_shifts_to_turnus_set, get_turnus_set_by_year, update_turnus_set_paths, create_tables
 from app.utils.shift_stats import Turnus
-from config import conf
+from config import AppConfig
 
 def create_new_turnus(year_id, name, turnus_json_path=None, df_json_path=None):
     """Create turnus set in database from existing JSON files"""
@@ -95,7 +95,7 @@ def create_new_turnus(year_id, name, turnus_json_path=None, df_json_path=None):
     
     # If no paths provided, try to find files in turnusfiler directory
     if not turnus_json_path or not df_json_path:
-        turnusfiler_dir = os.path.join(conf.static_dir, 'turnusfiler', year_id.lower())
+        turnusfiler_dir = os.path.join(AppConfig.static_dir, 'turnusfiler', year_id.lower())
         
         if not turnus_json_path:
             turnus_json_path = os.path.join(turnusfiler_dir, f'turnuser_{year_id}.json')
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     # Show database type being used
-    db_type = conf.CONFIG.get('general', 'db_type', fallback='sqlite')
+    db_type = AppConfig.CONFIG.get('general', 'db_type', fallback='sqlite')
     print(f"🗄️  Using {db_type.upper()} database")
     
     success = create_new_turnus(

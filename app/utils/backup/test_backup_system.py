@@ -15,7 +15,7 @@ import subprocess
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, project_root)
 
-from config import conf
+from config import AppConfig
 
 def print_header(text):
     print("\n" + "=" * 70)
@@ -36,7 +36,7 @@ def test_database_config():
     print_header("Test 1: Database Configuration")
     
     try:
-        config = conf.CONFIG
+        config = AppConfig.CONFIG
         db_type = config['general'].get('db_type', 'sqlite')
         
         if db_type != 'mysql':
@@ -92,7 +92,7 @@ def test_mysql_connection():
     print_header("Test 3: MySQL Connection")
     
     try:
-        config = conf.CONFIG
+        config = AppConfig.CONFIG
         host = config['mysql']['host']
         user = config['mysql']['user']
         password = config['mysql']['password']

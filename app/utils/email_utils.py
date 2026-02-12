@@ -3,20 +3,23 @@ Email utility functions for user verification
 """
 
 import os
+import logging
 import requests
 from flask import url_for, render_template
-from config import conf
+from config import AppConfig
+
+logger = logging.getLogger(__name__)
 
 
 def send_mailgun_email(to_email, subject, text_body, html_body):
     """Send email using Mailgun API"""
     try:
         # Get Mailgun configuration
-        mailgun_api_key = conf.CONFIG.get('email', 'mailgun_api_key', fallback=os.getenv('MAILGUN_API_KEY'))
-        mailgun_domain = conf.CONFIG.get('email', 'mailgun_domain', fallback='mail.turnushjelper.no')
-        mailgun_region = conf.CONFIG.get('email', 'mailgun_region', fallback='eu')
-        sender_name = conf.CONFIG.get('email', 'sender_name')
-        sender_email = conf.CONFIG.get('email', 'sender_email')
+        mailgun_api_key = AppConfig.CONFIG.get('email', 'mailgun_api_key', fallback=os.getenv('MAILGUN_API_KEY'))
+        mailgun_domain = AppConfig.CONFIG.get('email', 'mailgun_domain', fallback='mail.turnushjelper.no')
+        mailgun_region = AppConfig.CONFIG.get('email', 'mailgun_region', fallback='eu')
+        sender_name = AppConfig.CONFIG.get('email', 'sender_name')
+        sender_email = AppConfig.CONFIG.get('email', 'sender_email')
 
         # Build API URL based on region
         if mailgun_region == 'eu':
@@ -45,11 +48,11 @@ def send_mailgun_email(to_email, subject, text_body, html_body):
         if response.status_code == 200:
             return True
         else:
-            print(f"Mailgun API error: {response.status_code} - {response.text}")
+            logger.error("Mailgun API error: %s - %s", response.status_code, response.text)
             return False
 
     except Exception as e:
-        print(f"Error sending email via Mailgun API: {e}")
+        logger.error("Error sending email via Mailgun API: %s", e)
         return False
 
 
@@ -95,7 +98,7 @@ Turnushjelper
 
         return success
     except Exception as e:
-        print(f"Error sending verification email: {e}")
+        logger.error("Error sending verification email: %s", e)
         return False
 
 
@@ -121,7 +124,7 @@ Turnushjelper
 
         return send_mailgun_email(email, subject, text_body, html_body)
     except Exception as e:
-        print(f"Error sending welcome email: {e}")
+        logger.error("Error sending welcome email: %s", e)
         return False
 
 
@@ -161,5 +164,5 @@ Turnushjelper
 
         return send_mailgun_email(email, subject, text_body, html_body)
     except Exception as e:
-        print(f"Error sending password reset email: {e}")
+        logger.error("Error sending password reset email: %s", e)
         return False
