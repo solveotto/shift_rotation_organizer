@@ -1,14 +1,10 @@
 from flask import Flask
-from flask_login import LoginManager
-from flask_caching import Cache
-from flask_mail import Mail
-from config import AppConfig
-from app.models import User, cache
 from flask_session import Session
-from app.utils import db_utils
+from config import AppConfig
+from app.extensions import cache, mail, login_manager
+from app.database import create_tables
+from app.models import User
 
-# Create global mail instance
-mail = Mail()
 
 def create_app():
     app = Flask(__name__)
@@ -26,19 +22,14 @@ def create_app():
         AppConfig.CONFIG.get('email', 'sender_email', fallback='noreply@mail.turnushjelper.no')
     )
 
-    # Initialize Flask-Mail (not actively used - using Mailgun API instead)
+    # Initialize Flask extensions
     mail.init_app(app)
-
-    # Initialize cache (no db initialization needed - we use SQLAlchemy Core)
     cache.init_app(app)
-
-    # Create database tables if they don't exist
-    db_utils.create_tables()
-
-    login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
 
+    # Create database tables if they don't exist
+    create_tables()
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -48,22 +39,18 @@ def create_app():
         except (ValueError, TypeError):
             pass
         return None
-    
+
     # Configure server-side session storage
-    app.config['SESSION_TYPE'] = 'filesystem'  
-    app.config['SESSION_FILE_DIR'] = AppConfig.sessions_dir 
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_FILE_DIR'] = AppConfig.sessions_dir
     app.config['SESSION_PERMANENT'] = False
     app.config['SESSION_USE_SIGNER'] = True
     app.config['SESSION_KEY_PREFIX'] = 'session:'
 
     Session(app)
 
-
     from app.routes.main import blueprints
     for blueprint in blueprints:
         app.register_blueprint(blueprint)
 
-
-
     return app
-
