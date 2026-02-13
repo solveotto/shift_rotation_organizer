@@ -4,7 +4,7 @@ Daily MySQL Database Backup Script for PythonAnywhere
 This script is designed to be run by PythonAnywhere's scheduled tasks feature.
 
 Schedule: Daily at 2:00 AM (or your preferred time)
-Command: python /home/solveottooren/shift_rotation_organizer/app/utils/backup/daily_mysql_backup.py
+Command: python /home/solveottooren/shift_rotation_organizer/app/scripts/backup/daily_mysql_backup.py
 
 Features:
 - Creates daily backups with timestamps
@@ -19,7 +19,7 @@ import subprocess
 from datetime import datetime, timedelta
 import glob
 
-# Add project root to path (go up 4 levels: backup -> utils -> app -> project_root)
+# Add project root to path (go up 4 levels: backup -> scripts -> app -> project_root)
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, project_root)
 

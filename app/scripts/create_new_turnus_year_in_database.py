@@ -22,10 +22,10 @@ FEATURES:
 
 USAGE:
     Command Line:
-        python app/utils/create_new_turnus_year_in_database.py R23 "OSL Train Shifts 2023"
-        python app/utils/create_new_turnus_year_in_database.py R24 "OSL Train Shifts 2024" --json-path custom/path.json
+        python app/scripts/create_new_turnus_year_in_database.py R23 "OSL Train Shifts 2023"
+        python app/scripts/create_new_turnus_year_in_database.py R24 "OSL Train Shifts 2024" --json-path custom/path.json
     
-    From utils directory:
+    From scripts directory:
         python create_new_turnus_year_in_database.py R23 "OSL Train Shifts 2023"
 
 ARGUMENTS:
@@ -46,10 +46,10 @@ DATABASE OPERATIONS:
 
 EXAMPLES:
     # Basic usage (files in turnusfiler directory)
-    python app/utils/create_new_turnus_year_in_database.py R23 "OSL Train Shifts 2023"
+    python app/scripts/create_new_turnus_year_in_database.py R23 "OSL Train Shifts 2023"
     
     # With custom file paths
-    python app/utils/create_new_turnus_year_in_database.py R24 "OSL Train Shifts 2024" \\
+    python app/scripts/create_new_turnus_year_in_database.py R24 "OSL Train Shifts 2024" \\
         --json-path /path/to/turnuser_R24.json \\
         --df-path /path/to/turnus_df_R24.json
 
@@ -138,7 +138,7 @@ def create_new_turnus(year_id, name, turnus_json_path=None, df_json_path=None):
     # 2. Add shifts to database
     turnus_set = get_turnus_set_by_year(year_id)
     if turnus_set:
-        success = add_shifts_to_turnus_set(turnus_json_path, turnus_set['id'])
+        success, msg = add_shifts_to_turnus_set(turnus_json_path, turnus_set['id'])
         if success:
             print(f"✅ Added shifts to database")
         else:

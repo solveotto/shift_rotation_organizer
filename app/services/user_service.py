@@ -21,11 +21,11 @@ def create_new_user(username, password, is_auth):
         db_session.add(new_user)
         db_session.commit()
         logger.info("User created")
-        return True
+        return True, "Bruker opprettet"
     except Exception as e:
         db_session.rollback()
         logger.error("Error creating user: %s", e)
-        return False
+        return False, f"Error creating user: {e}"
     finally:
         db_session.close()
 

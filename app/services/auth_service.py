@@ -117,11 +117,11 @@ def create_verification_token(user_id, token):
         )
         db_session.add(new_token)
         db_session.commit()
-        return True
+        return True, "Verifiseringstoken opprettet"
     except Exception as e:
         db_session.rollback()
         logger.error("Error creating token: %s", e)
-        return False
+        return False, f"Error creating token: {e}"
     finally:
         db_session.close()
 
@@ -219,11 +219,11 @@ def create_password_reset_token(user_id, token):
         )
         db_session.add(new_token)
         db_session.commit()
-        return True
+        return True, "Tilbakestillingstoken opprettet"
     except Exception as e:
         db_session.rollback()
         logger.error("Error creating password reset token: %s", e)
-        return False
+        return False, f"Error creating password reset token: {e}"
     finally:
         db_session.close()
 

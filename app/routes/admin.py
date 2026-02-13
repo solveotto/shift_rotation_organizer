@@ -4,7 +4,7 @@ from flask_login import current_user
 from app.decorators import admin_required
 from app.forms import CreateUserForm, EditUserForm, CreateTurnusSetForm, SelectTurnusSetForm, UploadStreklisteForm
 from app.utils import db_utils
-from app.utils import strekliste_generator
+from app.utils.pdf import strekliste_generator
 
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -205,7 +205,7 @@ def handle_pdf_upload(pdf_file, year_id):
     """Handle PDF upload and scraping"""
     try:
         from config import AppConfig
-        from app.utils.shiftscraper import ShiftScraper
+        from app.utils.pdf.shiftscraper import ShiftScraper
         
         # Create turnusfiler directory
         turnusfiler_dir = os.path.join(AppConfig.static_dir, 'turnusfiler', year_id.lower())
@@ -261,7 +261,7 @@ def refresh_turnus_set(turnus_set_id):
 
     try:
         from config import AppConfig
-        from app.utils.shiftscraper import ShiftScraper
+        from app.utils.pdf.shiftscraper import ShiftScraper
         from app.utils.shift_stats import Turnus
 
         # Find the original PDF

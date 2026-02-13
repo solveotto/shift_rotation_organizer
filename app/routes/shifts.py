@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from flask_login import login_required, current_user
 from app.utils import db_utils, df_utils
 from app.utils.turnus_helpers import get_user_turnus_set
-from app.routes.main import df_manager, turnus_data
+
 
 shifts = Blueprint('shifts', __name__)
 

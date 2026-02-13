@@ -9,10 +9,6 @@ from app.utils import df_utils
 # Global variables that need to be shared across Blueprints
 df_manager = df_utils.DataframeManager()
 
-# Load turnus data - this will automatically load the active turnus set
-# If no active set exists, turnus_data will be an empty list
-turnus_data = df_manager.turnus_data if df_manager.turnus_data else []
-
 # Configure logging
 os.makedirs(AppConfig.log_dir, exist_ok=True)
 log_file_path = os.path.join(AppConfig.log_dir, 'app.log')

@@ -9,7 +9,7 @@ import sys
 # Add app to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from app.utils.strekliste_generator import render_shift_image, get_all_shifts, get_paths
+from app.utils.pdf.strekliste_generator import render_shift_image, get_all_shifts, get_paths
 
 # Configuration - adjust these values
 VERSION = "r26"  # Change to your turnus version

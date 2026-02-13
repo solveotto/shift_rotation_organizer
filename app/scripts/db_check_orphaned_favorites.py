@@ -53,7 +53,7 @@ def check_orphaned_favorites():
         if total_orphaned > 0:
             print(f"\n⚠ TOTAL ORPHANED RECORDS: {total_orphaned}")
             print("\nYou must clean these up before adding foreign keys.")
-            print("Run the cleanup script: python app/utils/cleanup_orphaned_favorites.py")
+            print("Run the cleanup script: python app/scripts/db_cleanup_orphaned_favorites.py")
             return False
         else:
             print("\n✓ Database is clean - safe to add foreign keys!")

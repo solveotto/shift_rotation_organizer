@@ -155,11 +155,11 @@ def add_shifts_to_turnus_set(file_path, turnus_set_id):
 
         db_session.commit()
         logger.info("Shifts added to turnus set %s successfully", turnus_set_id)
-        return True
+        return True, "Skift lagt til i turnussett"
     except Exception as e:
         db_session.rollback()
         logger.error("Error adding shifts to turnus set: %s", e)
-        return False
+        return False, f"Error adding shifts to turnus set: {e}"
     finally:
         db_session.close()
 

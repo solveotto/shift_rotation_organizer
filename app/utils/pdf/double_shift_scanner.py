@@ -15,7 +15,7 @@ import sys
 from typing import TypedDict
 
 # Allow running as standalone script
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 import pdfplumber
 import numpy as np

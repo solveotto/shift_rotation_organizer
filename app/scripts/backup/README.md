@@ -23,7 +23,7 @@ This directory contains scripts for automated MySQL database backups on PythonAn
 
 ```bash
 cd ~/shift_rotation_organizer
-python app/utils/backup/test_backup_system.py
+python app/scripts/backup/test_backup_system.py
 ```
 
 This verifies:
@@ -36,7 +36,7 @@ This verifies:
 ### Step 2: Test Manual Backup
 
 ```bash
-python app/utils/backup/daily_mysql_backup.py
+python app/scripts/backup/daily_mysql_backup.py
 ```
 
 This creates a backup in `backups/backup_YYYYMMDD_HHMMSS.sql`
@@ -48,7 +48,7 @@ This creates a backup in `backups/backup_YYYYMMDD_HHMMSS.sql`
 3. Enter:
    - **Command**: 
      ```
-     /home/solveottooren/shift_rotation_organizer/venv/bin/python /home/solveottooren/shift_rotation_organizer/app/utils/backup/daily_mysql_backup.py
+     /home/solveottooren/shift_rotation_organizer/venv/bin/python /home/solveottooren/shift_rotation_organizer/app/scripts/backup/daily_mysql_backup.py
      ```
    - **Hour**: `2` (2 AM UTC)
    - **Minute**: `0`
@@ -89,7 +89,7 @@ du -sh ~/shift_rotation_organizer/backups/
 ### Interactive Restore
 
 ```bash
-python app/utils/backup/restore_backup.py
+python app/scripts/backup/restore_backup.py
 ```
 
 This will:
@@ -181,7 +181,7 @@ Store locally as an additional backup layer!
 
 For issues:
 1. Check logs: `app/logs/backup.log`
-2. Run test script: `python app/utils/backup/test_backup_system.py`
+2. Run test script: `python app/scripts/backup/test_backup_system.py`
 3. Review this README for troubleshooting
 4. Check PythonAnywhere scheduled task logs
 

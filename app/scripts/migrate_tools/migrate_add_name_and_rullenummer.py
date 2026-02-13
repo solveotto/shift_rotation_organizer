@@ -8,7 +8,7 @@ This migration adds:
 - rullenummer field to authorized_emails table (for pre-registration authorization)
 
 Usage:
-    python app/utils/migrate_tools/migrate_add_name_and_rullenummer.py
+    python app/scripts/migrate_tools/migrate_add_name_and_rullenummer.py
 """
 
 import sys

@@ -76,7 +76,8 @@ def forgot_password():
         if user:
             # Generate token and create reset record
             token = secrets.token_urlsafe(32)
-            if db_utils.create_password_reset_token(user['id'], token):
+            success, _msg = db_utils.create_password_reset_token(user['id'], token)
+            if success:
                 # Send reset email
                 if send_password_reset_email(email, token):
                     pass  # Email sent successfully
