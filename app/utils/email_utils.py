@@ -2,7 +2,6 @@
 Email utility functions for user verification
 """
 
-import os
 import logging
 import requests
 from flask import url_for, render_template
@@ -15,11 +14,11 @@ def send_mailgun_email(to_email, subject, text_body, html_body):
     """Send email using Mailgun API"""
     try:
         # Get Mailgun configuration
-        mailgun_api_key = AppConfig.CONFIG.get('email', 'mailgun_api_key', fallback=os.getenv('MAILGUN_API_KEY'))
-        mailgun_domain = AppConfig.CONFIG.get('email', 'mailgun_domain', fallback='mail.turnushjelper.no')
-        mailgun_region = AppConfig.CONFIG.get('email', 'mailgun_region', fallback='eu')
-        sender_name = AppConfig.CONFIG.get('email', 'sender_name')
-        sender_email = AppConfig.CONFIG.get('email', 'sender_email')
+        mailgun_api_key = AppConfig.MAILGUN_API_KEY
+        mailgun_domain = AppConfig.MAILGUN_DOMAIN
+        mailgun_region = AppConfig.MAILGUN_REGION
+        sender_name = AppConfig.SENDER_NAME
+        sender_email = AppConfig.SENDER_EMAIL
 
         # Build API URL based on region
         if mailgun_region == 'eu':

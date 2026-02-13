@@ -11,16 +11,13 @@ def create_app():
     app.config.from_object(AppConfig)
 
     # Email configuration (optional - using Mailgun API by default)
-    app.config['MAIL_SERVER'] = AppConfig.CONFIG.get('email', 'smtp_server', fallback='smtp.gmail.com')
-    app.config['MAIL_PORT'] = AppConfig.CONFIG.getint('email', 'smtp_port', fallback=587)
-    app.config['MAIL_USE_TLS'] = AppConfig.CONFIG.getboolean('email', 'smtp_use_tls', fallback=True)
-    app.config['MAIL_USE_SSL'] = AppConfig.CONFIG.getboolean('email', 'smtp_use_ssl', fallback=False)
-    app.config['MAIL_USERNAME'] = AppConfig.CONFIG.get('email', 'smtp_username', fallback='')
-    app.config['MAIL_PASSWORD'] = AppConfig.CONFIG.get('email', 'smtp_password', fallback='')
-    app.config['MAIL_DEFAULT_SENDER'] = (
-        AppConfig.CONFIG.get('email', 'sender_name', fallback='Turnushjelper'),
-        AppConfig.CONFIG.get('email', 'sender_email', fallback='noreply@mail.turnushjelper.no')
-    )
+    app.config['MAIL_SERVER'] = AppConfig.SMTP_SERVER
+    app.config['MAIL_PORT'] = AppConfig.SMTP_PORT
+    app.config['MAIL_USE_TLS'] = AppConfig.SMTP_USE_TLS
+    app.config['MAIL_USE_SSL'] = AppConfig.SMTP_USE_SSL
+    app.config['MAIL_USERNAME'] = AppConfig.SMTP_USERNAME
+    app.config['MAIL_PASSWORD'] = AppConfig.SMTP_PASSWORD
+    app.config['MAIL_DEFAULT_SENDER'] = (AppConfig.SENDER_NAME, AppConfig.SENDER_EMAIL)
 
     # Initialize Flask extensions
     mail.init_app(app)

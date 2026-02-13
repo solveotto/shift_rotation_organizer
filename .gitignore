@@ -25,6 +25,7 @@ app/logs
 app/utils/sessions
 
 config.ini
+.env
 dummy.db
 *.sql
 backups/

@@ -20,7 +20,7 @@ def cleanup_unverified_users():
 
     try:
         # Get cleanup threshold from config
-        cleanup_days = AppConfig.CONFIG.getint('verification', 'unverified_user_cleanup_days', fallback=14)
+        cleanup_days = AppConfig.UNVERIFIED_CLEANUP_DAYS
         cutoff_date = datetime.now() - timedelta(days=cleanup_days)
 
         print(f"Cleanup unverified users created before: {cutoff_date.strftime('%Y-%m-%d %H:%M:%S')}")

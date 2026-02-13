@@ -36,27 +36,30 @@ def test_database_config():
     print_header("Test 1: Database Configuration")
     
     try:
-        config = AppConfig.CONFIG
-        db_type = config['general'].get('db_type', 'sqlite')
-        
+        db_type = AppConfig.DB_TYPE
+
         if db_type != 'mysql':
             print_check("Database type", False, f"Expected MySQL, got {db_type}")
             return False
-        
+
         print_check("Database type", True, "MySQL")
-        
+
         # Check required fields
-        required_fields = ['host', 'user', 'password', 'database']
+        fields = {
+            'host': AppConfig.MYSQL_HOST,
+            'user': AppConfig.MYSQL_USER,
+            'password': AppConfig.MYSQL_PASSWORD,
+            'database': AppConfig.MYSQL_DATABASE,
+        }
         all_present = True
-        
-        for field in required_fields:
-            value = config['mysql'].get(field)
+
+        for field, value in fields.items():
             if value:
                 print_check(f"MySQL {field}", True, "Configured")
             else:
                 print_check(f"MySQL {field}", False, "Missing")
                 all_present = False
-        
+
         return all_present
         
     except Exception as e:
@@ -92,11 +95,10 @@ def test_mysql_connection():
     print_header("Test 3: MySQL Connection")
     
     try:
-        config = AppConfig.CONFIG
-        host = config['mysql']['host']
-        user = config['mysql']['user']
-        password = config['mysql']['password']
-        database = config['mysql']['database']
+        host = AppConfig.MYSQL_HOST
+        user = AppConfig.MYSQL_USER
+        password = AppConfig.MYSQL_PASSWORD
+        database = AppConfig.MYSQL_DATABASE
         
         # Try to connect using mysql command
         cmd = [

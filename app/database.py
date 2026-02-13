@@ -20,7 +20,7 @@ engine = create_engine(
         'connect_timeout': 20,
         'read_timeout': 20,
         'write_timeout': 20,
-    } if AppConfig.db_type == 'mysql' else {}
+    } if AppConfig.DB_TYPE == 'mysql' else {}
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

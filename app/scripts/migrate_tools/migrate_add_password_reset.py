@@ -24,7 +24,7 @@ def migrate_database():
         print("Starting password reset migration...")
 
         # Check database type
-        db_type = AppConfig.CONFIG.get('general', 'db_type', fallback='sqlite')
+        db_type = AppConfig.DB_TYPE
         print(f"Database type: {db_type}")
 
         with engine.connect() as conn:

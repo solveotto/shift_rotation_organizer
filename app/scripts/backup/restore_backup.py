@@ -62,18 +62,17 @@ def list_backups():
 def restore_backup(backup_file):
     """Restore database from backup file"""
     
-    config = AppConfig.CONFIG
-    db_type = config['general'].get('db_type', 'sqlite')
-    
+    db_type = AppConfig.DB_TYPE
+
     if db_type != 'mysql':
         print(f"\n✗ Database type is {db_type}, not MySQL.")
         print("This restore script is for MySQL databases only.")
         return False
-    
-    host = config['mysql']['host']
-    user = config['mysql']['user']
-    password = config['mysql']['password']
-    database = config['mysql']['database']
+
+    host = AppConfig.MYSQL_HOST
+    user = AppConfig.MYSQL_USER
+    password = AppConfig.MYSQL_PASSWORD
+    database = AppConfig.MYSQL_DATABASE
     
     basename = os.path.basename(backup_file)
     

@@ -102,7 +102,7 @@ def create_verification_token(user_id, token):
     """Create email verification token"""
     db_session = get_db_session()
     try:
-        expiry_hours = AppConfig.CONFIG.getint('verification', 'token_expiry_hours', fallback=48)
+        expiry_hours = AppConfig.TOKEN_EXPIRY_HOURS
         expires_at = datetime.now() + timedelta(hours=expiry_hours)
 
         db_session.query(EmailVerificationToken).filter_by(
@@ -163,7 +163,7 @@ def can_send_verification_email(user_id):
     """Check rate limiting for verification emails"""
     db_session = get_db_session()
     try:
-        max_per_day = AppConfig.CONFIG.getint('verification', 'max_verification_emails_per_day', fallback=3)
+        max_per_day = AppConfig.MAX_VERIFICATION_EMAILS_PER_DAY
 
         user = db_session.query(DBUser).filter_by(id=user_id).first()
         if not user:

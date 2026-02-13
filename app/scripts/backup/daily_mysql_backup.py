@@ -88,18 +88,17 @@ def create_backup():
     
     try:
         # Get database configuration
-        config = AppConfig.CONFIG
-        db_type = config['general'].get('db_type', 'sqlite')
-        
+        db_type = AppConfig.DB_TYPE
+
         if db_type != 'mysql':
             log_message(f"Database type is {db_type}, not MySQL. Skipping backup.")
             return False
-        
+
         # Get MySQL connection info
-        host = config['mysql']['host']
-        user = config['mysql']['user']
-        password = config['mysql']['password']
-        database = config['mysql']['database']
+        host = AppConfig.MYSQL_HOST
+        user = AppConfig.MYSQL_USER
+        password = AppConfig.MYSQL_PASSWORD
+        database = AppConfig.MYSQL_DATABASE
         
         # Create backup directory if it doesn't exist
         os.makedirs(BACKUP_DIR, exist_ok=True)

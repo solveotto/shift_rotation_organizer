@@ -22,7 +22,7 @@ def migrate_database():
         print("Starting migration...")
 
         # Check database type
-        db_type = AppConfig.CONFIG.get('general', 'db_type', fallback='sqlite')
+        db_type = AppConfig.DB_TYPE
         print(f"Database type: {db_type}")
 
         # Add columns to users table
@@ -82,7 +82,7 @@ def migrate_database():
         print("\nMigration completed successfully!")
         print("\nNext steps:")
         print("1. Add authorized emails via admin panel")
-        print("2. Configure email settings in config.ini")
+        print("2. Configure email settings in .env")
         print("3. Test registration flow")
 
     except Exception as e:
