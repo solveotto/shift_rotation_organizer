@@ -1,32 +1,27 @@
 // Color Adjustment Module
-// Handles the color system for shift tables
+// Handles the color customization system for shift tables
 
 export class ColorAdjustment {
     constructor() {
         this.defaultSettings = {
-            early: {
-                color: '#00ffff',
-                time: '16:00'
-            },
-            late: {
-                color: '#ff9696',
-                time: '16:00'
-            },
-            night: {
-                color: '#eb41eb',
-                time: '19:00'
-            },
-            dayoff: {
-                color: '#42bb42'
-            },
-            hdag: {
-                color: '#ffd700'
-            },
-            earlylate: {
-                color: '#268eb8'
-            }
+            nightEarly: { color: '#1B3A6B', label: 'Før 06:00' },
+            morning:    { color: '#4A90D9', label: '06:00–07:59' },
+            midday:     { color: '#87CEEB', label: '08:00–11:59' },
+            afternoon:  { color: '#FF9999', label: '12:00–16:59' },
+            evening:    { color: '#9B59B6', label: '17:00+' },
+            dayoff:     { color: '#4ADE80', label: 'Fridag' },
+            hdag:       { color: '#FCD34D', label: 'Helligdag' }
         };
-        
+
+        // Same boundaries as ShiftColors for consistent classification
+        this.boundaries = [
+            { maxMinutes: 6 * 60,    settingKey: 'nightEarly', needsWhiteText: true },
+            { maxMinutes: 8 * 60,    settingKey: 'morning',    needsWhiteText: false },
+            { maxMinutes: 12 * 60,   settingKey: 'midday',     needsWhiteText: false },
+            { maxMinutes: 17 * 60,   settingKey: 'afternoon',  needsWhiteText: false },
+            { maxMinutes: Infinity,  settingKey: 'evening',    needsWhiteText: true }
+        ];
+
         this.init();
     }
 
@@ -61,12 +56,18 @@ export class ColorAdjustment {
         try {
             const saved = localStorage.getItem('shiftColorSettings');
             if (saved) {
-                return { ...this.defaultSettings, ...JSON.parse(saved) };
+                const parsed = JSON.parse(saved);
+                // Migration: if old keys are present, clear and return defaults
+                if (parsed.early || parsed.earlylate || parsed.earlybefore6 || parsed.late || parsed.night) {
+                    localStorage.removeItem('shiftColorSettings');
+                    return { ...this.defaultSettings };
+                }
+                return { ...this.defaultSettings, ...parsed };
             }
         } catch (error) {
             console.warn('Error loading color settings:', error);
         }
-        return this.defaultSettings;
+        return { ...this.defaultSettings };
     }
 
     saveColorSettings(settings) {
@@ -80,12 +81,12 @@ export class ColorAdjustment {
 
     applyColorsToTable() {
         const settings = this.loadColorSettings();
-        
+
         // Remove existing color classes
         const tds = document.querySelectorAll('td[id="cell"]');
-        
+
         tds.forEach(td => {
-            td.classList.remove('early', 'late', 'night', 'day_off', 'h-dag', 'early-and-late');
+            td.classList.remove('night-early', 'morning', 'midday', 'afternoon', 'evening', 'day_off', 'h-dag');
             td.style.backgroundColor = '';
             td.style.color = '';
         });
@@ -106,54 +107,27 @@ export class ColorAdjustment {
         // Check for H-dag
         if (customTextElement && customTextElement.textContent.trim().endsWith('H')) {
             td.style.backgroundColor = settings.hdag.color;
-            console.log('Applied H-dag color:', settings.hdag.color);
             return;
         }
 
         if (times.length > 1) {
-            this.applyShiftColors(td, times, settings, timeText);
+            this.applyShiftColors(td, times, settings);
         } else {
             this.applyDayOffColors(td, times, settings);
         }
     }
 
-    applyShiftColors(td, times, settings, timeText) {
-        const startTime = times[0];
-        const [start_hours, start_minutes] = startTime.split(':').map(Number);
-        const startTotalMinutes = start_hours * 60 + start_minutes;
+    applyShiftColors(td, times, settings) {
+        const [startHours, startMinutes] = times[0].split(':').map(Number);
+        const startTotal = startHours * 60 + startMinutes;
 
-        const endTime = times[1];
-        const [end_hours, end_minutes] = endTime.split(':').map(Number);
-        const endTotalMinutes = end_hours * 60 + end_minutes;
-
-        // Parse threshold times
-        const [late_hours, late_minutes] = settings.late.time.split(':').map(Number);
-        const late_shift = late_hours * 60 + late_minutes;
-        
-        const [night_hours, night_minutes] = settings.night.time.split(':').map(Number);
-        const night_shift = night_hours * 60 + night_minutes;
-
-        // Apply colors based on thresholds
-        if (startTotalMinutes >= night_shift) {
-            td.style.backgroundColor = settings.night.color;
-            console.log('Applied night color:', settings.night.color);
-        } else if (start_hours > 5 && start_hours < 9 && end_hours >= 16 && end_hours < 18) {
-            td.style.backgroundColor = settings.earlylate.color;
-            td.style.color = 'white';
-            console.log('Applied early+late color:', settings.earlylate.color);
-        } else if (endTotalMinutes <= late_shift) {
-            td.style.backgroundColor = settings.early.color;
-            console.log('Applied early color:', settings.early.color);
-        } else {
-            td.style.backgroundColor = settings.late.color;
-            console.log('Applied late color:', settings.late.color);
-        }
-        
-        // Handle overnight shifts
-        if (startTotalMinutes > endTotalMinutes && !td.style.backgroundColor) {
-            if (startTotalMinutes < night_shift) {
-                td.style.backgroundColor = settings.late.color;
-                console.log('Applied late color (overnight):', settings.late.color);
+        for (const { maxMinutes, settingKey, needsWhiteText } of this.boundaries) {
+            if (startTotal < maxMinutes) {
+                td.style.backgroundColor = settings[settingKey].color;
+                if (needsWhiteText) {
+                    td.style.color = '#fff';
+                }
+                return;
             }
         }
     }
@@ -162,41 +136,28 @@ export class ColorAdjustment {
         const listOfDaysoff = ['XX', 'OO', 'TT', ''];
         if (listOfDaysoff.includes(times[0])) {
             td.style.backgroundColor = settings.dayoff.color;
-            console.log('Applied day off color:', settings.dayoff.color);
         }
     }
 
     initializeColorInputs() {
         const settings = this.loadColorSettings();
-        
+
         try {
-            // Set color values
             const colorInputs = {
-                'early-color': settings.early.color,
-                'late-color': settings.late.color,
-                'night-color': settings.night.color,
+                'nightearly-color': settings.nightEarly.color,
+                'morning-color': settings.morning.color,
+                'midday-color': settings.midday.color,
+                'afternoon-color': settings.afternoon.color,
+                'evening-color': settings.evening.color,
                 'dayoff-color': settings.dayoff.color,
-                'hdag-color': settings.hdag.color,
-                'earlylate-color': settings.earlylate.color
+                'hdag-color': settings.hdag.color
             };
 
             Object.entries(colorInputs).forEach(([id, value]) => {
                 const input = document.getElementById(id);
                 if (input) input.value = value;
             });
-            
-            // Set time values
-            const timeInputs = {
-                'early-time': settings.early.time,
-                'late-time': settings.late.time,
-                'night-time': settings.night.time
-            };
 
-            Object.entries(timeInputs).forEach(([id, value]) => {
-                const input = document.getElementById(id);
-                if (input) input.value = value;
-            });
-            
             console.log('Color inputs initialized with settings:', settings);
         } catch (error) {
             console.error('Error initializing color inputs:', error);
@@ -206,32 +167,39 @@ export class ColorAdjustment {
     handleApplyColors() {
         try {
             const newSettings = {
-                early: {
-                    color: document.getElementById('early-color')?.value || this.defaultSettings.early.color,
-                    time: document.getElementById('early-time')?.value || this.defaultSettings.early.time
+                nightEarly: {
+                    color: document.getElementById('nightearly-color')?.value || this.defaultSettings.nightEarly.color,
+                    label: this.defaultSettings.nightEarly.label
                 },
-                late: {
-                    color: document.getElementById('late-color')?.value || this.defaultSettings.late.color,
-                    time: document.getElementById('late-time')?.value || this.defaultSettings.late.time
+                morning: {
+                    color: document.getElementById('morning-color')?.value || this.defaultSettings.morning.color,
+                    label: this.defaultSettings.morning.label
                 },
-                night: {
-                    color: document.getElementById('night-color')?.value || this.defaultSettings.night.color,
-                    time: document.getElementById('night-time')?.value || this.defaultSettings.night.time
+                midday: {
+                    color: document.getElementById('midday-color')?.value || this.defaultSettings.midday.color,
+                    label: this.defaultSettings.midday.label
+                },
+                afternoon: {
+                    color: document.getElementById('afternoon-color')?.value || this.defaultSettings.afternoon.color,
+                    label: this.defaultSettings.afternoon.label
+                },
+                evening: {
+                    color: document.getElementById('evening-color')?.value || this.defaultSettings.evening.color,
+                    label: this.defaultSettings.evening.label
                 },
                 dayoff: {
-                    color: document.getElementById('dayoff-color')?.value || this.defaultSettings.dayoff.color
+                    color: document.getElementById('dayoff-color')?.value || this.defaultSettings.dayoff.color,
+                    label: this.defaultSettings.dayoff.label
                 },
                 hdag: {
-                    color: document.getElementById('hdag-color')?.value || this.defaultSettings.hdag.color
-                },
-                earlylate: {
-                    color: document.getElementById('earlylate-color')?.value || this.defaultSettings.earlylate.color
+                    color: document.getElementById('hdag-color')?.value || this.defaultSettings.hdag.color,
+                    label: this.defaultSettings.hdag.label
                 }
             };
 
             this.saveColorSettings(newSettings);
             this.applyColorsToTable();
-            
+
             this.showButtonFeedback('apply-colors', 'Farger brukt!', 'btn-success');
             console.log('Colors applied successfully');
         } catch (error) {
@@ -246,7 +214,7 @@ export class ColorAdjustment {
                 localStorage.removeItem('shiftColorSettings');
                 this.initializeColorInputs();
                 this.applyColorsToTable();
-                
+
                 this.showButtonFeedback('reset-colors', 'Reset!', 'btn-success');
                 console.log('Colors reset to defaults');
             } catch (error) {
@@ -262,10 +230,10 @@ export class ColorAdjustment {
 
         const originalText = button.innerHTML;
         const originalClass = button.className;
-        
+
         button.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${message}`;
         button.className = button.className.replace(/btn-\w+/, successClass);
-        
+
         setTimeout(() => {
             button.innerHTML = originalText;
             button.className = originalClass;

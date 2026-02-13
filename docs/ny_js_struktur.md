@@ -11,7 +11,7 @@ This directory contains the modular JavaScript architecture for the shift rotati
 
 ### 2. `shift-colors.js` - ShiftColors Class
 - **CORE COLOR LOGIC** - Applies CSS classes to table cells
-- Default shift color application (early, late, night, day_off, h-dag, early-and-late)
+- Default shift color application (night-early, morning, midday, afternoon, evening, day_off, h-dag)
 - Works with existing CSS color definitions
 - Respects user custom color settings
 

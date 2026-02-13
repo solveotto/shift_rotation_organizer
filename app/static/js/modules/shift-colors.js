@@ -1,12 +1,15 @@
 // Shift Colors Module
-// Applies CSS classes to shift table cells based on time and shift type
+// Applies CSS classes to shift table cells based on start time
 
 export class ShiftColors {
     constructor() {
-        this.defaultTimeThresholds = {
-            lateShift: 16 * 60,  // 16:00 in minutes
-            nightShift: 19 * 60  // 19:00 in minutes
-        };
+        this.boundaries = [
+            { maxMinutes: 6 * 60,    className: 'night-early' },
+            { maxMinutes: 8 * 60,    className: 'morning' },
+            { maxMinutes: 12 * 60,   className: 'midday' },
+            { maxMinutes: 17 * 60,   className: 'afternoon' },
+            { maxMinutes: Infinity,  className: 'evening' }
+        ];
         this.init();
     }
 
@@ -32,16 +35,13 @@ export class ShiftColors {
 
     colorAllCells() {
         const tds = document.querySelectorAll('td[id="cell"]');
-        
+
         tds.forEach(td => this.colorCell(td));
     }
 
     colorCell(td) {
         const timeTextElement = td.querySelector('.time-text');
-        if (!timeTextElement) {
-            console.log('No .time-text element found in td:', td);
-            return;
-        }
+        if (!timeTextElement) return;
 
         // Clean up the timeText by removing newline characters and extra spaces
         let timeText = timeTextElement.textContent.trim();
@@ -64,31 +64,14 @@ export class ShiftColors {
     }
 
     applyShiftTypeColors(td, times) {
-        const startTime = times[0];
-        const [start_hours, start_minutes] = startTime.split(':').map(Number);
-        const startTotalMinutes = start_hours * 60 + start_minutes;
+        const [startHours, startMinutes] = times[0].split(':').map(Number);
+        const startTotal = startHours * 60 + startMinutes;
 
-        const endTime = times[1];
-        const [end_hours, end_minutes] = endTime.split(':').map(Number);
-        const endTotalMinutes = end_hours * 60 + end_minutes;
-
-        // Apply color classes based on shift timing
-        if (endTotalMinutes <= this.defaultTimeThresholds.lateShift) {
-            td.classList.add('early');
-        }
-        if (endTotalMinutes > this.defaultTimeThresholds.lateShift) {
-            td.classList.add('late');
-        }
-        if (startTotalMinutes >= this.defaultTimeThresholds.nightShift) {
-            td.classList.add('night');
-        }
-        if (startTotalMinutes > endTotalMinutes) {
-            td.classList.add('late');
-        }
-
-        // Check for early-and-late shift combination
-        if (start_hours > 5 && start_hours < 9 && end_hours >= 16 && end_hours < 18) {
-            td.classList.add('early-and-late');
+        for (const { maxMinutes, className } of this.boundaries) {
+            if (startTotal < maxMinutes) {
+                td.classList.add(className);
+                return;
+            }
         }
     }
 
@@ -106,9 +89,9 @@ export class ShiftColors {
 
     // Method to clear all color classes
     clearColors() {
-        const tds = document.querySelectorAll('td[id="cell"]');
-        tds.forEach(td => {
-            td.classList.remove('early', 'late', 'night', 'day_off', 'h-dag', 'early-and-late');
+        const classes = this.boundaries.map(b => b.className).concat(['day_off', 'h-dag']);
+        document.querySelectorAll('td[id="cell"]').forEach(td => {
+            td.classList.remove(...classes);
         });
     }
 }

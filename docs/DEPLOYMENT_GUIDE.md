@@ -95,20 +95,14 @@ This ensures environment variables are loaded before the Flask app initializes.
 
 ---
 
-## Step 5: Enable `.env` for Scheduled Tasks (CLI Scripts)
+## Step 5: Scheduled Tasks (Cron Jobs) — No Changes Needed
 
-Scheduled tasks (backup scripts, cleanup scripts) run outside the WSGI context,
-so they need `.env` loaded too. `config.py` handles this automatically via
-`load_dotenv()` at import time, so **no extra setup is needed** for scripts that
-import from `config`.
+All CLI scripts (e.g., `daily_mysql_backup.py`, `cleanup_unverified_users.py`)
+do `from config import AppConfig`, which triggers `load_dotenv()` automatically.
+The `.env` path is resolved from `config.py`'s location using an absolute path,
+so it works regardless of the cron job's working directory.
 
-If you run scripts manually in a Bash console and they fail to read config,
-you can source the `.env` file first:
-
-```bash
-set -a; source ~/shift_rotation_organizer/.env; set +a
-python ~/shift_rotation_organizer/app/scripts/backup/daily_mysql_backup.py
-```
+**Your existing PythonAnywhere scheduled tasks will keep working as-is.**
 
 ---
 

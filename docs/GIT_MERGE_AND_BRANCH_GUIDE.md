@@ -40,6 +40,8 @@ git merge development
 
 If there are **merge conflicts**, Git will tell you which files need manual resolution. Open those files, resolve the conflicts (look for `<<<<<<<`, `=======`, `>>>>>>>` markers), then:
 
+(Eller git reset --hard for a resette til det som er på github)
+
 ```bash
 git add <resolved-files>
 git commit
