@@ -218,6 +218,60 @@ def _rows_per_segment(block):
     return counts
 
 
+_ASCII_WEEKDAYS = tuple(d for d in WEEKDAYS if d.isascii())          # Mandag..Fredag
+_NON_ASCII_WEEKDAYS = tuple(d for d in WEEKDAYS if not d.isascii())  # Lørdag, Søndag
+
+
+def _count_weekday_rows(text, weekdays=tuple(WEEKDAYS)):
+    """Lines whose first tab-cell is one of ``weekdays``, i.e. candidate day rows."""
+    count = 0
+    for line in text.split("\n"):
+        if _clean(line.split("\t")[0]) in weekdays:
+            count += 1
+    return count
+
+
+def _diagnose_encoding(data, text, blocks):
+    """Failure path only: tell a wrong decode apart from real structural damage.
+
+    The tell is which weekday labels survived. 'Mandag'..'Fredag' are pure ASCII
+    and match under any decode, but 'Lørdag' and 'Søndag' do not — so a wrong
+    encoding silently drops exactly 2 of every 7 day rows, leaving 30 of 42.
+    Every turnus then reports a wrong rotation length and a scrambled weekday
+    order: ~1500 errors for the real R26 file, none of them mentioning encoding,
+    all of them pointing at a phantom rotation-length change.
+
+    A file that genuinely lacks weekend rows does not exist here — 42 consecutive
+    days always cover all seven labels — so ASCII labels present with zero
+    non-ASCII labels is unambiguous.
+
+    Returns the explanation, or None to let the normal per-block checks run.
+    """
+    if not blocks:
+        return None  # "not a timeskjema" is already reported, and is not this
+    if _count_weekday_rows(text, _ASCII_WEEKDAYS) == 0:
+        return None  # nothing recognisable at all; not specifically an encoding tell
+    if _count_weekday_rows(text, _NON_ASCII_WEEKDAYS) > 0:
+        return None  # weekend labels decoded fine, so the encoding is right
+
+    hint = ""
+    try:
+        as_utf8 = data.decode("utf-8")
+    except UnicodeDecodeError:
+        pass
+    else:
+        if _count_weekday_rows(as_utf8, _NON_ASCII_WEEKDAYS) > 0:
+            hint = "Filen ser ut til å være UTF-8-kodet. "
+
+    return (
+        f"{hint}Ingen {'/'.join(_NON_ASCII_WEEKDAYS)}-rader ble gjenkjent i "
+        f"{len(blocks)} turnusblokk(er), men {len(_ASCII_WEEKDAYS)} andre ukedager "
+        "ble det — dette er signaturen på feil tegnkoding. Timeskjema-eksporten "
+        "forventes å være ISO-8859-1-kodet. Konverter filen først: "
+        "venv/bin/python scripts/probe_timeskjema.py <fil> --convert <ny fil>"
+    )
+
+
 def parse_timeskjema(source) -> ParseResult:
     """Parse a timeskjema export from a path or raw bytes.
 
@@ -245,6 +299,12 @@ def parse_timeskjema(source) -> ParseResult:
         result.rutetermin_end = date(int(y1), int(m1), int(d1))
 
     blocks = _split_blocks_with_order(text, errors)
+
+    # Before the per-block checks, so one decode problem cannot masquerade as
+    # hundreds of independent structural ones.
+    encoding_error = _diagnose_encoding(data, text, blocks)
+    if encoding_error:
+        raise TimeskjemaParseError([encoding_error])
 
     for block in blocks:
         name = block["name"]

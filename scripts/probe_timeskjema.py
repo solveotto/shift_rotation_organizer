@@ -27,13 +27,20 @@ Structural constants (``_REQUIRED_COLUMNS``, ``_FREE_NORMALIZE``, ``WEEKDAYS``,
 ``_TIME_RE``) are imported from the parser rather than restated, so the probe
 cannot drift away from what the parser actually enforces.
 
+Encoding note: the parser hardcodes an ISO-8859-1 decode, which is what NLF has
+always sent. A different encoding does NOT corrupt anything silently — the
+Norwegian weekday labels stop matching and the import is refused with nothing
+written. ``--convert`` re-encodes such a file to ISO-8859-1 (lossless for the
+character set NLF uses) so the import can proceed.
+
 Usage:
     venv/bin/python scripts/probe_timeskjema.py <new-file.xls>
     venv/bin/python scripts/probe_timeskjema.py <new.xls> --baseline <old.xls>
+    venv/bin/python scripts/probe_timeskjema.py <new.xls> --convert <fixed.xls>
     venv/bin/python scripts/probe_timeskjema.py <new.xls> --json
 
 Exit codes: 0 = no structural differences, 1 = differences to look at,
-2 = the file could not be read as a timeskjema at all.
+2 = the file could not be read as a timeskjema at all (or a conversion failed).
 """
 
 import argparse
@@ -51,8 +58,10 @@ from app.utils.timeskjema_parser import (  # noqa: E402
     _REQUIRED_COLUMNS,
     _TIME_RE,
     WEEKDAYS,
+    _NON_ASCII_WEEKDAYS,
     TimeskjemaParseError,
     _clean,
+    _count_weekday_rows,
     parse_timeskjema,
     sniff_format,
 )
@@ -68,11 +77,21 @@ except Exception:  # pragma: no cover - depends on local .env
 
 DEFAULT_BASELINE_GLOB = os.path.join(TURNUSDATA_DIR, "r26", "*.xls")
 
-# UTF-8 'ø','æ','å','é' misread as ISO-8859-1 all start with these two bytes.
-# The parser hardcodes an iso-8859-1 decode that CANNOT fail (all 256 byte
-# values map), so a switch to UTF-8 upstream produces silent mojibake in shift
-# names rather than an error. This is the check for that.
-_MOJIBAKE_MARKERS = ("Ã¸", "Ã¦", "Ã¥", "Ã©", "Ã˜", "Ã†", "Ã…")
+# Encodings tried, in order. iso-8859-1 must stay last: it maps all 256 byte
+# values and therefore never raises, so it is the terminal fallback rather than a
+# candidate that can be ruled out.
+#
+# cp1252 is deliberately NOT a candidate. It differs from iso-8859-1 only in
+# 0x80-0x9F, and every Norwegian letter is identical in both, so it would decode
+# the real file just as successfully and the probe would report "cp1252" for a
+# file that is iso-8859-1 — making --convert think a conversion was needed. The
+# only bytes that could tell them apart are reported separately below.
+_ENCODINGS = ("utf-8", "iso-8859-1")
+
+# 0x80-0x9F: C1 controls in iso-8859-1, printable punctuation in cp1252 (smart
+# quotes, en dash). None appear in the R26 export. If they ever do, iso-8859-1
+# will read them as control characters and cp1252 is the better interpretation.
+_C1_RANGE = range(0x80, 0xA0)
 
 
 def _find_default_baseline():
@@ -80,21 +99,52 @@ def _find_default_baseline():
     return matches[0] if matches else None
 
 
+def detect_encoding(data):
+    """Return (text, encoding) verified by content rather than guessed.
+
+    The check is whether the *non-ASCII* weekday labels appear — 'Lørdag' and
+    'Søndag'. Testing all seven would prove nothing, since 'Mandag'..'Fredag' are
+    pure ASCII and match under any decode; those two are the only labels that
+    actually discriminate.
+
+    This is a far stronger signal than generic charset sniffing: an ISO-8859-1
+    file cannot masquerade as UTF-8 ('ø' is 0xF8, an invalid UTF-8 start byte),
+    and a file that is already mojibake ('Ã¸' = 0xC3 0xB8) is valid UTF-8 and
+    decodes back to 'ø' — which is the repair we want.
+
+    Returns encoding None when no candidate yields those labels; the file is then
+    something other than an encoding problem.
+    """
+    for encoding in _ENCODINGS:
+        try:
+            text = data.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+        if _count_weekday_rows(text, _NON_ASCII_WEEKDAYS):
+            return text, encoding
+    return data.decode("iso-8859-1"), None
+
+
 def fingerprint(path):
     """Permissive structural scan. Never raises on malformed content — an
-    unexpected shape is a finding to report, not a crash."""
+    unexpected shape is a finding to report, not a crash.
+
+    Scans using the *detected* encoding, so that an encoding difference is
+    reported on its own rather than cascading into phantom findings about
+    rotation length and weekday order.
+    """
     with open(path, "rb") as f:
         data = f.read()
 
     fmt = sniff_format(data)
-    text = data.decode("iso-8859-1")
+    text, encoding = detect_encoding(data)
     lines = text.split("\n")
 
     fp = {
         "path": path,
         "sniff_format": fmt,
-        "mojibake_markers": sorted({m for m in _MOJIBAKE_MARKERS if m in text}),
-        "decodes_as_utf8": _decodes_as_utf8(data),
+        "encoding": encoding,
+        "c1_bytes": sum(1 for b in data if b in _C1_RANGE),
         "rutetermin_line": None,
         "ruteterminperiode_line": None,
         "turnus_names": [],
@@ -177,17 +227,6 @@ def fingerprint(path):
     return fp
 
 
-def _decodes_as_utf8(data):
-    """True when the bytes are valid UTF-8 *and* contain multibyte sequences —
-    i.e. the export was probably re-encoded and the parser's hardcoded
-    iso-8859-1 read is now silently producing mojibake."""
-    try:
-        data.decode("utf-8")
-    except UnicodeDecodeError:
-        return False
-    return any(b >= 0x80 for b in data)
-
-
 def _segment_shape(row_order):
     """Day rows per accounting segment, in raw file order — the 'Sum uke'
     interleaving that the parser replays. Sunday-night shifts land in the next
@@ -251,10 +290,15 @@ def _cell(row, index):
 def compare(base, new):
     """Structural differences worth a human look. Returns a list of strings.
 
-    A wrong encoding or a renamed column makes every later check fail too —
-    weekday labels stop matching ``WEEKDAYS``, day-row counts collapse, off-code
-    scanning is skipped. Those are cascade effects, not independent findings, so
-    the root causes are counted and a note is appended when others follow them.
+    A renamed column makes every later check fail too — off-code scanning is
+    skipped, day rows match no known shape. Those are cascade effects, not
+    independent findings, so root causes are counted and a note is appended when
+    others follow them.
+
+    Encoding is deliberately NOT a root cause here: ``fingerprint`` scans using
+    the detected encoding, so a UTF-8 file is read correctly and its structural
+    findings are real rather than artefacts. Only the encoding line itself is
+    reported, and it tells you the import will refuse the file until converted.
     """
     diffs = []
     root_causes = 0
@@ -264,20 +308,29 @@ def compare(base, new):
             f"format: baseline is {base['sniff_format']!r}, new file is "
             f"{new['sniff_format']!r} — the import will refuse anything but 'timeskjema'"
         )
-    if new["mojibake_markers"] and not base["mojibake_markers"]:
+    if new["encoding"] is None:
         diffs.append(
-            "encoding: mojibake markers present "
-            f"({', '.join(new['mojibake_markers'])}) — the file looks like UTF-8 but "
-            "the parser hardcodes an iso-8859-1 decode that cannot fail, so Norwegian "
-            "characters will be silently mangled rather than error"
+            "encoding: no candidate encoding produced Norwegian weekday labels "
+            f"(tried {', '.join(_ENCODINGS)}) — this is not an encoding problem the "
+            "conversion can fix; the file is something else"
         )
         root_causes += 1
-    elif new["decodes_as_utf8"] and not base["decodes_as_utf8"]:
+    elif new["encoding"] != base["encoding"]:
         diffs.append(
-            "encoding: the new file is valid UTF-8 with multibyte characters while the "
-            "baseline is not — check shift names for mangled æøå before importing"
+            f"encoding: {new['encoding']} (baseline: {base['encoding']}) — the parser "
+            "expects iso-8859-1 and will refuse the file, writing nothing. Convert it "
+            "first: --convert <fixed.xls>. Structural findings below were read using "
+            f"{new['encoding']}, so they are real and not artefacts of the encoding."
         )
-        root_causes += 1
+
+    # Only meaningful for a single-byte encoding: in UTF-8 this range is ordinary
+    # continuation bytes, so checking it there reports noise, not punctuation.
+    if new["encoding"] == "iso-8859-1" and new["c1_bytes"] and not base["c1_bytes"]:
+        diffs.append(
+            f"encoding: {new['c1_bytes']} byte(s) in 0x80-0x9F, which the baseline has "
+            "none of — iso-8859-1 reads these as control characters, cp1252 as smart "
+            "quotes and dashes. Check how they render in shift names before importing."
+        )
 
     base_cols = set(base["column_headers"])
     new_cols = set(new["column_headers"])
@@ -367,6 +420,7 @@ def _print_summary(fp, label):
     print(f"  {label}")
     print(f"    file            {os.path.basename(fp['path'])}")
     print(f"    format          {fp['sniff_format']}")
+    print(f"    encoding        {fp['encoding'] or '(none matched)'}")
     print(f"    turnuser        {len(fp['turnus_names'])}")
     print(f"    day rows/turnus {dict(fp['day_row_counts']) or '-'}")
     print(f"    off-codes       {dict(fp['off_codes']) or '-'}")
@@ -380,6 +434,46 @@ def _print_summary(fp, label):
         print(f"    hours >= 24:00  {fp['hours_over_24']}")
 
 
+def convert_to_iso8859_1(source_path, out_path):
+    """Re-encode a timeskjema to what the parser expects. Returns (ok, message).
+
+    Refuses rather than damages: an existing output file is never overwritten,
+    and a character with no latin-1 representation aborts the whole conversion.
+    That last case is the real signal — it means NLF's character set has grown
+    beyond what conversion can carry, and the parser would need actual
+    multi-encoding support rather than this escape hatch.
+    """
+    if os.path.exists(out_path):
+        return False, f"Refusing to overwrite existing file: {out_path}"
+
+    with open(source_path, "rb") as f:
+        data = f.read()
+    text, encoding = detect_encoding(data)
+    if encoding is None:
+        return False, (
+            "No candidate encoding produced Norwegian weekday labels — nothing to "
+            "convert. This file's problem is not its encoding."
+        )
+    if encoding == "iso-8859-1":
+        return False, "Already iso-8859-1 — no conversion needed."
+
+    try:
+        converted = text.encode("iso-8859-1")
+    except UnicodeEncodeError:
+        unmappable = sorted({c for c in text if ord(c) > 255})
+        return False, (
+            "Cannot convert: these characters have no ISO-8859-1 representation: "
+            + " ".join(f"{c!r} (U+{ord(c):04X})" for c in unmappable[:10])
+            + ". Conversion is not the answer here — the parser needs real "
+            "multi-encoding support. See the plan in docs, or ask NLF for a "
+            "latin-1 export."
+        )
+
+    with open(out_path, "wb") as f:
+        f.write(converted)
+    return True, f"Converted {encoding} -> iso-8859-1: {out_path}"
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("new_file", help="the Timeskjema .xls to probe")
@@ -388,14 +482,20 @@ def main():
         help=f"known-good file to compare against (default: newest match of "
         f"{DEFAULT_BASELINE_GLOB})",
     )
+    ap.add_argument(
+        "--convert",
+        metavar="OUT",
+        help="re-encode the file to iso-8859-1 at OUT, then re-probe the result",
+    )
     ap.add_argument("--json", action="store_true", help="dump both fingerprints as JSON")
     args = ap.parse_args()
 
     baseline_path = args.baseline or _find_default_baseline()
     if baseline_path is None:
         print(
-            f"No baseline found at {DEFAULT_BASELINE_GLOB}. Timeskjema sources are "
-            "gitignored and do not travel with git — pass --baseline explicitly.",
+            f"No baseline found at {DEFAULT_BASELINE_GLOB}. The R26 export is tracked "
+            "in git and should be there — check the working tree, or pass --baseline "
+            "explicitly to compare against another known-good export.",
             file=sys.stderr,
         )
         return 2
@@ -435,10 +535,40 @@ def main():
         print("  none — the file has the same shape as the baseline")
     print()
 
+    _report_parser(args.new_file)
+
+    if args.convert:
+        print("Conversion")
+        print("-" * 70)
+        ok, message = convert_to_iso8859_1(args.new_file, args.convert)
+        print(f"  {message}")
+        print()
+        if not ok:
+            return 2
+        # Never hand back a converted file unverified — re-probe it as if it had
+        # arrived that way, so a conversion cannot quietly mangle anything.
+        converted = fingerprint(args.convert)
+        print("Re-probe of the converted file")
+        print("-" * 70)
+        converted_diffs = compare(base, converted)
+        if converted_diffs:
+            for d in converted_diffs:
+                print(f"  * {d}")
+        else:
+            print("  none — the converted file has the same shape as the baseline")
+        print()
+        _report_parser(args.convert)
+        return 1 if converted_diffs else 0
+
+    # Baseline is a sample of one, so differences are prompts to look, not verdicts.
+    return 1 if diffs else 0
+
+
+def _report_parser(path):
     print("Would the real parser accept it?")
     print("-" * 70)
     try:
-        result = parse_timeskjema(args.new_file)
+        result = parse_timeskjema(path)
     except TimeskjemaParseError as e:
         print(f"  NO — {len(e.errors)} error(s), first 10:")
         for err in e.errors[:10]:
@@ -450,9 +580,6 @@ def main():
         )
         print("  (parsing is not validation — validate_turnus_json still gates the import)")
     print()
-
-    # Baseline is a sample of one, so differences are prompts to look, not verdicts.
-    return 1 if diffs else 0
 
 
 def _jsonable(obj):

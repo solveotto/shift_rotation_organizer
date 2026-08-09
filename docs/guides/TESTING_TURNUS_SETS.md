@@ -320,6 +320,34 @@ the import flow is not the same day the real file lands.
 
 ### 2.1 Upload and validation
 
+- [ ] **Probe the file before uploading it** — this is the cheapest step in the
+      whole checklist and it runs on the dev machine, not the server:
+
+      ```bash
+      venv/bin/python scripts/probe_timeskjema.py "<ny fil>.xls"
+      ```
+
+      It diffs the file's *structure* against the last known-good export
+      (`turnusdata/r26/*.xls` by default): encoding, column headers, 42-day
+      rotation, off-codes, Sum-uke grouping, `Rutetermin:` dates. **Forventet:**
+      `none — the file has the same shape as the baseline`.
+      It is not a validator and not a correctness check — `validate_turnus_json`
+      still gates the import. The baseline is a sample of one, so expect the odd
+      false positive and judge the output rather than reading it as pass/fail.
+- [ ] **If the probe reports an encoding difference:** convert first, then import
+      the converted file. NLF supplies these files and the encoding is theirs to
+      change; the parser expects ISO-8859-1 and refuses anything else, writing
+      nothing.
+
+      ```bash
+      venv/bin/python scripts/probe_timeskjema.py "<ny fil>.xls" --convert "<konvertert>.xls"
+      ```
+
+      The conversion is lossless for the character set NLF uses (verified against
+      R26), and `--convert` re-probes its own output so a conversion cannot
+      quietly mangle anything. Keep NLF's original alongside it for provenance.
+      **If it refuses** because characters have no ISO-8859-1 representation, stop
+      — that needs a code change, not a workaround.
 - [ ] **Admin → Opprett turnussett.** Fill in Navn and Årsidentifikator (e.g.
       `R27`), **untick "Bruk eksisterende filer"**, choose the Timeskjema file.
       **Note:** the checkbox is ticked by default, and leaving it ticked while
