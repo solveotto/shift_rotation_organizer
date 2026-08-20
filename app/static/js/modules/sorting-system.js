@@ -5,6 +5,8 @@ export class SortingSystem {
     constructor() {
         this.originalOrder = [];
         this.currentOrder = [];
+        this.metrics = {};
+        this.saveTimer = null;
         this.init();
     }
 
@@ -26,6 +28,7 @@ export class SortingSystem {
             return;
         }
 
+        this.metrics = this.loadMetrics();
         this.initializeOriginalOrder();
         this.setupEventListeners();
         
@@ -39,90 +42,81 @@ export class SortingSystem {
         sliders.forEach(slider => this.updateSliderValue(slider));
     }
 
+    /**
+     * Real numbers from the route, keyed by raw turnus name.
+     *
+     * This replaced parsing the rendered .data-felt grid, which read every value
+     * through parseInt on a positional <b> index: helgetimer 58.3 became 58, an
+     * unknown kompdager count ("–") became 0 — i.e. the best rank under "Færre" —
+     * and reordering one cell in the grid silently mis-mapped every field after it.
+     */
+    loadMetrics() {
+        const block = document.getElementById('turnus-metrics');
+        if (!block) {
+            console.warn('No #turnus-metrics block found; sorting will be neutral');
+            return {};
+        }
+        try {
+            return JSON.parse(block.textContent) || {};
+        } catch (error) {
+            console.error('Could not parse #turnus-metrics:', error);
+            return {};
+        }
+    }
+
+    /**
+     * The turnus cards, paired with their raw name.
+     *
+     * Identity comes from data-turnus, never from .t-name — that goes through the
+     * display_name filter, so it reads "OSL 01" while the metrics are keyed
+     * "OSL_01". Cards without the attribute are skipped rather than sorted blind.
+     */
+    getTurnusItems() {
+        const items = document.querySelectorAll('.list-group-item[data-turnus]');
+        return Array.from(items).map(element => ({
+            element,
+            name: element.dataset.turnus
+        }));
+    }
+
     initializeOriginalOrder() {
-        const turnusItems = document.querySelectorAll('.list-group-item');
-        this.originalOrder = Array.from(turnusItems).map(item => {
-            const turnusName = item.querySelector('.t-name').textContent.trim();
-            return { element: item, name: turnusName };
-        });
+        this.originalOrder = this.getTurnusItems();
         this.currentOrder = [...this.originalOrder];
     }
 
     getTurnusData() {
-        const turnusData = [];
-        const turnusItems = document.querySelectorAll('.list-group-item');
-        
-        turnusItems.forEach((item, index) => {
-            const turnusName = item.querySelector('.t-name');
-            if (!turnusName) {
-                console.warn(`No turnus name found for item ${index}`);
-                return;
+        return this.getTurnusItems().map(({ element, name }) => {
+            const metrics = this.metrics[name];
+            if (!metrics) {
+                // Still take part in the sort, with every criterion unknown —
+                // otherwise appendChild never touches this card and it sits still
+                // while the rest of the list reorders around it.
+                console.warn(`No metrics for turnus ${name}`);
             }
-            
-            const name = turnusName.textContent.trim();
-            const dataRow = item.querySelector('.data-felt');
-            
-            if (dataRow) {
-                try {
-                    // data-felt uses a CSS grid: interleaved <span> label + <b> value pairs.
-                    // Order: Dagsverk, Tidlig, Kveld, Natt, Starter før 6, Tidlig 6-8,
-                    //        Tidlig 8-12, Helgetimer, Helgtimer dag, Lengste fri,
-                    //        Lengste rekke, Kompdager (maks)
-                    const bs = dataRow.querySelectorAll('b');
-                    const shiftCnt   = parseInt(bs[0]?.textContent)   || 0;
-                    const tidlig     = parseInt(bs[1]?.textContent)   || 0;
-                    const ettermiddag = parseInt(bs[2]?.textContent)  || 0;
-                    const natt       = parseInt(bs[3]?.textContent)   || 0;
-                    const before6    = parseInt(bs[4]?.textContent)   || 0;
-                    const tidlig68   = parseInt(bs[5]?.textContent)   || 0;
-                    const tidlig812  = parseInt(bs[6]?.textContent)   || 0;
-                    const helgetimer = parseInt(bs[7]?.textContent)   || 0;
-                    // bs[8] = helgetimer_dagtid (not used in sorting)
-                    const longestOff    = parseInt(bs[9]?.textContent)  || 0;
-                    const longestStreak = parseInt(bs[10]?.textContent) || 0;
-                    // Kompdager (maks) renders as "10 (L1)"; parseInt takes the count.
-                    const kompdagerMax  = parseInt(bs[11]?.textContent) || 0;
-
-                    turnusData.push({
-                        name: name,
-                        element: item,
-                        shift_cnt: shiftCnt,
-                        tidlig: tidlig,
-                        ettermiddag: ettermiddag,
-                        natt: natt,
-                        helgetimer: helgetimer,
-                        before_6: before6,
-                        tidlig_6_8: tidlig68,
-                        tidlig_8_12: tidlig812,
-                        longest_off_streak: longestOff,
-                        longest_work_streak: longestStreak,
-                        kompdager_max: kompdagerMax
-                    });
-                } catch (error) {
-                    console.error(`Error parsing data for turnus ${name}:`, error);
-                }
-            } else {
-                console.warn(`No data-felt found for turnus ${name}`);
-            }
+            return { name, element, ...(metrics || {}) };
         });
-        
-        return turnusData;
     }
 
     /**
      * Calculate min/max values for each criterion from the current dataset
      */
     calculateMinMax(turnusData) {
-        const criteria = ['helgetimer', 'shift_cnt', 'tidlig', 'natt', 'ettermiddag', 'before_6',
+        const criteria = ['helgetimer', 'helgetimer_dagtid', 'helgetimer_ettermiddag', 'helgetimer_natt',
+                          'shift_cnt', 'tidlig', 'natt', 'ettermiddag', 'before_6',
                           'tidlig_6_8', 'tidlig_8_12', 'longest_off_streak', 'longest_work_streak', 'kompdager_max'];
         const minMax = {};
 
         criteria.forEach(key => {
-            const values = turnusData.map(t => t[key] || 0);
-            minMax[key] = {
-                min: Math.min(...values),
-                max: Math.max(...values)
-            };
+            // == null catches both null (unknown, e.g. kompdager without the
+            // nøkkel template) and undefined. A falsy test would swallow a
+            // legitimate 0 — which is exactly what the old `|| 0` did.
+            const values = turnusData
+                .map(t => t[key])
+                .filter(value => value != null);
+
+            minMax[key] = values.length
+                ? { min: Math.min(...values), max: Math.max(...values) }
+                : { min: 0, max: 1 };
         });
 
         return minMax;
@@ -144,11 +138,15 @@ export class SortingSystem {
             if (weight === 0) return; // Skip neutral weights
 
             const dataKey = key;
-            const value = turnus[dataKey] || 0;
+            const value = turnus[dataKey];
             const { min, max } = minMax[dataKey] || { min: 0, max: 1 };
 
-            // Normalize to 0-1 scale
-            const normalized = this.normalizeValue(value, min, max);
+            // Unknown is neutral, not zero. Scoring it as 0 would rank a turnus
+            // with no kompdag data as having the fewest of them. Note 0.5 lands
+            // the same contribution whichever sign the weight has.
+            const normalized = value == null
+                ? 0.5
+                : this.normalizeValue(value, min, max);
 
             // Positive weight: higher normalized values get higher scores
             // Negative weight: lower normalized values get higher scores (invert)
@@ -168,6 +166,9 @@ export class SortingSystem {
     sortTurnuser() {
         const weights = {
             helgetimer: parseFloat(document.getElementById('helgetimer-slider').value),
+            helgetimer_dagtid: parseFloat(document.getElementById('helgetimer-dagtid-slider').value),
+            helgetimer_ettermiddag: parseFloat(document.getElementById('helgetimer-ettermiddag-slider').value),
+            helgetimer_natt: parseFloat(document.getElementById('helgetimer-natt-slider').value),
             shift_cnt: parseFloat(document.getElementById('shift-cnt-slider').value),
             tidlig: parseFloat(document.getElementById('tidlig-slider').value),
             natt: parseFloat(document.getElementById('natt-slider').value),
@@ -207,9 +208,48 @@ export class SortingSystem {
         
         // Update current order
         this.currentOrder = turnusData.map(t => ({ element: t.element, name: t.name }));
-        
+
         // Update sorting info display
+        this.updateMatchBadges(turnusData, weights);
         this.updateSortingInfo(weights);
+    }
+
+    /**
+     * Per-card "NN %" — the share of the maximum achievable score.
+     *
+     * Values are min/max-normalised across the rendered list, so this is a
+     * comparison against the other turnuser, not an absolute quality score: with
+     * one active slider the top card always reads 100 % and the bottom 0 %, and
+     * if every value is identical they all read 50 %. The title and the panel
+     * hint say so — a bare "100 %" reads as "perfect match".
+     */
+    updateMatchBadges(turnusData, weights) {
+        const totalWeight = Object.values(weights)
+            .reduce((sum, weight) => sum + Math.abs(weight), 0);
+
+        if (totalWeight === 0) {
+            this.clearMatchBadges();
+            return;
+        }
+
+        const criteria = this.activeCriteria(weights).join(', ');
+
+        turnusData.forEach(turnus => {
+            const badge = turnus.element.querySelector('.turnus-match-badge');
+            if (!badge) return;
+
+            badge.textContent = `${Math.round((turnus.score / totalWeight) * 100)} %`;
+            badge.title = `Treff sammenlignet med de andre turnusene i lista. Kriterier: ${criteria}`;
+            badge.classList.remove('d-none');
+        });
+    }
+
+    clearMatchBadges() {
+        document.querySelectorAll('.turnus-match-badge').forEach(badge => {
+            badge.textContent = '';
+            badge.title = '';
+            badge.classList.add('d-none');
+        });
     }
 
     resetOrder() {
@@ -226,6 +266,11 @@ export class SortingSystem {
             this.updateSliderValue(slider);
         });
         
+        // Drop any pending debounced write first — otherwise a timer armed by the
+        // drag that preceded this click fires afterwards and writes the weights
+        // we just cleared straight back into localStorage.
+        this.cancelPendingSave();
+
         // Clear saved settings
         try {
             localStorage.removeItem('turnuslisteSortingSettings');
@@ -233,7 +278,11 @@ export class SortingSystem {
         } catch (error) {
             console.error('Error clearing sorting settings:', error);
         }
-        
+
+        // This path never calls sortTurnuser(), so the per-card match badges have
+        // to be cleared here too, not only in its zero-weight branch.
+        this.clearMatchBadges();
+
         // Clear active-criteria badge on the Sorter button
         const badge = document.getElementById('sorter-active-badge');
         if (badge) {
@@ -268,15 +317,18 @@ export class SortingSystem {
         }
     }
 
-    updateSortingInfo(weights) {
-        const activeCriteria = [];
-        Object.entries(weights).forEach(([key, value]) => {
-            if (value !== 0) {
-                const label = this.getCriteriaLabel(key);
+    /** Labelled criteria the user has actually moved, e.g. "Natt: Lav → Høy". */
+    activeCriteria(weights) {
+        return Object.entries(weights)
+            .filter(([, value]) => value !== 0)
+            .map(([key, value]) => {
                 const direction = value > 0 ? 'Høy → Lav' : 'Lav → Høy';
-                activeCriteria.push(`${label}: ${direction}`);
-            }
-        });
+                return `${this.getCriteriaLabel(key)}: ${direction}`;
+            });
+    }
+
+    updateSortingInfo(weights) {
+        const activeCriteria = this.activeCriteria(weights);
 
         const badge = document.getElementById('sorter-active-badge');
         if (badge) {
@@ -289,6 +341,9 @@ export class SortingSystem {
     getCriteriaLabel(key) {
         const labels = {
             helgetimer: 'Helgetimer',
+            helgetimer_dagtid: 'Helg dagtid',
+            helgetimer_ettermiddag: 'Helg kveld',
+            helgetimer_natt: 'Helg natt',
             shift_cnt: 'Dagsverk',
             tidlig: 'Tidlig',
             natt: 'Natt',
@@ -303,10 +358,33 @@ export class SortingSystem {
         return labels[key] || key;
     }
 
+    /**
+     * Defer the write. 'input' fires continuously while a slider is dragged; the
+     * sort stays synchronous per event because the immediate reorder is the whole
+     * point, but localStorage only needs the value the user settles on.
+     */
+    queueSaveSortingSettings() {
+        this.cancelPendingSave();
+        this.saveTimer = window.setTimeout(() => {
+            this.saveTimer = null;
+            this.saveSortingSettings();
+        }, 200);
+    }
+
+    cancelPendingSave() {
+        if (this.saveTimer !== null) {
+            window.clearTimeout(this.saveTimer);
+            this.saveTimer = null;
+        }
+    }
+
     saveSortingSettings() {
         try {
             const settings = {
                 helgetimer: document.getElementById('helgetimer-slider').value,
+                helgetimer_dagtid: document.getElementById('helgetimer-dagtid-slider').value,
+                helgetimer_ettermiddag: document.getElementById('helgetimer-ettermiddag-slider').value,
+                helgetimer_natt: document.getElementById('helgetimer-natt-slider').value,
                 shift_cnt: document.getElementById('shift-cnt-slider').value,
                 tidlig: document.getElementById('tidlig-slider').value,
                 natt: document.getElementById('natt-slider').value,
@@ -354,7 +432,10 @@ export class SortingSystem {
                            key === 'longest_off_streak' ? 'longest-off-slider' :
                            key === 'longest_work_streak' ? 'longest-streak-slider' :
                            key === 'kompdager_max' ? 'kompdager-slider' :
-                           `${key}-slider`;
+                           // Everything else: the metric key with underscores
+                           // swapped for hyphens. The branches above are the
+                           // irregular ones, whose id is not derivable.
+                           `${key.replace(/_/g, '-')}-slider`;
             
             const slider = document.getElementById(sliderId);
             const mobileSlider = document.getElementById(sliderId + '-mobile');
@@ -403,7 +484,7 @@ export class SortingSystem {
                 }
                 
                 this.sortTurnuser();
-                this.saveSortingSettings(); // Save settings after each change
+                this.queueSaveSortingSettings();
             });
         });
         

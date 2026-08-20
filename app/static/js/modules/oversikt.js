@@ -431,29 +431,28 @@ function renderVaktprofil() {
     });
 }
 
-// datasetIndex → metric key that segment represents (for legend-click sorting)
-const HP_KEYS = ['helgetimer_dagtid', 'helgetimer_ettermiddag'];
+// datasetIndex → metric key that segment represents (for legend-click sorting).
+// The three keys partition helgetimer, so the stack height is the weekend total.
+const HP_KEYS    = ['helgetimer_dagtid', 'helgetimer_ettermiddag', 'helgetimer_natt'];
+const HP_COLORS  = ['#6ee7b7', '#10b981', '#065f46'];
+const HP_BORDERS = ['#10b981', '#059669', '#064e3b'];
+const HP_LBLS    = [
+    'Dagtid (lør/søn før 14)',
+    'Kveld (fre 17+, lør/søn etter 14)',
+    'Natt (over midnatt, slutt 04+)',
+];
 let helgeprofilSortKey = 'helgetimer';  // set by legend clicks; default = total helgetimer
 
 function renderHelgeprofil() {
     if (!(metricsData['helgetimer_dagtid'] || []).length) return;
     const { lbls } = sortedData(turnusLabels, metricsData[helgeprofilSortKey] || [], currentSort);
-    const datasets = [
-        {
-            label: 'Dagtid (lør/søn før 14)',
-            data: lbls.map(lbl => (metricsData['helgetimer_dagtid'] || [])[turnusLabels.indexOf(lbl)] || 0),
-            backgroundColor: '#6ee7b7cc',
-            borderColor: '#10b981',
-            borderWidth: 1, borderRadius: 2, borderSkipped: false,
-        },
-        {
-            label: 'Kveld/natt (fre 17+, lør/søn etter 14)',
-            data: lbls.map(lbl => (metricsData['helgetimer_ettermiddag'] || [])[turnusLabels.indexOf(lbl)] || 0),
-            backgroundColor: '#065f46cc',
-            borderColor: '#064e3b',
-            borderWidth: 1, borderRadius: 2, borderSkipped: false,
-        },
-    ];
+    const datasets = HP_KEYS.map((k, ki) => ({
+        label: HP_LBLS[ki],
+        data: lbls.map(lbl => (metricsData[k] || [])[turnusLabels.indexOf(lbl)] || 0),
+        backgroundColor: HP_COLORS[ki] + 'cc',
+        borderColor:     HP_BORDERS[ki],
+        borderWidth: 1, borderRadius: 2, borderSkipped: false,
+    }));
     // Clicking a legend item re-sorts the bars by that segment (highest first),
     // instead of Chart.js's default hide/show of the dataset.
     makeStackedBar('chart-helgeprofil', 'wrap-helgeprofil', lbls, datasets, false, (_e, legendItem) => {

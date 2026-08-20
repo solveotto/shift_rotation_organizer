@@ -257,3 +257,26 @@
         height: 22px;
     }
 }
+
+/* ---- Match badge on the turnus cards ---- */
+
+/* Written by sorting-system.js when at least one slider is off centre, and
+   hidden again (d-none) on Nullstill. The percentage is relative to the other
+   turnuser in the list, which is why it stays a quiet outline rather than a
+   filled "score" pill — see the hint text in components/sorter_controls.html. */
+.turnus-match-badge {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    padding: 0.2rem 0.45rem;
+    border-radius: var(--radius-full);
+    color: var(--color-primary-dark);
+    /* rgba literals of --color-primary: there is no --color-primary-rgb to feed
+       an alpha channel, and this is the convention the rest of the file and
+       components/guided-tour.css already use. */
+    background-color: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    cursor: help;
+}

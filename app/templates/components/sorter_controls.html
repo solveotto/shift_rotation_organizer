@@ -6,8 +6,23 @@
    by `{base_id}-slider{suffix}` and derives its value chip by replacing
    '-slider' with '-value'. The desktop/mobile sync is plain string surgery on
    the '-mobile' suffix, so `suffix` must be '' or '-mobile' and nothing else.
-   tests/test_turnusliste_sorter.py asserts all 22 ids render.
+   tests/test_turnusliste_sorter.py asserts all 28 ids render.
 #}
+
+{#
+   Shared hint. The treff-% is min/max-normalised within the rendered list, so
+   the top card reads 100 % whenever a single slider is active regardless of how
+   good that turnus actually is — the wording has to say "sammenlignet med de
+   andre" or users will read it as an absolute score.
+#}
+{% macro sorter_hint() %}
+<p class="filter-hint">
+    Dra mot høyre for å prioritere turnuser med <strong>flere</strong> — mot venstre for
+    <strong>færre</strong>. Listen sorteres mens du drar.
+    Prosenten på hver turnus viser hvor godt den treffer <em>sammenlignet med de andre
+    i lista</em>, ikke en absolutt score.
+</p>
+{% endmacro %}
 
 {% macro sorter_group(title) %}
 <section class="filter-group">
@@ -32,8 +47,12 @@
 {% endmacro %}
 
 {#
-   The eleven criteria in their three families. Called with a suffix so the
+   The fourteen criteria in their four families. Called with a suffix so the
    desktop dropdown and the mobile modal can never drift apart.
+
+   The three helg sub-sliders rank on columns that partition helgetimer
+   (dagtid / kveld / natt — see app/utils/shift_stats.py), so a user can
+   prioritise weekend nights without also dragging weekend daytime.
 #}
 {% macro sorter_body(suffix='') %}
 {% call sorter_group('Skifttyper') %}
@@ -46,9 +65,14 @@
     {{ sorter_slider('tidlig-6-8', 'Tidlig 6–8', 'Færre', 'Flere', suffix) }}
     {{ sorter_slider('tidlig-8-12', 'Tidlig 8–12', 'Færre', 'Flere', suffix) }}
 {% endcall %}
+{% call sorter_group('Helg') %}
+    {{ sorter_slider('helgetimer', 'Helgetimer', 'Færre', 'Flere', suffix) }}
+    {{ sorter_slider('helgetimer-dagtid', 'Helg dagtid', 'Færre', 'Flere', suffix) }}
+    {{ sorter_slider('helgetimer-ettermiddag', 'Helg kveld', 'Færre', 'Flere', suffix) }}
+    {{ sorter_slider('helgetimer-natt', 'Helg natt', 'Færre', 'Flere', suffix) }}
+{% endcall %}
 {% call sorter_group('Belastning & fri') %}
     {{ sorter_slider('shift-cnt', 'Dagsverk', 'Færre', 'Flere', suffix) }}
-    {{ sorter_slider('helgetimer', 'Helgetimer', 'Færre', 'Flere', suffix) }}
     {{ sorter_slider('longest-off', 'Lengste fri', 'Kort', 'Lang', suffix) }}
     {{ sorter_slider('longest-streak', 'Lengste rekke', 'Kort', 'Lang', suffix) }}
     {{ sorter_slider('kompdager', 'Kompdager (maks)', 'Færre', 'Flere', suffix) }}
