@@ -202,6 +202,55 @@ class TestFailureModes:
         assert any("Duplicate" in e for e in errors)
 
 
+class TestEncodingDiagnosis:
+    """A wrong decode breaks the Norwegian weekday labels every day row is keyed
+    on, so it would otherwise surface as ~1500 errors about rotation length and
+    weekday order — none mentioning encoding. It must collapse to one."""
+
+    @staticmethod
+    def as_utf8():
+        return fixture_bytes().decode("iso-8859-1").encode("utf-8")
+
+    def test_utf8_file_reports_exactly_one_error(self):
+        with pytest.raises(TimeskjemaParseError) as exc:
+            parse_timeskjema(self.as_utf8())
+        assert len(exc.value.errors) == 1
+
+    def test_utf8_error_names_the_encoding(self):
+        with pytest.raises(TimeskjemaParseError) as exc:
+            parse_timeskjema(self.as_utf8())
+        error = exc.value.errors[0]
+        assert "UTF-8" in error and "ISO-8859-1" in error
+
+    def test_non_timeskjema_keeps_its_own_error(self):
+        # No 'Turnus:' blocks at all is not an encoding problem, and must not be
+        # relabelled as one.
+        with pytest.raises(TimeskjemaParseError) as exc:
+            parse_timeskjema(b"noe helt annet\nuten blokker\n")
+        assert any("Turnus:" in e for e in exc.value.errors)
+        assert not any("ISO-8859-1" in e for e in exc.value.errors)
+
+    def test_real_structural_damage_is_not_swallowed(self):
+        # One shuffled weekday label still leaves other day rows intact, so the
+        # diagnosis must stay out of the way and let the real finding through.
+        mutated = fixture_bytes().replace(b"Tirsdag\t3007", b"Mandag\t3007", 1)
+        with pytest.raises(TimeskjemaParseError) as exc:
+            parse_timeskjema(mutated)
+        assert any("Tirsdag" in e for e in exc.value.errors)
+        assert not any("ISO-8859-1" in e for e in exc.value.errors)
+
+    def test_sniff_format_still_recognises_utf8_file(self):
+        # Its markers are ASCII, so classification must be unaffected — the file
+        # is a timeskjema, just in the wrong encoding.
+        assert sniff_format(self.as_utf8()) == "timeskjema"
+
+    def test_conversion_back_to_iso8859_1_parses(self):
+        # The escape hatch the error message points at must actually work.
+        recovered = self.as_utf8().decode("utf-8").encode("iso-8859-1")
+        assert recovered == fixture_bytes()
+        assert len(parse_timeskjema(recovered).turnuser) > 0
+
+
 from config import AppConfig  # noqa: E402
 
 _REAL_XLS = os.path.join(AppConfig.turnusfiler_dir, "r26", "R26 endelig.xls")
