@@ -36,7 +36,15 @@
 <div class="filter-item">
     <div class="filter-item-head">
         <label class="filter-label" for="{{ slider_id }}">{{ label }}</label>
-        <span class="filter-value" id="{{ base_id }}-value{{ suffix }}"></span>
+        <span class="filter-item-actions">
+            {# Per-slider reset. Shares the .is-active gate with the value chip, so
+               it fades in beside the number and is unreachable while at 0. #}
+            <button type="button" class="filter-item-reset" data-reset-for="{{ slider_id }}"
+                title="Nullstill {{ label }}" aria-label="Nullstill {{ label }}" tabindex="-1">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <span class="filter-value" id="{{ base_id }}-value{{ suffix }}"></span>
+        </span>
     </div>
     <input type="range" class="form-range filter-slider" id="{{ slider_id }}" min="-10" max="10" value="0" step="0.5" />
     <div class="slider-direction-info">

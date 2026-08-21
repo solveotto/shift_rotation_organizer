@@ -292,6 +292,29 @@ export class SortingSystem {
         }
     }
 
+    /**
+     * Mirror a slider's value onto its desktop/mobile twin.
+     *
+     * The two panels are rendered from the same macro with a '-mobile' suffix,
+     * so the twin's id is pure string surgery on that suffix and nothing else.
+     */
+    syncCounterpart(slider) {
+        const counterpartId = slider.id.includes('-mobile')
+            ? slider.id.replace('-mobile', '')
+            : `${slider.id}-mobile`;
+        const counterpart = document.getElementById(counterpartId);
+        if (counterpart) {
+            counterpart.value = slider.value;
+            this.updateSliderValue(counterpart);
+        }
+    }
+
+    /** True while any slider is off centre (desktop and mobile twins alike). */
+    hasActiveSlider() {
+        return Array.from(document.querySelectorAll('.filter-slider'))
+            .some(slider => (parseFloat(slider.value) || 0) !== 0);
+    }
+
     updateSliderValue(slider) {
         const value = parseFloat(slider.value) || 0;
         const min = parseFloat(slider.min);
@@ -464,30 +487,35 @@ export class SortingSystem {
             
             slider.addEventListener('input', () => {
                 this.updateSliderValue(slider);
-                
-                // Sync mobile and desktop sliders
-                const sliderId = slider.id;
-                if (sliderId.includes('-mobile')) {
-                    const desktopId = sliderId.replace('-mobile', '');
-                    const desktopSlider = document.getElementById(desktopId);
-                    if (desktopSlider) {
-                        desktopSlider.value = slider.value;
-                        this.updateSliderValue(desktopSlider);
-                    }
-                } else {
-                    const mobileId = sliderId + '-mobile';
-                    const mobileSlider = document.getElementById(mobileId);
-                    if (mobileSlider) {
-                        mobileSlider.value = slider.value;
-                        this.updateSliderValue(mobileSlider);
-                    }
-                }
-                
+                this.syncCounterpart(slider);
+
                 this.sortTurnuser();
                 this.queueSaveSortingSettings();
             });
         });
-        
+
+        // Per-slider reset — the small arrow beside the value chip. Zeroing the
+        // last active slider leaves the same state as Nullstill alt, so it takes
+        // the full reset path: original order back, saved settings dropped.
+        const itemResetButtons = document.querySelectorAll('.filter-item-reset');
+        itemResetButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const slider = document.getElementById(button.dataset.resetFor);
+                if (!slider) return;
+
+                slider.value = 0;
+                this.updateSliderValue(slider);
+                this.syncCounterpart(slider);
+
+                if (this.hasActiveSlider()) {
+                    this.sortTurnuser();
+                    this.queueSaveSortingSettings();
+                } else {
+                    this.resetOrder();
+                }
+            });
+        });
+
         // Add event listener to reset buttons (both desktop and mobile)
         const resetButtons = document.querySelectorAll('#reset-sorting, #reset-sorting-mobile');
         resetButtons.forEach(button => {
