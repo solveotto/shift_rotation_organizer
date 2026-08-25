@@ -4,7 +4,7 @@ from flask_login import current_user, login_required
 from app.routes.shifts import _classify_shift_type, shifts
 from app.services.innplassering_service import get_innplassering_for_user
 from app.services import turnus_service
-from app.utils import df_utils
+from app.utils import df_utils, turnuskalender
 from app.utils.kompdag_utils import count_kompdager, get_holidays_for_dates
 
 
@@ -18,12 +18,6 @@ def _load_mintur_data(user_id: int) -> dict | None:
     Each cell dict in groups includes a 'tid' key (raw ["HH:MM","HH:MM"] list).
     Each date dict in groups includes a 'date_obj' key (Python date or None).
     """
-    import os
-
-    import openpyxl
-
-    from config import AppConfig
-
     active_set = turnus_service.get_active_turnus_set()
     records = get_innplassering_for_user(user_id)
     if not records or not active_set:
@@ -66,48 +60,38 @@ def _load_mintur_data(user_id: int) -> dict | None:
             }
 
     dag_names = ["Man", "Tirs", "Ons", "Tors", "Fre", "Lør", "Søn"]
-    template_path = os.path.join(
-        AppConfig.turnusfiler_dir,
-        year_identifier.lower(),
-        f"turnusnøkkel_{year_identifier}_org.xlsx",
-    )
-    template_found = os.path.exists(template_path)
+    all_rows = turnuskalender.load_nokkel_rows(year_identifier)
+    template_found = all_rows is not None
     groups = []
 
     _empty_cell = {"value": "", "dagsverk": "", "tid": []}
 
-    if template_found:
-        wb = openpyxl.load_workbook(template_path, data_only=True)
-        sheet = wb["Turnusnøkkel"]
-        all_rows = [list(row) for row in sheet.iter_rows(min_row=1, max_row=48)]
-        wb.close()
+    def _cells_for(g, d):
+        """The six linje columns of one weekday row, in linje order."""
+        return [
+            linje_shifts.get(turnuskalender.rotation_week(g, j), {}).get(
+                d + 1, _empty_cell
+            )
+            for j in range(1, 7)
+        ]
 
+    if template_found:
         # Holiday flag comes from the computed §5.13.1 set (multi-year, since
         # a turnus year spans two calendar years), not the manual red font.
-        all_dates = [
-            c.value.date() if hasattr(c.value, "date") else c.value
-            for row in all_rows
-            for c in row[7:16]
-            if c.value is not None and hasattr(c.value, "strftime")
-        ]
-        holiday_set = get_holidays_for_dates(all_dates)
+        holiday_set = get_holidays_for_dates(
+            list(turnuskalender.build_date_index(rows=all_rows))
+        )
 
-        for g in range(6):
-            uke_labels = [
-                str(c.value) for c in all_rows[g * 8][7:16] if c.value is not None
-            ]
+        for g in range(turnuskalender.NOKKEL_GROUPS):
             day_rows = []
-            for d in range(7):
-                cells = [
-                    linje_shifts.get((g + j - 1) % 6 + 1, {}).get(d + 1, _empty_cell)
-                    for j in range(1, 7)
-                ]
+            for d in range(turnuskalender.DAYS_PER_WEEK):
                 dates = []
-                for c in all_rows[g * 8 + 1 + d][7:16]:
-                    if c.value is not None and hasattr(c.value, "strftime"):
-                        cal_date = (
-                            c.value.date() if hasattr(c.value, "date") else c.value
-                        )
+                row = all_rows[g * turnuskalender.ROWS_PER_GROUP + 1 + d]
+                for c in row[turnuskalender.DATE_COLUMNS]:
+                    cal_date = turnuskalender.cell_date(c)
+                    if cal_date is None:
+                        dates.append({"value": "", "holiday": False, "date_obj": None})
+                    else:
                         dates.append(
                             {
                                 "value": c.value.strftime("%d.%m.%y"),
@@ -115,24 +99,20 @@ def _load_mintur_data(user_id: int) -> dict | None:
                                 "date_obj": c.value,
                             }
                         )
-                    else:
-                        dates.append({"value": "", "holiday": False, "date_obj": None})
-                day_rows.append({"name": dag_names[d], "cells": cells, "dates": dates})
-            groups.append({"uke_labels": uke_labels, "day_rows": day_rows})
-    else:
-        for g in range(6):
-            day_rows = [
+                day_rows.append(
+                    {"name": dag_names[d], "cells": _cells_for(g, d), "dates": dates}
+                )
+            groups.append(
                 {
-                    "name": dag_names[d],
-                    "cells": [
-                        linje_shifts.get((g + j - 1) % 6 + 1, {}).get(
-                            d + 1, _empty_cell
-                        )
-                        for j in range(1, 7)
-                    ],
-                    "dates": [],
+                    "uke_labels": turnuskalender.week_labels(all_rows, g),
+                    "day_rows": day_rows,
                 }
-                for d in range(7)
+            )
+    else:
+        for g in range(turnuskalender.NOKKEL_GROUPS):
+            day_rows = [
+                {"name": dag_names[d], "cells": _cells_for(g, d), "dates": []}
+                for d in range(turnuskalender.DAYS_PER_WEEK)
             ]
             groups.append(
                 {
