@@ -2,6 +2,9 @@
 
 This guide covers what to do when the site becomes slow or unresponsive.
 
+For the *before* half — verifying the server is ready ahead of a known traffic
+peak — see [PRODUCTION_READINESS_CHECKLIST.md](PRODUCTION_READINESS_CHECKLIST.md).
+
 ## Current State (as of 2026-05-25)
 
 These improvements are already active in `main`/`development`:

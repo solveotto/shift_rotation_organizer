@@ -271,8 +271,12 @@ def turnus_list(*data_by_name):
     return [{name: data} for name, data in data_by_name]
 
 
-def single_shift_schedule(name, start, end):
-    """A minimal schedule with one work shift on W1D1 and 41 free days.
+def single_shift_schedule(name, start, end, day=1):
+    """A minimal schedule with one work shift in week 1 and 41 free days.
+
+    ``day`` is the 1-indexed weekday the shift lands on (1 = Mandag ...
+    7 = Søndag), for tests whose result depends on it — the weekend-hour
+    buckets in shift_stats.py read ``ukedag``.
 
     Totals are omitted (shift_stats ignores them); not validator-valid on its
     own. Used for shift_stats night-classification tests.
@@ -281,8 +285,8 @@ def single_shift_schedule(name, start, end):
     for w in range(1, 7):
         week = {}
         for d in range(1, 8):
-            if w == 1 and d == 1:
-                week["1"] = {"ukedag": "Mandag", "tid": [start, end], "dagsverk": "TEST"}
+            if w == 1 and d == day:
+                week[str(d)] = {"ukedag": WEEKDAYS_NB[d - 1], "tid": [start, end], "dagsverk": "TEST"}
             else:
                 week[str(d)] = {"ukedag": WEEKDAYS_NB[d - 1], "tid": ["X"], "dagsverk": "X"}
         data[str(w)] = week

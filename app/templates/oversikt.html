@@ -293,10 +293,10 @@ block extra_css %}
             </div>
         </div>
 
-        {# ─ Helgeprofil — dagtid vs kveld/natt ─ #}
+        {# ─ Helgeprofil — dagtid vs kveld vs natt ─ #}
         <div class="section-header section-helg mb-3">
             <span class="section-icon"><i class="bi bi-sunset-fill"></i></span>
-            <h5>Helgeprofil — dag vs kveld/natt</h5>
+            <h5>Helgeprofil — dag / kveld / natt</h5>
             <hr />
         </div>
         <div class="row g-3 mb-4">
@@ -304,8 +304,10 @@ block extra_css %}
                 <div class="card chart-card">
                     <div class="card-body">
                         <p class="chart-title">
-                            Helgetimer: dagtid (lør/søn før 14:00) vs kveld/natt
-                            (fre 17+, lør/søn etter 14)
+                            Helgetimer fordelt på dagtid (lør/søn før 14:00),
+                            kveld (fre 17+, lør/søn etter 14) og natt (vakt over
+                            midnatt som slutter 04:00 eller senere). De tre
+                            summerer seg til totale helgetimer.
                         </p>
                         <div class="chart-wrap" id="wrap-helgeprofil">
                             <canvas id="chart-helgeprofil"></canvas>

@@ -86,9 +86,10 @@ class Turnus():
             shift_cnt = 0
             helgetimer = 0
             helgetimer_dagtid = 0
+            helgetimer_ettermiddag = 0
+            helgetimer_natt = 0
             helgedager = 0
             natt_helg = 0
-            helgetimer_ettermiddag = 0
             tidlig = 0
             before_6 = 0
             afternoon_count = 0
@@ -168,27 +169,42 @@ class Turnus():
                         prev_was_night = is_night
 
                         ### WEEKENDS ###
+                        # Each day computes its weekend hours and the moment
+                        # they start counting; one shared decision then routes
+                        # them into a bucket, so the three buckets always
+                        # partition helgetimer.
+                        helg_hours = 0
+                        helg_start = start
+
                         if ukedag == 'Fredag':
                             fri_17 = start.replace(hour=17, minute=0, second=0)
                             if end > fri_17:
+                                # Only the hours from 17:00 count, so those — not
+                                # the shift's own start — decide the bucket.
                                 helg_start = max(start, fri_17)
-                                friday_helg_hours = (end - helg_start).total_seconds() / 3600
-                                helgetimer += friday_helg_hours
-                                helgetimer_ettermiddag += friday_helg_hours   # always after 17:00 = evening
+                                helg_hours = (end - helg_start).total_seconds() / 3600
                                 helgedager += 1
 
-
                         elif ukedag == 'Lørdag':
-                            saturday_hours = (end - start).total_seconds() / 3600
-                            helgetimer += saturday_hours
+                            helg_hours = (end - start).total_seconds() / 3600
                             helgedager += 1
 
-                            if start.time() >= time(14, 0):
-                                helgetimer_ettermiddag += saturday_hours
+                        elif ukedag == 'Søndag':
+                            # Weekend window closes Monday 06:00. `end` is already
+                            # +1 day when the shift crosses midnight, so min()
+                            # handles both the crossing and non-crossing case.
+                            mon_6am = start.replace(hour=6, minute=0, second=0) + pd.Timedelta(days=1)
+                            helg_hours = (min(end, mon_6am) - start).total_seconds() / 3600
+                            helgedager += 1
 
-                            # Counts daytime hours in weekend
-                            if start.time() < time(14, 0):
-                                helgetimer_dagtid += saturday_hours
+                        if helg_hours:
+                            helgetimer += helg_hours
+                            if is_night:
+                                helgetimer_natt += helg_hours
+                            elif helg_start.time() >= time(14, 0) or crosses_midnight:
+                                helgetimer_ettermiddag += helg_hours
+                            else:
+                                helgetimer_dagtid += helg_hours
 
 
 
@@ -274,10 +290,11 @@ class Turnus():
                 'ettermiddag' : [afternoon_count],
                 'natt': [night_count],
                 'natt_helg': [round(natt_helg,1)],
-                'helgetimer': [round(helgetimer,1)],
                 'helgedager': [helgedager],
+                'helgetimer': [round(helgetimer,1)],
                 'helgetimer_dagtid': [round(helgetimer_dagtid,1)],
-                'helgetimer_ettermiddag': [round(helgetimer_ettermiddag)],
+                'helgetimer_ettermiddag': [round(helgetimer_ettermiddag,1)],
+                'helgetimer_natt': [round(helgetimer_natt,1)],
                 'before_6': [before_6],
                 'afternoon_ends_before_20': [afternoon_ends_before_20],
                 'afternoons_in_row': [afternons_in_row],

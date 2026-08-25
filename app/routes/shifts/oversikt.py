@@ -34,6 +34,7 @@ def oversikt():
         "natt_helg",
         "helgetimer_dagtid",
         "helgetimer_ettermiddag",
+        "helgetimer_natt",
         "tidlig_6_8",
         "tidlig_8_12",
         "longest_off_streak",

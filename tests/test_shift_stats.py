@@ -83,11 +83,11 @@ def stored_stats_r26():
 # We build the smallest valid turnus JSON that exercises specific boundaries.
 # ---------------------------------------------------------------------------
 
-def _make_single_shift_json(turnus_name, start, end):
+def _make_single_shift_json(turnus_name, start, end, day=1):
     """Return a minimal turnus_schedule JSON with one work shift and 41 off days."""
     from tests.conftest import single_shift_schedule
 
-    return single_shift_schedule(turnus_name, start, end)
+    return single_shift_schedule(turnus_name, start, end, day)
 
 
 def _compute_natt(start, end):
@@ -117,6 +117,31 @@ def _compute_kveld(start, end):
     try:
         result = Turnus(path).stats_df
         return int(result[result["turnus"] == "TEST"]["ettermiddag"].iloc[0])
+    finally:
+        os.unlink(path)
+
+
+# Weekday numbers for single_shift_schedule(day=...).
+MANDAG, ONSDAG, FREDAG, LORDAG, SONDAG = 1, 3, 5, 6, 7
+
+
+def _compute_helg(start, end, day):
+    """Helper: the (dagtid, ettermiddag, natt) weekend hours of one shift."""
+    import tempfile
+    data = _make_single_shift_json("TEST", start, end, day)
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", delete=False, encoding="utf-8"
+    ) as f:
+        json.dump(data, f)
+        path = f.name
+    try:
+        result = Turnus(path).stats_df
+        row = result[result["turnus"] == "TEST"].iloc[0]
+        return (
+            float(row["helgetimer_dagtid"]),
+            float(row["helgetimer_ettermiddag"]),
+            float(row["helgetimer_natt"]),
+        )
     finally:
         os.unlink(path)
 
@@ -172,6 +197,54 @@ class TestNightShiftClassification:
             os.unlink(path)
 
 
+class TestWeekendHourBuckets:
+    """The dagtid / ettermiddag / natt split of helgetimer.
+
+    One decision in shift_stats.py routes every weekend hour:
+      nattevakt (crosses midnight, ends 04:00+)  -> natt
+      starts 14:00+ OR crosses midnight          -> ettermiddag
+      otherwise                                  -> dagtid
+
+    The `or crosses_midnight` clause is load-bearing: without it a Sunday
+    shift running past midnight but ending before 04:00 lands in helgetimer
+    and in no bucket at all.
+    """
+
+    def test_saturday_before_14_is_dagtid(self):
+        assert _compute_helg("10:00", "18:00", LORDAG) == (8.0, 0.0, 0.0)
+
+    def test_saturday_from_14_is_ettermiddag(self):
+        assert _compute_helg("14:00", "22:00", LORDAG) == (0.0, 8.0, 0.0)
+
+    def test_sunday_past_midnight_is_ettermiddag_not_dagtid(self):
+        """The gap: starts before 14:00, crosses midnight, is not a nattevakt."""
+        assert _compute_helg("12:00", "0:30", SONDAG) == (0.0, 12.5, 0.0)
+
+    def test_friday_night_shift_is_natt(self):
+        """Friday counts only from 17:00, and a nattevakt goes to natt."""
+        assert _compute_helg("22:00", "6:00", FREDAG) == (0.0, 0.0, 8.0)
+
+    def test_friday_before_14_running_past_17_is_ettermiddag(self):
+        """Friday counts only the hours from 17:00, and those are evening hours
+        whatever time the shift itself began — the bucket must be decided on the
+        start of the counted window, not on the start of the shift."""
+        assert _compute_helg("10:00", "19:00", FREDAG) == (0.0, 2.0, 0.0)
+
+    def test_friday_hours_are_clipped_at_17(self):
+        """15:00-20:00 contributes only the three hours after 17:00."""
+        assert _compute_helg("15:00", "20:00", FREDAG) == (0.0, 3.0, 0.0)
+
+    def test_friday_ending_before_17_has_no_weekend_hours(self):
+        assert _compute_helg("12:00", "16:00", FREDAG) == (0.0, 0.0, 0.0)
+
+    def test_sunday_night_is_capped_at_monday_06(self):
+        """22:00-08:00 counts 8 h, not 10 — the weekend window closes at 06:00."""
+        assert _compute_helg("22:00", "8:00", SONDAG) == (0.0, 0.0, 8.0)
+
+    def test_midweek_shift_has_no_weekend_hours(self):
+        assert _compute_helg("10:00", "18:00", ONSDAG) == (0.0, 0.0, 0.0)
+
+
 # ---------------------------------------------------------------------------
 # TestStatsFreshness
 #
@@ -180,8 +253,9 @@ class TestNightShiftClassification:
 # ---------------------------------------------------------------------------
 
 _STAT_COLUMNS = ["shift_cnt", "tidlig", "ettermiddag", "natt", "before_6",
-                 "tidlig_6_8", "tidlig_8_12", "helgetimer", "longest_off_streak",
-                 "longest_work_streak", "avg_shift_hours"]
+                 "tidlig_6_8", "tidlig_8_12", "helgetimer",
+                 "helgetimer_dagtid", "helgetimer_ettermiddag", "helgetimer_natt",
+                 "longest_off_streak", "longest_work_streak", "avg_shift_hours"]
 
 
 def _load_stored_as_dict(stats_path):
@@ -260,6 +334,18 @@ class TestStatsSanity:
         for _, row in fresh_stats_r26.iterrows():
             assert 4.0 <= row["avg_shift_hours"] <= 16.0, (
                 f"{row['turnus']}: avg_shift_hours={row['avg_shift_hours']} out of range"
+            )
+    def test_helg_buckets_partition_helgetimer(self, fresh_stats_r26):
+        """dagtid + ettermiddag + natt must account for every weekend hour."""
+        for _, row in fresh_stats_r26.iterrows():
+            total = (row["helgetimer_dagtid"]
+                        + row["helgetimer_ettermiddag"]
+                        + row["helgetimer_natt"])
+            # Three buckets and the total are each rounded to one decimal
+            # independently, so the rounded sum can drift up to 4 x 0.05 from
+            # the rounded total. Worst case observed across R25+R26 is 0.1.
+            assert abs(total - row["helgetimer"]) <= 0.2, (
+                f"{row['turnus']}: buckets sum to {total}, helgetimer is {row['helgetimer']}"
             )
 
     def test_helgetimer_non_negative(self, fresh_stats_r26):

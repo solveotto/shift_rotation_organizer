@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% from 'components/sorter_controls.html' import sorter_body %} {% block extra_css %}
+{% extends "base.html" %} {% from 'components/sorter_controls.html' import sorter_body, sorter_hint %} {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/turnusliste/highlighted-turnus.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/turnusliste/view-options.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/turnusliste/sorting.css') }}" />
@@ -41,10 +41,7 @@
             <span class="badge bg-dark ms-1 d-none" id="sorter-active-badge">0</span>
         </button>
         <div class="dropdown-menu dropdown-menu-end filter-menu">
-            <p class="filter-hint">
-                Dra mot høyre for å prioritere turnuser med <strong>flere</strong> — mot venstre for
-                <strong>færre</strong>. Listen sorteres mens du drar.
-            </p>
+            {{ sorter_hint() }}
             <div class="filter-controls">
                 {{ sorter_body() }}
             </div>
@@ -104,14 +101,23 @@
                             loop.index0 %}
                             <!-- Setter indexen for toggle funksjonen-->
                             {% for name, data in turnus.items() %}
-                            <li class="list-group-item mb-2 rounded p-2 small {% if highlighted_turnus and name == highlighted_turnus %}highlighted-turnus{% endif %} {% if name in favoritt %}favorite-item{% endif %}"
+                            {# data-turnus carries the raw name (OSL_01); .t-name
+                               below shows the display_name form (OSL 01). It lives
+                               on the <li> and nowhere else — sorting-system.js reads
+                               identity from it, and turnusliste.js:71 resolves the
+                               ?turnus= highlight with a page-wide querySelector, so a
+                               second element carrying the same attribute would shadow
+                               this one. #}
+                            <li data-turnus="{{ name }}"
+                                class="list-group-item mb-2 rounded p-2 small {% if highlighted_turnus and name == highlighted_turnus %}highlighted-turnus{% endif %} {% if name in favoritt %}favorite-item{% endif %}"
                                 style="border: 1px solid black">
                                 <!-- Title section outside scroll wrapper -->
                                 <div class="d-flex align-items-center justify-content-between py-1 mb-2">
-                                    <div data-turnus="{{name}}">
+                                    <div class="d-flex align-items-center gap-2">
                                         <h5 class="h4-hover t-name">
                                             {{name | display_name}}
                                         </h5>
+                                        <span class="turnus-match-badge d-none"></span>
                                     </div>
                                     {% if name in favoritt %}
                                     <div class="d-flex align-items-center gap-2 turnus-favorite-badge">
@@ -298,7 +304,7 @@
                                         </table>
                                     </div>
                                 </template>
-                                {% for row in df %} {% if row.turnus == name %}
+                                {% set row = df_by_name.get(name) %} {% if row %}
                                 <div class="container-fluid data-felt text-center">
                                     <div style="overflow-x: auto;">
                                         <div class="small-text text-start" style="
@@ -333,7 +339,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                {%endif%} {% endfor %}
+                                {% endif %}
                             </li>
 
                             {% endfor %} {% endfor %}
@@ -358,6 +364,7 @@
             </div>
             <div class="modal-body">
                 <div class="mobile-sorting-controls">
+                    {{ sorter_hint() }}
                     {{ sorter_body(suffix="-mobile") }}
                 </div>
             </div>
@@ -372,5 +379,12 @@
         </div>
     </div>
 </div>
+
+{# Numeric metrics for sorting-system.js, keyed by raw turnus name. The
+   .data-felt grid above is display only — the sorter must never parse it back
+   out of the rendered text, which truncated floats and read "–" as 0. #}
+<script id="turnus-metrics" type="application/json">
+    {{ turnus_metrics|tojson }}
+</script>
 
 {% endblock %}
